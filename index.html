@@ -124,10 +124,20 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radiu
 #ci{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:99px;padding:10px 14px;font:inherit;font-size:16px;outline:none}
 #cf button{background:var(--purple);color:#fff;font-weight:700;border-radius:99px;padding:0 18px;font-size:14px}
 .gdot{width:8px;height:8px;border-radius:50%;background:#2ee56a;box-shadow:0 0 8px #2ee56a;display:inline-block;animation:gp 1.8s ease-in-out infinite}@keyframes gp{50%{opacity:.35}}
-.wawrap{flex:none;display:flex;justify-content:center;padding:10px 16px 0}
-.wa{display:inline-flex;align-items:center;gap:8px;background:#25d366;color:#07210f;font-weight:700;font-size:14px;text-decoration:none;border-radius:99px;padding:9px 20px;box-shadow:0 4px 16px rgba(37,211,102,.28)}
-.wa svg{width:18px;height:18px;fill:currentColor}
-.wa:active{transform:scale(.97)}
+.soc{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;min-width:0}
+.sc{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:0;text-transform:none;text-decoration:none;color:#fff;white-space:nowrap}
+.sc svg{width:13px;height:13px;fill:currentColor;flex:none}
+.sc:active{transform:scale(.96)}
+.sc.wa{background:#25d366;color:#07210f}
+.sc.ig{background:linear-gradient(45deg,#f9a03c,#e1306c 55%,#8a3ab9)}
+.list h2 .sc span{color:inherit;font-weight:700}
+@media(max-width:360px){.sc span{display:none}.sc{padding:0 8px}}
+.pin{flex:none;max-height:40%;overflow-y:auto;padding:8px 12px;display:flex;flex-direction:column;gap:6px;background:rgba(168,85,247,.08);border-bottom:1px solid rgba(168,85,247,.35)}
+.pin[hidden]{display:none}
+.pin .msg small.pn{display:block;color:#c9a2ff;font-size:10px;letter-spacing:.06em;margin-bottom:2px}
+.pin .wait{font-size:11px;color:var(--faint);padding:0 4px}
+.msg.special{background:linear-gradient(135deg,rgba(168,85,247,.32),rgba(46,229,166,.16));border:1px solid rgba(168,85,247,.85);box-shadow:0 0 18px rgba(168,85,247,.28);padding:11px 14px}
+.msg.special b{color:#e6d0ff}.msg.special p{color:#fff;font-weight:600;font-size:13.5px}
 </style>
 </head>
 <body>
@@ -136,7 +146,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radiu
     <div class="brand"><div class="logo display">R</div><b class="display">RADYOAI</b></div>
     <div class="live"><i id="dot" class="off"></i><span id="liveTxt">HAZIR</span><em id="n"></em></div>
   </header>
-  <div class="wawrap"><a class="wa" href="https://wa.me/905388153632?text=Merhaba%20DJ%20YavRu%2C%20RadyoAI%27yi%20dinliyorum.%20Size%20bir%20mesaj%C4%B1m%20var." target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2a9.9 9.9 0 0 0-8.5 14.95L2 22l5.2-1.5A9.9 9.9 0 1 0 12.04 2zm0 1.8a8.1 8.1 0 1 1-4.3 15l-.3-.2-3 .9.9-2.9-.2-.3a8.1 8.1 0 0 1 6.9-12.5zM8.6 7.3c-.2 0-.5.1-.7.4-.3.3-1 1-1 2.4s1.1 2.8 1.2 3c.2.2 2.1 3.3 5.2 4.5 2.5 1 3.1.8 3.6.7.6-.1 1.8-.7 2-1.5.3-.7.3-1.3.2-1.5-.1-.1-.3-.2-.7-.4l-2-1c-.3-.1-.5-.1-.7.1l-.9 1.1c-.2.2-.3.2-.6.1-.9-.4-1.9-1-2.8-2.1-.3-.4-.9-1.2-1-1.5-.1-.3 0-.4.2-.6l.4-.5.3-.5c.1-.2 0-.4 0-.5l-.9-2.1c-.2-.5-.4-.4-.6-.4z"/></svg><span>WhatsApp</span></a></div>
+  
   <div class="banner display">İSTER YALNIZ İSTERSEN SEVDİKLERİN İLE BİRLİKTE AÇ RADYOAI'Yİ İLK SEN DİNLE</div>
 
   <section class="player" id="player">
@@ -158,7 +168,8 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radiu
   </section>
 
   <section class="list" id="listWrap">
-    <h2 class="display"><span style="color:inherit;font-weight:700;letter-spacing:.16em">CANLI SOHBET</span><span id="active" style="display:inline-flex;align-items:center;gap:6px;letter-spacing:.04em;text-transform:none;color:#7ff0b0"><i class="gdot"></i><b id="actN">0</b> aktif</span></h2>
+    <h2 class="display"><span style="color:inherit;font-weight:700;letter-spacing:.16em">CANLI SOHBET</span><div class="soc"><a class="sc ig" href="https://instagram.com/MyByYavRu" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2zm0 1.8A4 4 0 0 0 3.8 7.8v8.4a4 4 0 0 0 4 4h8.4a4 4 0 0 0 4-4V7.8a4 4 0 0 0-4-4H7.8zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 1.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4zM17.3 5.6a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4z"/></svg><span>Instagram</span></a><a class="sc wa" href="https://wa.me/905388153632?text=Merhaba%20DJ%20YavRu%2C%20RadyoAI%27yi%20dinliyorum.%20Size%20bir%20mesaj%C4%B1m%20var." target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2a9.9 9.9 0 0 0-8.5 14.95L2 22l5.2-1.5A9.9 9.9 0 1 0 12.04 2zm0 1.8a8.1 8.1 0 1 1-4.3 15l-.3-.2-3 .9.9-2.9-.2-.3a8.1 8.1 0 0 1 6.9-12.5zM8.6 7.3c-.2 0-.5.1-.7.4-.3.3-1 1-1 2.4s1.1 2.8 1.2 3c.2.2 2.1 3.3 5.2 4.5 2.5 1 3.1.8 3.6.7.6-.1 1.8-.7 2-1.5.3-.7.3-1.3.2-1.5-.1-.1-.3-.2-.7-.4l-2-1c-.3-.1-.5-.1-.7.1l-.9 1.1c-.2.2-.3.2-.6.1-.9-.4-1.9-1-2.8-2.1-.3-.4-.9-1.2-1-1.5-.1-.3 0-.4.2-.6l.4-.5.3-.5c.1-.2 0-.4 0-.5l-.9-2.1c-.2-.5-.4-.4-.6-.4z"/></svg><span>WhatsApp</span></a></div><span id="active" style="display:inline-flex;align-items:center;gap:6px;letter-spacing:.04em;text-transform:none;color:#7ff0b0"><i class="gdot"></i><b id="actN">0</b> aktif</span></h2>
+    <div class="pin" id="pin" hidden></div>
     <div class="scroll" id="chat"></div>
     <form id="cf" autocomplete="off"><input id="ci" maxlength="200" placeholder="Mesaj yaz…" aria-label="Mesaj"><button type="submit">Gönder</button></form>
   </section>
@@ -176,6 +187,15 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radiu
 <script>
 /* ============ AYARLAR — burayı düzenle ============ */
 const CONFIG = {
+  // Gerçek mesajlaşma sunucusu (Cloudflare Worker adresi). Boşsa mesaj sadece yazanın ekranında sabitlenir ve otomatik cevap gelir.
+  API: "",
+  // Player'da şarkı adı yerine çıkan armağan cümleleri. {u} yerine sohbetten bir isim gelir. İstediğin kadar cümle ekleyebilir/değiştirebilirsin.
+  DEDICATIONS: [
+    "🎁 {u} için armağan",
+    "🎁 Bu şarkı {u} armağanıdır",
+    "🎁 {u} için özel bir şarkı",
+    "🎁 {u}'e armağan edildi"
+  ],
   // Şarkıları iki şekilde ekleyebilirsin:
   //  1) drive: "Google Drive dosya kimliği"  (dosya "Bağlantıya sahip herkes" olarak paylaşılmış olmalı)
   //  2) file : "dosya-adi.mp3"             (şarkıyı index.html ile AYNI klasöre koyarsan önce o çalar, olmazsa Drive denenir)
@@ -396,7 +416,11 @@ function unlockB(){                           // ikinci elemanı kullanıcı dok
 }
 function showMeta(){
   newDedic();
-  const label = '🎁 ' + DED + ' için armağan';
+  const dl = CONFIG.DEDICATIONS && CONFIG.DEDICATIONS.length ? CONFIG.DEDICATIONS : ['🎁 {u} için armağan'];
+  let di, dg = 0;
+  do { di = Math.floor(Math.random()*dl.length); dg++; } while (di === window._lastDL && dl.length > 1 && dg < 10);
+  window._lastDL = di;
+  const label = dl[di].replace(/\{u\}/g, DED);
   $('title').textContent = label;
   $('count').textContent = (livePos+1)+' / '+liveN;
   $('sub').textContent = "Şarkının adını DJ YavRu'ya sor 💬";
@@ -476,13 +500,45 @@ else initLive();
   const shorts=["🔥","👏👏","❤️","😍","🙌","🎧","💯","Çok iyi","Süper","Efsane","Harika","Evet!","Aynen","+1","Bence de","😂","🥹","Vay be","Yaşasın","Bomba","Muhteşem 🤌","Güzel","Of of 🔥","Tam böyle","Helal"];
   const quest=["Bu kanalın instagram'ı var mı?","Canlı performans ne zaman?","Hangi programla yapıyorsun?","Kaç saattir yayındasınız?","Yarın da aynı saatte mi?","Burada kimler var, el kaldırsın ✋","Kaç kişi telefonla dinliyor?","Şarkı sözleri nerede bulunur?","Albüm çıkacak mı?","Konser verir misin bir gün?","Bu şarkıları Spotify'da bulabilir miyim?","Yeni şarkı gelecek mi?","Bu yayın hep açık mı?"];
   const toDJ=["DJ YavRu selam!","@DJ YavRu eline sağlık","DJ abi harikasın","Yavru abi bu şarkıyı çok sevdim","DJ YavRu bugün formundasın 🔥","DJ YavRu yayın süper gidiyor","@DJ YavRu naber?","DJ yavru selamlar buradayız","Yavru usta emeğine sağlık","DJ YavRu bu şarkı kimin?","@DJ YavRu teşekkürler bu güzel yayın için","DJ abi bir selam versene 🙏","DJ YavRu hayranınız oldum","@DJ YavRu ses kalitesi harika","DJ YavRu nasılsın?","Yavru abi seni çok seviyoruz ❤️","DJ YavRu sıradaki ne olacak?","@DJ YavRu bir selam bekliyorum 😄","DJ YavRu iyi ki varsın","DJ abi mixler çok güzel"];
+
+  /* ---- GENİŞLETİLMİŞ CÜMLE HAZNESİ (kombinasyonlar + elle yazılmışlar) ---- */
+  const musicP=[],ctxP=[],cityP=[];
+  const cross=(...L)=>L.reduce((a,b)=>a.flatMap(x=>b.map(y=>x+y)),['']);
+  (function(){
+    const emo=[""," 🔥"," 😍"," 👏"," ❤️"," 🎧"," 🙌"," 💯"," 🤌"];
+    const aspects=["Bas","Vokal","Melodi","Geçiş","Ritim","Tempo","Aranjman","Ses kalitesi","Nakarat","Mix","Hicaz kısmı","Davul","Synth sesi","Giriş","Beat","Sound","Sözler","Prodüksiyon"];
+    const preds=["çok iyi","muhteşem","tam yerinde","efsane","bir başka","çok temiz","harika","vurucu","süper","kusursuz","çok profesyonel","çok akıcı","kafa yapıyor","çok dolu","ne güzel","bayağı iyi","tam bana göre","bu gece çok yakıyor"];
+    const lead=["","","","Valla ","Bence ","Gerçekten ","Ya ","Abi ","Yalnız ","Açıkçası "];
+    musicP.push(...cross(lead,aspects.map(a=>a+" "),preds,emo).map(x=>{const m=x.match(/^(\S+ )?(Bas|Vokal|Melodi|Geçiş|Ritim|Tempo|Aranjman|Ses kalitesi|Nakarat|Mix|Hicaz kısmı|Davul|Synth sesi|Giriş|Beat|Sound|Sözler|Prodüksiyon)(.*)$/);return (m&&m[1])?m[1]+m[2].toLocaleLowerCase('tr')+m[3]:x;}));
+    const ctx=["Arabada","Evde","İşte","Yolda","Mutfakta","Balkonda","Otobüste","Metroda","Kafede","Dükkanda","Okulda","Sahilde","Çalışırken","Ders çalışırken","Yemek yaparken","Spor yaparken","Temizlik yaparken","Yürürken","Nöbette","Vardiyada","Taksiyle yolda","Bahçede","Çay demlerken","Kahve içerken","Yatmadan önce","Uyku öncesi","Dışarıda"];
+    const ends=[" dinliyorum 🎧"," dinleyen var mı?"," dinlemek ayrı güzel"," bu şarkılar bir başka oluyor"," ses çok iyi geliyor"," kulaklık şart"," bu radyo çok yakışıyor"," tam olmuş"];
+    ctxP.push(...cross(ctx,ends));
+    const city=trCities.slice(0,81);
+    const cf=[" tarafından selamlar 👋"," burada, kim var?"," seviyor bu yayını"," bu radyoyu dinliyor 🎶"," orada kimler var?"," 📍 canlı bağlandık"," selam gönderiyor"," ayakta! 🙌"," çok güzel gidiyor"];
+    cityP.push(...cross(city,cf));
+    const lines=["Çay koydum, hazırım ☕","Kahvemi aldım, şimdi tam oldu","Bu saatte uyumak yok 😄","Kapıdan girer girmez buraya bağlandım","Telefonu şarja taktım, bütün gece buradayım","Komşu da dinliyor, duvardan duydum 😂","Annem de dinliyor bu arada","Eşim 'bu ne güzel şey' diyor yanımda","Çocuklar dans etmeye başladı 😄","Kedi bile kulağını dikti 🐱","Yeni dinleyiciyim, ilk kez denk geldim","Instagram'dan buldum bu yayını","Arkadaşım yolladı, iyi ki yollamış","Sabahtan beri açık bu sekme","Bu radyoyu favorilere ekledim","İşyerinde hoparlörden veriyorum","Müşteriler soruyor 'ne çalıyor' diye 😄","Mesaiye bu radyo ile başlıyoruz","Ders çalışırken tam konsantrasyon müziği","Burada sakin ve güzel bir akış var","Reklam yok, konuşma yok, sadece müzik, bayıldım","Sürekli aynı yerden devam ediyor, çok akıcı","Ses seviyesini sonuna kadar açtım","Hoparlörde dinlemek de güzel, kulaklıkta da","Bugün işten sonra buraya sığındım","Akşam yorgunluğunu aldı bu şarkılar","Bu gece uyku yok 🌙","Geç saatte de yayın var, ne güzel","Sabah ezanı vakti hâlâ buradayım 😄","Dışarıda yağmur var, içeride bu şarkılar 🌧️","Hava çok soğuk ama burası sıcacık 🔥","Plajdan yazıyorum, hoparlörde çalıyor 🏖️","Yolculuğun en güzel eşlikçisi","Uzun yol şoförüyüm, gece radyosu bu","Seferden dönüyorum, bu radyo iyi geldi","Gurbetteyim, burası memleket gibi 🥹","Yurt dışından dinliyorum, çok özlemişim","Askerde telefondan dinliyorum 🫡","Hastanede nöbetteyim, moral oldu","Kuaförde açtık, herkes soruyor 😄","Pazarda tezgahta dinliyoruz 🍅","Fırında çalışıyorum, hamur eşliğinde dinliyorum","Bu müzik ellerimi dans ettiriyor","Mutfakta rakı balık değil ama bu şarkılar yeter","Telefonumun hoparlörü zorlanıyor ama değer 😄","Pil bitiyor ama bırakmam 🔋","İnternet çekmiyor gibi ama burası akıyor","Şarkıların hepsi özgün, bunu seviyorum","Yeni nesil müzik budur","Hicaz'ı böyle işleyen az","Afro house sevenler burada mı?","Türkçe house nadir buluyorum, güzel","Arka planda açıp çalışıyorum, verim arttı","Yaşım kaç olursa olsun bu tempo tutuyor","Bu radyo kimin fikriydi, tebrikler","Bir tane daha böyle radyo olsa","Bu enerjiyle bütün hafta geçer","Hafta sonu sabahı bu radyo güzel gidiyor","Pazar sabahı için ideal","Cuma akşamı modu açıldı 🎉","Pazartesi sendromunu aldı götürdü","Tatile çıkmadan önce son dinleyiş","Yarın sınavım var ama bırakmıyorum 😅","Kulaklığı kulağıma yapıştırdım","Sesi kıstım komşu uyuyor 🤫","Sesi açtım komşu da dinlesin 😂","Yayında olmak güzel, dinleyici sayısı artıyor","Bu kadar kişiyle aynı şarkıyı dinlemek garip bir keyif","Herkes aynı anda aynı şarkıda, ne güzel","Birlikte dinlemek ayrı bir hava katıyor","Burası bana huzur veriyor","Stres atmaya geldim, atıyorum","Anılarım canlandı bu şarkıyla","Bu melodiyi bir yerden hatırlıyorum","Şarkı seçimi çok yerinde","Bu sırayla gitmesi çok mantıklı","Mix geçişlerini fark ettiniz mi, pürüzsüz","Şarkılar birbirine akıyor, çok güzel","Hiç kesilmiyor, çok rahat","Rahat bir akış, hiç sıkmıyor","Hiç reklam yok, harika","Bu kalitede müzik bedava mı gerçekten?","Her şarkı bir diğerinden iyi","Hangisi daha iyi karar veremedim","Sıradaki daha da iyi mi olacak?","Beklemekten keyif alıyorum","Merak ediyorum sıradakini","Yeni gelen hoş geldin 🙌","Biz buradayız, siz de gelin","Linki gruba attım, geliyorlar","Whatsapp'tan paylaştım, bakalım kaç kişi gelecek","Hikayeme koydum bu radyoyu","Bu yayını kayıt almak istiyorum","Telefon ekranını kapattım, çalmaya devam ediyor mu? 🙂","Ekran kilitli de çalıyor, süper","Arka planda sorunsuz çalıyor","Ses kalitesi çok net","Hiç donma yok, akıcı","Bugün buraya yeni takıldım, sevdim","Dün de buradaydım, bugün de","Bu hafta her akşam buradayım","Sabah erken kalktım, ilk iş bu radyo","Gece vardiyasına bu radyo ile başlıyorum","Allah herkese huzurlu bir gece versin 🌙","Günaydın dinleyiciler ☀️","İyi akşamlar herkese 🌆","İyi geceler şimdiden 🌙","Hayırlı akşamlar","Hayırlı geceler herkese","Hayırlı sabahlar ☀️","Kolay gelsin esnaf 🙌","Kolay gelsin herkese","Herkese iyi çalışmalar","Afiyet olsun yemek yiyenlere 🍽️","Çay içenler el kaldırsın ✋☕","Kahve içenler de buraya 😄","Ben mandalina soyuyorum, şarkı eşlik ediyor 🍊","Mısır patlattım, tam film gibi 🍿","Battaniye altındayım, tam huzur","Sobanın yanında dinliyorum","Klima açık, ses açık, hayat güzel","Çalışma masasındayım, mod tam","Dersten çıktım direkt buraya bağlandım","Toplantıdayım ama kulaklık takılı 🤫","Dolmuşta kulaklıkla bu radyo ♥","Vapurda dinliyorum, martılar eşlik ediyor 🚢","Tren yolculuğunda güzel gidiyor","Uçakta uçak modunda indirdim, yok olmuyor 😅","Bisikletle dönerken dinliyorum 🚲","Koşu bandında tempo tuttu 🏃","Salonda ağırlık kaldırırken tam motivasyon","Yürüyüşte kulaklığımda bu radyo"];
+    react.push(...lines);
+    shorts.push("😎","🤩","🥰","👌","🫶","🙏","💥","🚀","✨","🎶","🎵","Sağ olun","Çok güzel","Tam bana göre","Harikasınız","Tamam bu iş bitti 😄","Kral","Aşırı iyi","Bayıldım","Ne iyi ya","Güzelmiş","Of ya","Çok yaşa","Müthiş","Süpersiniz","Bravo","Alkış 👏","İyi ki varsınız","Devam devam","Hadi be","Vallahi güzel","Yok artık 🔥","Resmen","Tam isabet","Kafa dağıtıyor","Bayağı iyi","Hep birlikte","Hadi hep beraber","Evet evet","Kesinlikle","Katılıyorum","Doğru","Hakikaten","Tabii ya","Ayyy","Ooo","Waoo","Mükemmel","Şahane","Harikulade");
+    const qw=["Bu radyo her gün açık mı?","Gece boyunca da yayın var mı?","Yayını kim yapıyor?","Bu şarkılar kimin?","Şarkıların hepsi aynı sanatçıdan mı?","Burada kim var, nerelisiniz?","Sizce en iyi şarkı hangisi?","Favori şarkınız hangisi?","Kaç şarkı var acaba?","Liste baştan mı başlıyor bittiğinde?","Yeni şarkı ne zaman eklenecek?","Konser olacak mı?","Instagram hesabı neydi?","Whatsapp kanalı var mı?","DJ YavRu kaç yaşında?","Kaç yıldır müzik yapıyorsun?","İlk şarkını ne zaman çıkardın?","Hangi sanatçıları dinliyorsun?","En sevdiğin şarkı hangisi?","Müzik yapmaya nasıl başladın?","Stüdyoda mı yapıyorsun?","Vokal kime ait?","Bu tarz hangi türe giriyor?","Afro house mu bu?","Remix mi bu?","Orijinal mi bu şarkı?","Spotify'da var mı?","Youtube'da da var mı?","Kulaklık markası ne tavsiye edersin?","Hangi kulaklıkla dinliyorsunuz?","Bu saatte kaç kişi dinler sizce?","Dinleyici sayısı hep böyle mi?","Burası nasıl bir yer?","Kim kurdu bu radyoyu?","Bu şarkıyı daha önce duymuştum, nerede?","Bu şarkının sözleri var mı?","Yabancı şarkı mı bu?","Ne zamandır yayındasınız?","Sabaha kadar mı?","Sabaha kadar kim uyanık?","Kim hâlâ ayakta?","Uyuyan var mı?","Kim işte?","Kim evde?","Kim yolda?","Gurbetçi var mı?","Yurt dışından yazan var mı?","Memleket nereli kim var?","İzmirli var mı?","Ankaralı var mı?","İstanbullu var mı?","Karadenizli var mı?","Doğulu var mı?","Egeli var mı?","Hatay'dan kim var?","Sakarya'dan yazan var mı?","Adapazarı'ndan biri var mı?"];
+    quest.push(...qw);
+    const dj1=["DJ YavRu","@DJ YavRu","Yavru abi","DJ abi","Yavru usta","DJ YavRu hocam","DJ Yavru","Sayın DJ YavRu"];
+    const dj2=["selam!","eline sağlık","bugün çok iyisin","yayın süper gidiyor","bir selam versene","hayranınız","seni seviyoruz","naber?","sağ ol bu yayın için","harikasın","enerji tavan","bu akşam kurtardın","mikser başında usta 🎛️","nasılsın?","bu gece uyumak yok 😄","bu sıralama çok iyi","kral yayın 🔥","iyi ki varsın","tebrikler, çok güzel olmuş","hoş geldin yayına","emeğine sağlık","sesin çok güzel","bu şarkıyı kim yaptı?","bu şarkının adı neydi?","bize bir şarkı armağan et 😄","bizi de duyuyor musun?","beni fark ettin mi 😄","buradayız, sen devam et"];
+    toDJ.push(...cross(dj1,dj2.map(x=>" "+x)).map(x=>x.trim()));
+  })();
   function botText(){
     const x=Math.random();
-    if(x<.38) return {text:nr(react,'react',30)};
+    if(x<.38){
+      const y=Math.random();
+      if(y<.42) return {text:nr(react,'react',120)};
+      if(y<.66) return {text:nr(musicP,'mus',400)};
+      if(y<.86) return {text:nr(ctxP,'ctx',300)};
+      return {text:nr(cityP,'cty',300)};
+    }
     if(x<.54){ const tx=nr(trackT,'trk',6); return {text:tx,q:/adı|neydi/.test(tx),toDJ:/adı ne/.test(tx)}; }
-    if(x<.66) return {text:nr(shorts,'sh',6)};
-    if(x<.75) return {text:nr(quest,'q',8),q:true};
-    if(x<.90) return {text:nr(toDJ,'toDJ',10),toDJ:true};
+    if(x<.66) return {text:nr(shorts,'sh',18)};
+    if(x<.75) return {text:nr(quest,'q',25),q:true};
+    if(x<.80) return {text:nr(toDJ,'toDJ',40),toDJ:true};
+    if(x<.90) return {text:nr(shorts,'sh',18)};
     return {text:placeMsg().text};
   }
 
@@ -494,6 +550,16 @@ else initLive();
   const reqs=["@{n} burası radyo gibi, akışı ben belirliyorum, istek alamıyorum 😄 Şarkının adını sorarsan söylerim","İstek alamıyorum @{n} ama sıradakiler de güzel, kalın! 🎶","@{n} radyo mantığı bu, herkes aynı şarkıyı birlikte dinliyor 🎧"];
   const nowp=["@{n} şu an çalan: {t} 🎶","@{n} {t} çalıyor, keyfini çıkar! 🎧","@{n} dinlediğin şarkı: {t} 🔊","@{n} sorduğun şarkı {t}, güzel değil mi? 😍"];
   const defaults=["@{n} yazdıklarını okuyorum, teşekkürler! 🔥","@{n} sağ ol, devam edelim böyle 🎧","@{n} güzel söyledin, teşekkürler ❤️","@{n} seni duyuyorum, yayın seninle güzel 🙌","@{n} teşekkürler, mesajların çok değerli!","@{n} bence de! Sağ ol 😄"];
+  (function(){
+    const o=["Teşekkürler","Sağ ol","Eyvallah","Çok sağ ol","Teşekkür ederim","Allah razı olsun","Sevgiler","Minnettarım","Çok teşekkürler"];
+    const tl=["bu güzel sözler için","bu destek için","dinlediğin için","enerjin için","yorumun için","burada olduğun için","bu sıcak ilgi için","her zaman yanımda olduğun için"];
+    const em=[" ❤️"," 🙏"," 🔥"," 🎧"," ✨"," 🙌"," 🥹",""];
+    thanks.push(...cross(o,tl.map(x=>" @{n}, "+x),em).map(x=>x.replace(/^(\S+) @/,'$1 @')));
+    const gr=["Selam","Merhaba","Hoş geldin","Selamlar","Hoş bulduk","Aleyküm selam"];
+    const gt=["keyifli dinlemeler 🎧","kendini evinde hisset 🏠","bugün yayın seninle güzel ✨","çay kahve hazır mı? ☕","nasılsın bakalım?","iyi ki geldin 🙌","bugün nereden bağlandın?","yayın tam sana göre 🔥"];
+    greets.push(...cross(gr,gt.map(x=>" @{n}, "+x)));
+    defaults.push(...cross(["Güzel söyledin","Haklısın","Bence de","Aynen öyle","Çok doğru","Katılıyorum","Süper bir bakış","Ne güzel yazmışsın"],[" @{n}, "],["yayın seninle güzel 🙌","devam edelim böyle 🎧","teşekkürler ❤️","sağ ol 😄","mesajların çok değerli 🙏","seni okumak güzel ✨"]));
+  })();
   function reply(t,n){
     const l=t.toLowerCase(), m={n,t:title()};
     if(locMode && t.trim().split(/\s+/).length<=4) return fill(nr([ "@{n} "+t.trim()+" selamlar, aramıza hoş geldin! 🌍","Hoş geldin @{n}! "+t.trim()+" tarafına selam olsun 👋","@{n} "+t.trim()+" burada demek, harika! 🙌"],'locr',3),m);
@@ -547,16 +613,16 @@ else initLive();
   (function tick(){
     const u=pick(users);
     let txt, meta={};
-    if(locMode){ const pm=placeMsg(); txt=pm.text; placed.push(pm.place); if(Math.random()<.07) dj(pm.place+" selamlar, hoş geldiniz! 👋",rnd(1200,2800)); }
+    if(locMode){ const pm=placeMsg(); txt=pm.text; placed.push(pm.place); if(Math.random()<.02) dj(pm.place+" selamlar, hoş geldiniz! 👋",rnd(1200,2800)); }
     else { meta=botText(); txt=meta.text; }
     botSay(u,txt);
     if(!locMode){
-      if(meta.toDJ && Math.random()<.92) dj(reply(txt,u),rnd(1500,4200));          // DJ'e hitap edilene bizzat cevap + teşekkür
-      else if(meta.q && Math.random()<.5) dj(reply(txt,u),rnd(2000,5000));
+      if(meta.toDJ && Math.random()<.06) dj(reply(txt,u),rnd(5000,11000));          // DJ'e hitap edilene bizzat cevap + teşekkür
+      else if(meta.q && Math.random()<.03) dj(reply(txt,u),rnd(5000,11000));
     }
     setTimeout(tick, locMode ? rnd(350,900) : rnd(500,2000));
   })();
-  for(let k=0;k<6;k++) botSay(pick(users),nr(react,'react',30));
+  for(let k=0;k<6;k++) botSay(pick(users),nr(react,'react',250));
 
   /* ---- DJ kendiliğinden konuşur ---- */
   const hour=()=>new Date().getHours();
@@ -574,24 +640,45 @@ else initLive();
       else add('DJ YavRu','🎧 '+nr(djPool,'djp',10),'dj');
       if(Math.random()<.55) flurry(rnd(2,5),react);
       djLoop();
-    },rnd(16000,30000));
+    },rnd(100000,190000));
   })();
 
   /* ---- "Herkes dinlediği yeri yazsın" anı: sohbet şehir ve ülkelerle dolar ---- */
   const locCalls=["Herkes dinlediği yeri yazsın! 🌍 Şehrini ve ülkeni yaz, hepinizi okuyacağım","Hadi bakalım, herkes dinlediği yeri yazsın! 📍 Nereden katılıyorsunuz?","Herkes dinlediği yeri yazsın, merak ediyorum nerelerdeyiz! 🌎","Şimdi herkes dinlediği yeri yazsın, şehir de olur ülke de! 🗺️"];
+  function runLoc(call){
+    if(locMode) return;
+    add('DJ YavRu','🎧 '+call,'dj');
+    setTimeout(()=>{ locMode=true; placed=[]; },rnd(1200,2200));
+    setTimeout(()=>{ if(locMode && placed.length){ const u=[...new Set(placed)]; dj("Vay be! "+u.slice(0,3).join(", ")+"… hepsini görüyorum, süpersiniz! 🌍🔥"); } },22000);
+    setTimeout(()=>{
+      const u=[...new Set(placed)]; locMode=false;
+      dj("Teşekkürler hepinize! "+u.length+" farklı yerden mesaj geldi: "+u.slice(0,4).join(", ")+" ve daha fazlası. Nerelerden dinlendiğimizi görmek harika 🌍❤️");
+    },46000);
+  }
   function startLoc(){
-    if(!locMode){
-      add('DJ YavRu','🎧 '+nr(locCalls,'loc',3),'dj');
-      setTimeout(()=>{ locMode=true; placed=[]; },rnd(1200,2200));
-      setTimeout(()=>{ if(locMode && placed.length){ const u=[...new Set(placed)]; dj("Vay be! "+u.slice(0,3).join(", ")+"… hepsini görüyorum, süpersiniz! 🌍🔥"); } },22000);
-      setTimeout(()=>{
-        const u=[...new Set(placed)]; locMode=false;
-        dj("Teşekkürler hepinize! "+u.length+" farklı yerden mesaj geldi: "+u.slice(0,4).join(", ")+" ve daha fazlası. Nerelerden dinlendiğimizi görmek harika 🌍❤️");
-      },46000);
-    }
+    runLoc(nr(locCalls,'loc',3));
     setTimeout(startLoc, rnd(420000,600000));
   }
   setTimeout(startLoc, 100000);
+
+  /* ---- Her saat başı: DJ YavRu "hangi şehirlerden yazıyorsunuz?" diye sorar ---- */
+  const hourCalls=["Saat başı yoklaması! 🕐 Şu an hangi şehirlerden yazıyorsunuz? Şehrinizi yazın, hepsini okuyacağım 📍","Saat {h}:00 oldu! 🕐 Herkes hangi şehirde olduğunu yazsın, bakalım nerelerdeyiz 🌍","Yeni saat, yeni yoklama! 📍 Hangi şehirdesiniz, hangi ülkedesiniz? Yazın bakalım","Saat tam {h}:00! ⏰ Kim hangi şehirden dinliyor? Şehirlerinizi bekliyorum 🗺️","Saat başı geldi! 🕐 Sohbetteki herkes şehrini yazsın, kim nereden bağlanmış merak ediyorum 🌎"];
+  function hourly(){
+    if(locMode){ setTimeout(hourly,50000); return; }
+    const d=new Date(); const h=String(d.getHours()).padStart(2,'0');
+    runLoc(fill(nr(hourCalls,'hc',2),{h}));
+    const nx=new Date(); nx.setHours(nx.getHours()+1,0,2,0);
+    setTimeout(hourly, nx-new Date());
+  }
+  (function(){ const nx=new Date(); nx.setHours(nx.getHours()+1,0,2,0); setTimeout(hourly, nx-new Date()); })();
+
+
+  /* ---- DJ'in ara sıra yazdığı belirgin teşekkür mesajı ---- */
+  const specials=["İlginiz için müteşekkirim 🙏 Her mesaja cevap yazamıyorum ama her birini okuyorum. Yazmaya devam edin, sizi seviyorum 🫶"];
+  (function special(){
+    setTimeout(()=>{ add('DJ YavRu',nr(specials,'spc',1),'dj special'); special(); }, rnd(480000,840000));
+  })();
+  setTimeout(()=>add('DJ YavRu',specials[0],'dj special'),rnd(70000,110000));
 
   /* ---- dinleyiciler çalan şarkıyı sorar ---- */
   const askQ=["Çalan şarkı ne?","Bu şarkının adı ne?","Şu an ne çalıyor?","Bu parça kimin?","Şarkı adını yazar mısın?","Bu şarkı çok güzel, adı neydi?","Az önce başlayan şarkı hangisi?"];
@@ -599,24 +686,55 @@ else initLive();
     setTimeout(()=>{
       if(!locMode){
         const u=pick(users); const q=nr(askQ,'ask',4);
-        botSay(u,q); dj(reply(q,u),rnd(2000,4500));
+        botSay(u,q); if(Math.random()<.4) dj(reply(q,u),rnd(4500,9000));
       }
       ask();
-    },rnd(18000,34000));
+    },rnd(120000,240000));
   })();
 
   /* ---- kullanıcı mesajı ---- */
+  /* ---- gerçek dinleyici mesajı: sohbetin üstüne sabitlenir, DJ cevabı altına eklenir ---- */
+  const pin=$('pin'); let pinned=[];
+  function pinAdd(name,text,cls,label){
+    const d=document.createElement('div'); d.className='msg '+(cls||'');
+    d.innerHTML='<small class="pn"></small><b></b><p></p>';
+    d.querySelector('.pn').textContent='📌 '+(label||'Sabitlendi');
+    d.querySelector('b').textContent=name; d.querySelector('p').textContent=text;
+    pin.appendChild(d); pin.hidden=false; pin.scrollTop=pin.scrollHeight;
+    pinned.push({name,text,cls}); return d;
+  }
+  function unpinAll(){
+    if(!pinned.length) return;
+    pinned.forEach(m=>add(m.name,m.text,m.cls));
+    pinned=[]; pin.innerHTML=''; pin.hidden=true;
+  }
+  $('ci').addEventListener('input',()=>{ if(pinned.length) unpinAll(); });   // yeni mesaja başlayınca eskiler akışa karışır
   $('cf').addEventListener('submit',e=>{
     e.preventDefault();
     const i=$('ci'),t=i.value.trim();
     if(!t)return;
-    add('Sen',t,'me');
+    unpinAll();
     i.value='';
-    dj(reply(t,'Sen'),rnd(1200,3000));
+    const id=Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+    pinAdd('Sen',t,'me','Mesajın');
+    const api=(CONFIG.API||'').replace(/\/+$/,'');
+    const wait=document.createElement('div'); wait.className='wait'; wait.textContent='⏳ DJ YavRu mesajını okuyunca cevap verecek…';
+    const showReply=r=>{ wait.remove(); pinAdd('DJ YavRu','🎧 '+r,'dj','DJ YavRu cevapladı'); };
+    if(api){
+      pin.appendChild(wait);
+      fetch(api+'/message',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,name:'Dinleyici',text:t})}).catch(()=>{});
+      let tries=0;
+      const iv=setInterval(()=>{
+        if(++tries>225){ clearInterval(iv); wait.remove(); return; }       // ~15 dk bekler
+        fetch(api+'/reply?id='+encodeURIComponent(id)).then(r=>r.json()).then(j=>{ if(j&&j.reply){ clearInterval(iv); showReply(j.reply); } }).catch(()=>{});
+      },4000);
+    } else {
+      setTimeout(()=>showReply(reply(t,'Sen')),rnd(1200,3000));
+    }
   });
 
   /* ---- izleyici sayacı 2400–5000, aktif yazan sayısı, her +100'de duyuru ---- */
-  let v=rnd(2800,4200), top=Math.floor(v/100)*100, tgt=3700;
+  let lastHype=0, v=rnd(2800,4200), top=Math.floor(v/100)*100, tgt=3700;
   const fmt=n=>n.toLocaleString('tr-TR');
   const hype=["📈 Dinleyici sayısı {x} oldu! Hoş geldiniz herkese 🙌","🎉 Şu an {x} kişi birlikte dinliyoruz!","🔥 {x} dinleyiciyiz, yayın büyüyor!","👥 Aktif dinleyici sayısı {x} oldu, hepinize teşekkürler ❤️","🚀 {x} kişi aynı anda dinliyor, inanılmaz!"];
   function upd(){
@@ -627,7 +745,7 @@ else initLive();
     $('n').textContent='· 👁 '+fmt(v);
     $('actN').textContent=fmt(Math.max(40,Math.round(v*0.055+rnd(-10,10))));
     const lvl=Math.floor(v/100)*100;
-    if(lvl>=top+100){ top=lvl; add('DJ YavRu','🎧 '+fill(nr(hype,'hype',3),{x:fmt(lvl)}),'dj'); flurry(rnd(2,4),shorts); }
+    if(lvl>=top+100 && Date.now()-lastHype>300000){ lastHype=Date.now(); top=lvl; add('DJ YavRu','🎧 '+fill(nr(hype,'hype',3),{x:fmt(lvl)}),'dj'); flurry(rnd(2,4),shorts); }
     else if(lvl<=top-300){ top=lvl; }     // sayı düştüyse yeniden artışta tekrar duyur
   }
   upd(); setInterval(upd,2000);
