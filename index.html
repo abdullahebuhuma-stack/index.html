@@ -1,27 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
-<head><style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
-</style>
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>RadyoAI</title>
@@ -190,44 +169,45 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radiu
 <audio id="audio" preload="metadata" playsinline></audio>
 
 <script>
-/* ============ AYARLAR — güncellendi: klasördeki tüm şarkılar eklendi ============ */
+/* ============ AYARLAR — burayı düzenle ============ */
 const CONFIG = {
+  // Şarkıları iki şekilde ekleyebilirsin:
+  //  1) drive: "Google Drive dosya kimliği"  (dosya "Bağlantıya sahip herkes" olarak paylaşılmış olmalı)
+  //  2) file : "dosya-adi.mp3"             (şarkıyı index.html ile AYNI klasöre koyarsan önce o çalar, olmazsa Drive denenir)
   TRACKS: [
-    { title: "Ayları Cicim", file: "aylari-cicim.wav" },
-    { title: "Azıcık Ucundan", file: "azicik-ucundan.mp3" },
-    { title: "Azıcık Ucundan Remix", file: "azicik-ucundan-remix.mp3", drive: "1hzLh67yFdNr-bNhy17twBS4SH6C7tJnz" },
-    { title: "Bar Bar", file: "bar-bar.mp3" },
+    { title: "Azıcık ucundan", file: "azicikucundan.mp3" },
+    { title: "Bar bar", file: "bar-bar.mp3" },
+    { title: "Beddua helallik", file: "bedduahelallik.mp3" },
     { title: "Bestie", file: "bestie.mp3" },
-    { title: "Bestie Deep", file: "bestiedeep.mp3" },
+    { title: "Bestie deep", file: "bestiedeep.mp3" },
     { title: "Bilsen", file: "bilsen.mp3" },
-    { title: "Bumbo Hidehu 2", file: "bumbo.mp3" },
-    { title: "Çuvaldız MP3", file: "cuvaldiz.mp3", drive: "1KbfpBMQaSuFt3VPnf-bPZyRLCLUe_ZpF" },
-    { title: "Çuvaldız WAV", file: "cuvaldiz.wav" },
-    { title: "Draga", file: "draga .wav" },
-    { title: "Dün Gitti", file: "dungitti.mp3" },
-    { title: "Elif", file: "elif .mp3" },
+    { title: "Çuvaldız", file: "cuvaldiz.mp3" },
+    { title: "Düngitti", file: "dungitti.mp3" },
+    { title: "Elif", file: "elif.mp3" },
     { title: "Fısıltı", file: "fisilti.mp3" },
-    { title: "İki İleri Bi Geri", file: "ikiileribigeri.mp3" },
-    { title: "İkimize", file: "ikimize.mp3", drive: "1hwb0WG-L-RG6l9wQ-QY_hHtKzSq7CFLx" },
-    { title: "İstirahat Extended", file: "istirahat-extended.wav" },
-    { title: "İtin Teki", file: "itin-teki.wav", drive: "15jriU6EfEqiJZ_tQKwmznuOB0o22lvLv" },
-    { title: "Jelibon", file: "jelibon.mp3" },
-    { title: "Jump Küme", file: "jump.mp3" },
-    { title: "Kaldıramıyorum", file: "kaldiramiyorum.mp3" },
-    { title: "KL", file: "kl.mp3" },
-    { title: "Krallar Lobisi", file: "krallarlobisi.mp3" },
-    { title: "Mışıl Mışıl", file: "misilmisil.mp3" },
-    { title: "MyByYavRu", file: "mybyyavru .m4a", drive: "14-rTFrYJsn8_gAFFmLI8aojYYDJmrles" },
-    { title: "Ne Beddua", file: "nebeddua.wav", drive: "12EfmtEIjmvrUTjbL3UsgrxpbqqIMwaAA" },
-    { title: "Nefes Nefes", file: "nefesnefes.mp3" },
-    { title: "Pınar Çingene", file: "pinar-cingene.wav", drive: "1SO0b4SH5MrZoxd6T5pEbPzk3CnF4Cxyb" },
-    { title: "Rabbiyesir", file: "rabbiyesir.mp3" },
-    { title: "Rintintin", file: "rintintin.mp3" },
-    { title: "Sevgili", file: "sevgili.mp3", drive: "1sBRamgha-gJw6v9f9bzwYxySVfSio4LH" },
-    { title: "Talan", file: "talan.mp3", drive: "1EJnnnpnqZr6QJNz6-EXepFHikFA3UCvH" },
-    { title: "Toksik", file: "toksik.mp3" },
-    { title: "Vakti Seher", file: "vakti-seher .wav", drive: "1WNK2Iv7Qkv4bzA-truGaaw9ZG_Hp-nEP" },
-    { title: "Yada", file: "yada.mp3", drive: "1lsEqZbiUFSBJVLtX9l4QBjLvGZcONxOB" }
+    { title: "İkimize", file: "ikimize.mp3" },
+    { title: "İki sorunlu", file: "ikisorunlu.mp3" },
+    { title: "İste böyle", file: "isteboyle.mp3" },
+    { title: "İstirahat", file: "istirahat.mp3" },
+    { title: "İstirahat (extended)", file: "istirahatextended.mp3" },
+    { title: "Kazulet", file: "kazulet.mp3" },
+    { title: "KRL", file: "krl.mp3" },
+    { title: "Lobo", file: "lobo.m4a" },
+    { title: "Mesein", file: "mesein.mp3" },
+    { title: "Metus", file: "metus.mp3" },
+    { title: "Mışılmışıl", file: "misilmisil.mp3" },
+    { title: "Naar", file: "naar.mp3" },
+    { title: "Ne anladın", file: "neanladın.mp3" },
+    { title: "Nefes nefes", file: "nefesnefes.mp3" },
+    { title: "Nefsim doyumsuz", file: "nefsim-doyumsuz.mp3" },
+    { title: "Para ve pul", file: "paravepul.mp3" },
+    { title: "Rabbi yesir", file: "RabbiYesir.mp3" },
+    { title: "Sen gibi", file: "sengibi.mp3" },
+    { title: "Sevgili", file: "sevgili.mp3" },
+    { title: "Talan", file: "talann.mp3" },
+    { title: "Toksik toksik", file: "toksiktoksik.mp3" },
+    { title: "What is real", file: "whatisreal.wav" },
+    { title: "Yaz geldi", file: "yazgeldi.mp3" }
   ],
   ARTIST: "MyByYavRu"
 };
@@ -236,7 +216,7 @@ const CONFIG = {
 const $ = id => document.getElementById(id);
 const A = $('audio'), B = new Audio();
 B.preload = 'auto'; B.setAttribute('playsinline','');
-let audio = A;
+let audio = A;                                   // şu an çalan eleman (geçiş sırasında A <-> B değişir)
 const bind = (ev, fn) => [A,B].forEach(el => el.addEventListener(ev, e => { if (el === audio) fn(e); }));
 const tracks = CONFIG.TRACKS;
 let idx = 0, shuffle = false, wantPlay = false, srcTry = 0, failStreak = 0;
@@ -244,12 +224,16 @@ const failed = new Set();
 
 function sources(t){
   const l = [];
-  if (t.file){
+  if (t.file){                                         // önce sitedeki dosya (boşluk / Türkçe karakter varyantlarıyla)
     const v = new Set();
-    [t.file, t.file.replace(/\s+(\.[a-z0-9]+)$/i,'$1')].forEach(f=>{ v.add(f.normalize('NFC')); v.add(f.normalize('NFD')); });
+    const names = [t.file, t.file.replace(/\s+(\.[a-z0-9]+)$/i,'$1')];
+    const mp3s = names.filter(n=>/\.wav$/i.test(n)).map(n=>n.replace(/\.wav$/i,'.mp3'));   // wav için önce aynı adlı mp3'ü dene
+    const base = [...mp3s, ...names];
+    const fold = x => x.replace(/ı/g,'i').replace(/İ/g,'I').replace(/ş/g,'s').replace(/Ş/g,'S').replace(/ğ/g,'g').replace(/Ğ/g,'G').replace(/ü/g,'u').replace(/Ü/g,'U').replace(/ö/g,'o').replace(/Ö/g,'O').replace(/ç/g,'c').replace(/Ç/g,'C');
+    [...base, ...base.map(x=>x.toLowerCase()), ...base.map(fold), ...base.map(x=>fold(x).toLowerCase())].forEach(f=>{ v.add(f.normalize('NFC')); v.add(f.normalize('NFD')); });
     v.forEach(f=>l.push(encodeURI(f)));
   }
-  if (t.drive){
+  if (t.drive){                                        // bulunamazsa Drive yedeği
     l.push(`https://drive.usercontent.google.com/download?id=${t.drive}&export=download`);
     l.push(`https://drive.google.com/uc?export=download&id=${t.drive}`);
   }
@@ -258,6 +242,8 @@ function sources(t){
 const fmt = s => (!isFinite(s)||s<0) ? '0:00' : Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
 const setFill = el => el.style.setProperty('--p', (el.value/el.max*100)+'%');
 
+
+/* ---- Bars ---- */
 const barsEl = $('bars');
 for (let i=0;i<20;i++) barsEl.appendChild(document.createElement('span'));
 setInterval(()=>{
@@ -265,6 +251,7 @@ setInterval(()=>{
   barsEl.childNodes.forEach(b => b.style.height = (playing ? 4+Math.random()*22 : 4) + 'px');
 }, 110);
 
+/* ---- Yükle / Çal ---- */
 function load(i){
   idx = (i + tracks.length) % tracks.length;
   srcTry = 0;
@@ -279,6 +266,7 @@ function play(){
 function pause(){ wantPlay = false; audio.pause(); }
 function skip(dir){ load(nextIndex(dir)); if (wantPlay) play(); }
 
+/* ---- Olaylar ---- */
 bind('play', ()=>ui(true));
 bind('pause', ()=>ui(false));
 function ui(on){
@@ -300,12 +288,13 @@ bind('timeupdate', ()=>{
 bind('ended', ()=>skip(1));
 bind('error', ()=>{
   const list = sources(tracks[idx]);
-  if (srcTry < list.length-1){
+  if (srcTry < list.length-1){            // yedek adresi dene
     srcTry++;
     audio.src = list[srcTry];
     if (wantPlay) play();
     return;
   }
+  // iki adres de çalışmadı: işaretle, sıradakine geç
   failed.add(idx);
   failStreak++;
   if (failStreak >= tracks.length){ wantPlay = false; $('sub').textContent = 'Hiçbir şarkı açılamadı. Paylaşım ayarlarını kontrol et.'; return; }
@@ -333,6 +322,7 @@ if ('mediaSession' in navigator){
   navigator.mediaSession.setActionHandler('pause', pause);
 }
 
+/* ---- Armağan: çalan şarkının adı yerine sohbetten birinin adı ---- */
 let DED = '', _users = null;
 function getUsers(){
   if (_users) return _users;
@@ -353,6 +343,7 @@ function newDedic(){
   DED = n;
 }
 
+/* ---- Sıralı liste: baştan 1. şarkıdan başlar, çıkıp girince kaldığı yerden devam eder ---- */
 const RESUME_KEY = 'radyoai_resume_v1';
 let pendingSeek = 0, started = false, livePos = 0, liveN = tracks.length;
 const fileOf = i => tracks[i].file || tracks[i].title;
@@ -386,11 +377,12 @@ setInterval(saveLive, 2000);
 document.addEventListener('visibilitychange', ()=>{ if (document.hidden) saveLive(); });
 window.addEventListener('pagehide', saveLive);
 
-const XF = 6;
-const WA = (()=>{ try { const a = new Audio(); a.volume = 0.5; return a.volume === 0.5; } catch(e){ return false; } })();
+/* ---- Mix geçiş (crossfade): ses seviyesi ayarlanabilen cihazlarda çalışır; WebAudio kullanılmaz, arka plan/kilit ekranı çalması bozulmaz ---- */
+const XF = 6;                                  // geçiş süresi (sn)
+const WA = (()=>{ try { const a = new Audio(); a.volume = 0.5; return a.volume === 0.5; } catch(e){ return false; } })();   // iPhone'da false: orada ses seviyesi koddan ayarlanamaz
 let xfading = false, xfIdx = -1;
 const SILENT = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
-function unlockB(){
+function unlockB(){                           // ikinci elemanı kullanıcı dokunuşunda "uyandır"
   try {
     B.src = SILENT;
     const pr = B.play();
@@ -439,16 +431,18 @@ setInterval(()=>{
 
 window.addEventListener('error', e=>{ if (e.message && e.message !== 'Script error.') $('sub').textContent = 'Hata: ' + e.message; });
 
+/* ---- Başlangıç kapısı (tarayıcılar otomatik çalmayı engeller) ---- */
 $('start').onclick = ()=>{ $('gate').classList.add('hide'); started = true; if (WA) unlockB(); play(); };
 if (!tracks.length){ $('gateTxt').textContent = 'Listede şarkı yok.'; $('start').style.display = 'none'; }
 else initLive();
 
+/* ---- Radyo sohbeti: dinleyici şarkı seçemez, DJ çalanı duyurur ---- */
 (function(){
   const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
   const pick=a=>a[rnd(0,a.length-1)];
   const fill=(t,m)=>t.replace(/\{(\w+)\}/g,(_,k)=>m[k]);
   const rec={};
-  function nr(pool,key,keep){
+  function nr(pool,key,keep){                       // son kullanılanları tekrar etme
     const r=rec[key]||(rec[key]=[]); let c,g=0;
     do{ c=pick(pool); g++; }while(r.includes(c)&&g<30);
     r.push(c); if(r.length>(keep||8)) r.shift(); return c;
@@ -457,6 +451,7 @@ else initLive();
   const colors=["#ff8a65","#ffd54f","#aed581","#4dd0e1","#9fa8da","#ce93d8","#f48fb1","#80cbc4","#ffb74d"];
   const title=()=>tracks[idx].title;
 
+  /* ---- yerler: 81 il + ilçeler + yurt dışı şehirler + ülkeler ---- */
   const trCities=["Adana","Adıyaman","Afyon","Ağrı","Amasya","Ankara","Antalya","Artvin","Aydın","Balıkesir","Bilecik","Bingöl","Bitlis","Bolu","Burdur","Bursa","Çanakkale","Çankırı","Çorum","Denizli","Diyarbakır","Edirne","Elazığ","Erzincan","Erzurum","Eskişehir","Gaziantep","Giresun","Gümüşhane","Hakkari","Hatay","Isparta","Mersin","İstanbul","İzmir","Kars","Kastamonu","Kayseri","Kırklareli","Kırşehir","Kocaeli","Konya","Kütahya","Malatya","Manisa","Kahramanmaraş","Mardin","Muğla","Muş","Nevşehir","Niğde","Ordu","Rize","Sakarya","Samsun","Siirt","Sinop","Sivas","Tekirdağ","Tokat","Trabzon","Tunceli","Şanlıurfa","Uşak","Van","Yozgat","Zonguldak","Aksaray","Bayburt","Karaman","Kırıkkale","Batman","Şırnak","Bartın","Ardahan","Iğdır","Yalova","Karabük","Kilis","Osmaniye","Düzce","Adapazarı","Bodrum","Alanya","Kadıköy","Beşiktaş","Çankaya","Karşıyaka","Nilüfer","Marmaris","Fethiye","Maltepe","Üsküdar"];
   const abroadPairs=[["Berlin","Almanya"],["Köln","Almanya"],["Hamburg","Almanya"],["Münih","Almanya"],["Stuttgart","Almanya"],["Frankfurt","Almanya"],["Düsseldorf","Almanya"],["Amsterdam","Hollanda"],["Rotterdam","Hollanda"],["Paris","Fransa"],["Strazburg","Fransa"],["Londra","İngiltere"],["Viyana","Avusturya"],["Zürih","İsviçre"],["Brüksel","Belçika"],["Stockholm","İsveç"],["Kopenhag","Danimarka"],["Bakü","Azerbaycan"],["Lefkoşa","KKTC"],["Gazimağusa","KKTC"],["Almatı","Kazakistan"],["Toronto","Kanada"],["New York","ABD"],["Sydney","Avustralya"],["Dubai","BAE"],["Doha","Katar"],["Tiflis","Gürcistan"],["Saraybosna","Bosna"],["Üsküp","Kuzey Makedonya"],["Priştine","Kosova"],["Sofya","Bulgaristan"],["Moskova","Rusya"],["Roma","İtalya"],["Madrid","İspanya"],["Barselona","İspanya"],["Tokyo","Japonya"]];
   const countries=["Almanya","Hollanda","Fransa","Avusturya","İsviçre","Belçika","İngiltere","Azerbaycan","KKTC","Kazakistan","Kanada","ABD","Avustralya","İsveç","Danimarka","Katar","BAE","Gürcistan","Bosna","Kosova","Bulgaristan","Rusya","İtalya","İspanya","Japonya","Norveç"];
@@ -470,6 +465,7 @@ else initLive();
     return {text:t,place:p};
   }
 
+  /* ---- dinleyici mesajları (çeşitli) ---- */
   const react=["Yayın efsane başlamış 🔥","Hicaz kısmı çok güzel","Ses kalitesi süper","Kaç kişiyiz bugün 😄","Bu geçiş mükemmel","Türkiye'den selamlar","Harika enerji 🔥🔥🔥","Tempo tam yerinde","Bas çok iyi","Kulaklıkla dinliyorum, muhteşem","Beğendim, takipteyim","Sabaha kadar dinlerim","Arkadaşlarıma da attım linki","Yeni albüm ne zaman?","Bu melodi kafamda kaldı","Bu sound çok özgün","Gerçekten profesyonel","Spotify'da var mı bu şarkılar?","Bu liste ateş ediyor","Geceye yakıştı","Eskilere götürdü","Bağımlısı oldum bu radyonun","Sözler çok manidar","Gece için ideal","Telefonu şarja taktım, bırakmıyorum 😅","Yolda dinliyorum, trafik bile güzel","Tüylerim diken diken","Bu kanalı yeni buldum, iyi ki bulmuşum","Arabada sesi sonuna kadar açtım 🚗","Çay eşliğinde dinleniyor ☕","Mutfakta temizlik yaparken ideal 😄","Ders çalışırken fon oldu","Tam kafa dağıtmalık","Böyle yayın az bulunur","Emeğe saygı 👏","Kim yapıyor bu müzikleri, helal olsun","Hepsi orijinal mi gerçekten?","Daha önce duymadığım bir tarz","Akşam yorgunluğu gitti","Bu radyo benim yeni favorim","Yayına yeni girdim, ne kaçırdım?","Kız arkadaşıma gönderdim linki","Annem bile beğendi 😂","Burada kimse uyumuyor mu? 🌙","Gece kuşları toplansın 🦉","Bugün de buradayım","Kaç gündür bırakmıyorum","Vokal çok temiz","Mix çok yumuşak geçiyor","Altyapı müthiş","Davul sesi çok iyi","Bu tarzda uzun set yapın","Playlist'e eklenir kesin","Shazam bile tanımadı, özel şarkı demek 😄","Ritim kafayı yerinden oynatıyor","Odada dans ettim 😂","Balkonda dinliyorum, hava harika","Yağmur yağıyor, tam atmosfer 🌧️","Trenle yolculuk, kulaklıkta bu radyo 🚆","Nöbetteyim, bu yayın tek eğlencem","Dükkânı açtım, müzik açık 🎶","Sabah sabah ne güzel başlangıç ☀️","Okuldan çıktım, direkt buraya geldim","Mesai bitti, şimdi keyif zamanı","Bu şarkıyı repeat'e alsam diyorum","Sessiz odada dinlemek bambaşka","Hoparlörü komşu da duysun 😎","Spor yaparken açtım, tempo yükseldi 💪","Yemek yaparken eşlik ediyor 🍳","Bu radyoyu herkese önerdim","Gerçek bir sanatçı işi","Duygusal oldum şimdi","Uykum kaçtı, iyi ki bu yayın varmış","Hafta sonu keyfi 🙌","Şarkılar hep bir üst seviye","Dinledikçe seviyorum"];
   const trackT=["Bu şarkı favorim oldu","Bu şarkı yeniden dinlenir 🔥","Bu şarkı ne zaman çıktı?","Bu şarkıyı dinlerken tüylerim diken diken","Bu şarkı bu aralar dilimde","Sözleri çok iyi bu şarkının","Bu şarkı geldi, tamam bu gece kurtuldu","Bu şarkının mix'i yumuşacık geçti","Bu şarkı bitmesin 😍","Bu şarkıya bayıldım","Bu şarkı başladığı an kulaklığı taktım","Bu şarkıyı bilen var mı?","Kimler bu şarkıyı sevdi? 👇","Bu şarkının adı neydi, kaçırdım?","DJ abi şarkının adı ne?","Bu şarkıyı Shazam'a okuttum bulamadı, adı ne?"];
   const shorts=["🔥","👏👏","❤️","😍","🙌","🎧","💯","Çok iyi","Süper","Efsane","Harika","Evet!","Aynen","+1","Bence de","😂","🥹","Vay be","Yaşasın","Bomba","Muhteşem 🤌","Güzel","Of of 🔥","Tam böyle","Helal"];
@@ -485,6 +481,7 @@ else initLive();
     return {text:placeMsg().text};
   }
 
+  /* ---- DJ cevapları ---- */
   const thanks=["Teşekkürler @{n}! Çok güzel söyledin ❤️","Sağ ol @{n}, bu sözler beni çok mutlu etti 🙏","@{n} çok teşekkür ederim, devam edeceğiz 🔥","Eyvallah @{n}, asıl sen sağ ol!","@{n} teşekkürler, dinlediğin için ayrıca minnettarım 🎧","Çok sağ ol @{n}, enerjin harika ✨","@{n} teşekkür ederim, böyle desteklerle ayaktayız 💪","Sevgiler @{n}, teşekkürler canım ❤️","@{n} bu söz bana yeter, teşekkürler 🙌","Minnettarım @{n}, çok sağ ol! 🥹","@{n} sen de çok yaşa, teşekkürler 🤝","Teşekkürler @{n}, her mesajı okuyorum 👀"];
   const greets=["Selam @{n}, hoş geldin! 🙌","Merhaba @{n}, iyi ki buradasın!","@{n} hoş geldin, kendini evinde hisset 🏠","Selamlar @{n}! Keyifli dinlemeler 🎧","Hoş geldin @{n}, yayın tam seninle güzelleşti ✨","Aleyküm selam / selam @{n} 👋","@{n} selam, nasılsın bakalım?","Selam selam @{n}! Çay kahve hazır mı? ☕"];
   const howare=["İyiyim @{n}, sorduğun için sağ ol! Sen nasılsın? 😊","@{n} çok iyiyim, sizlerle olunca daha da iyi! Sen nasılsın?","Şükür iyiyim @{n}, yayın başında hep enerjiliyim 😄","@{n} iyiyim, teşekkürler! Bugün neler yaptın?"];
@@ -509,6 +506,7 @@ else initLive();
     return fill(Math.random()<.6 ? nr(thanks,'th',5) : nr(defaults,'df',4),m);
   }
 
+  /* ---- DOM ---- */
   const chat=$('chat');
   function add(name,text,cls,color){
     const d=document.createElement('div');
@@ -526,6 +524,7 @@ else initLive();
   const botSay=(u,text)=>{ add(u,text,'',colors[u.length%colors.length]); recent.push(u); if(recent.length>12)recent.shift(); };
   function flurry(n,pool){ for(let k=0;k<n;k++) setTimeout(()=>botSay(pick(users),nr(pool||shorts,'fl',6)),rnd(900,5500)); }
 
+  /* ---- çalan şarkı duyurusu ---- */
   const dedT=["Bu şarkı @{u} için armağan edildi 🎁 Adını merak edersen bana sor!","@{u} için özel bir armağan: şu an çalan şarkı onun! 🎁","Bu parça @{u} armağanıdır 🎁 Şarkının adını öğrenmek isteyen bana yazsın 💬","Sırada @{u} için armağan bir şarkı var 🎶 Adını sorarsanız söylerim","@{u} bu şarkı senin için, keyfini çıkar! 🎁 Diğerleri adını bana sorabilir 😉","Armağan zamanı! 🎁 Bu şarkı @{u} için çalıyor, adı gizli, sormayı unutmayın 😄"];
   const dedThanks=["Vay be, bu şarkı benim için mi? Çok teşekkürler DJ 🥹","DJ YavRu bu armağan için sağ ol, çok mutlu oldum ❤️","Bu şarkı benim için mi?! Gözlerim doldu 😭","Teşekkürler DJ abi, günümü güzelleştirdin 🙏","Armağana bak ya, çok sağ ol DJ YavRu 🎁","Ben mi? Gerçekten mi? Teşekkürler ❤️","Şaşırdım valla, çok teşekkürler DJ 🥹","İyi ki yazmışım bugün, armağan bana çıktı 😄","Bu şarkı artık benim şarkım 😍 Teşekkürler DJ!"];
   const dedReply=["Güle güle dinle @{u}! 🎁","@{u} hak ettin, keyfini çıkar ❤️","Rica ederim @{u}, bu şarkı senin! 🎶","@{u} sevindiysen ben de sevindim 🥹","Ne demek @{u}, sırayla hepiniz armağan alacaksınız 😉"];
@@ -538,6 +537,7 @@ else initLive();
     }
   });
 
+  /* ---- akan sohbet ---- */
   let locMode=false, placed=[];
   (function tick(){
     const u=pick(users);
@@ -546,13 +546,14 @@ else initLive();
     else { meta=botText(); txt=meta.text; }
     botSay(u,txt);
     if(!locMode){
-      if(meta.toDJ && Math.random()<.92) dj(reply(txt,u),rnd(1500,4200));
+      if(meta.toDJ && Math.random()<.92) dj(reply(txt,u),rnd(1500,4200));          // DJ'e hitap edilene bizzat cevap + teşekkür
       else if(meta.q && Math.random()<.5) dj(reply(txt,u),rnd(2000,5000));
     }
     setTimeout(tick, locMode ? rnd(350,900) : rnd(500,2000));
   })();
   for(let k=0;k<6;k++) botSay(pick(users),nr(react,'react',30));
 
+  /* ---- DJ kendiliğinden konuşur ---- */
   const hour=()=>new Date().getHours();
   const greetTime=()=>{ const h=hour(); return h<6?"Gece kuşları, hoş geldiniz 🌙":h<12?"Günaydın herkese ☀️":h<18?"İyi günler herkese 👋":"İyi akşamlar herkese 🌆"; };
   const djPool=[
@@ -571,6 +572,7 @@ else initLive();
     },rnd(16000,30000));
   })();
 
+  /* ---- "Herkes dinlediği yeri yazsın" anı: sohbet şehir ve ülkelerle dolar ---- */
   const locCalls=["Herkes dinlediği yeri yazsın! 🌍 Şehrini ve ülkeni yaz, hepinizi okuyacağım","Hadi bakalım, herkes dinlediği yeri yazsın! 📍 Nereden katılıyorsunuz?","Herkes dinlediği yeri yazsın, merak ediyorum nerelerdeyiz! 🌎","Şimdi herkes dinlediği yeri yazsın, şehir de olur ülke de! 🗺️"];
   function startLoc(){
     if(!locMode){
@@ -586,6 +588,7 @@ else initLive();
   }
   setTimeout(startLoc, 100000);
 
+  /* ---- dinleyiciler çalan şarkıyı sorar ---- */
   const askQ=["Çalan şarkı ne?","Bu şarkının adı ne?","Şu an ne çalıyor?","Bu parça kimin?","Şarkı adını yazar mısın?","Bu şarkı çok güzel, adı neydi?","Az önce başlayan şarkı hangisi?"];
   (function ask(){
     setTimeout(()=>{
@@ -597,6 +600,7 @@ else initLive();
     },rnd(18000,34000));
   })();
 
+  /* ---- kullanıcı mesajı ---- */
   $('cf').addEventListener('submit',e=>{
     e.preventDefault();
     const i=$('ci'),t=i.value.trim();
@@ -606,22 +610,23 @@ else initLive();
     dj(reply(t,'Sen'),rnd(1200,3000));
   });
 
+  /* ---- izleyici sayacı 2400–5000, aktif yazan sayısı, her +100'de duyuru ---- */
   let v=rnd(2800,4200), top=Math.floor(v/100)*100, tgt=3700;
-  const fmtN=n=>n.toLocaleString('tr-TR');
+  const fmt=n=>n.toLocaleString('tr-TR');
   const hype=["📈 Dinleyici sayısı {x} oldu! Hoş geldiniz herkese 🙌","🎉 Şu an {x} kişi birlikte dinliyoruz!","🔥 {x} dinleyiciyiz, yayın büyüyor!","👥 Aktif dinleyici sayısı {x} oldu, hepinize teşekkürler ❤️","🚀 {x} kişi aynı anda dinliyor, inanılmaz!"];
   function upd(){
     tgt=Math.max(2600,Math.min(4800,tgt+rnd(-25,25)));
     v+=rnd(-40,40)+Math.round((tgt-v)*0.03);
     if(v<2400)v=2400+rnd(0,60);
     if(v>5000)v=5000-rnd(0,60);
-    $('n').textContent='· 👁 '+fmtN(v);
-    $('actN').textContent=fmtN(Math.max(40,Math.round(v*0.055+rnd(-10,10))));
+    $('n').textContent='· 👁 '+fmt(v);
+    $('actN').textContent=fmt(Math.max(40,Math.round(v*0.055+rnd(-10,10))));
     const lvl=Math.floor(v/100)*100;
-    if(lvl>=top+100){ top=lvl; add('DJ YavRu','🎧 '+fill(nr(hype,'hype',3),{x:fmtN(lvl)}),'dj'); flurry(rnd(2,4),shorts); }
-    else if(lvl<=top-300){ top=lvl; }
+    if(lvl>=top+100){ top=lvl; add('DJ YavRu','🎧 '+fill(nr(hype,'hype',3),{x:fmt(lvl)}),'dj'); flurry(rnd(2,4),shorts); }
+    else if(lvl<=top-300){ top=lvl; }     // sayı düştüyse yeniden artışta tekrar duyur
   }
   upd(); setInterval(upd,2000);
 })();
 </script>
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+</body>
 </html>
