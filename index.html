@@ -144,6 +144,26 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radiu
 #ezanBar[hidden]{display:none}
 #ezanBar button{background:rgba(255,255,255,.1);color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;white-space:nowrap}
 #ezanTxt{flex:1}
+#giftModal{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.65);display:grid;place-items:center;padding:16px}
+#giftModal[hidden]{display:none}
+.gbox{position:relative;width:100%;max-width:380px;background:#12121a;border:1px solid rgba(168,85,247,.5);border-radius:18px;padding:18px 16px;display:flex;flex-direction:column;gap:10px;max-height:92vh;overflow-y:auto}
+.gbox h3{font-size:14px;letter-spacing:.14em;padding-right:28px}
+.gbox .gh{font-size:12px;color:var(--faint);line-height:1.4}
+.gbox label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--dim)}
+.gbox input{background:#0b0b11;border:1px solid var(--line);border-radius:10px;color:#fff;padding:10px 12px;font-size:16px;width:100%}
+#giftX{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.08)}
+.gmain{background:var(--purple);color:#fff;border-radius:12px;padding:12px;font-weight:700}
+.grow{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.grow a,.grow button{flex:1;text-align:center;background:#25d366;color:#07210f;border-radius:10px;padding:10px;font-size:13px;font-weight:700;text-decoration:none;min-width:90px}
+.grow button{background:rgba(255,255,255,.1);color:#fff}
+#giftLine{margin-top:4px;font-size:12px;line-height:1.35;color:#e6c8ff;font-weight:600;overflow-wrap:anywhere}
+#giftLine[hidden]{display:none}
+.seek[hidden]{display:none}
+.giftwide{width:100%;height:40px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;font-size:13px;font-weight:700;letter-spacing:.02em;color:#fff;background:linear-gradient(90deg,rgba(168,85,247,.38),rgba(168,85,247,.16));border:1px solid rgba(168,85,247,.55)}
+.giftwide span{font-size:17px}
+.giftwide:active{transform:scale(.98)}
+.grow button.ig{background:linear-gradient(45deg,#f9a03c,#e1306c 55%,#8a3ab9);color:#fff}
+.grow button.tt{background:#000;color:#fff;border:1px solid #25f4ee;box-shadow:inset 0 0 0 1px #fe2c55}
 </style>
 </head>
 <body>
@@ -161,12 +181,14 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radiu
       <div class="kicker">ŞİMDİ ÇALIYOR · <span id="count">1 / 1</span></div>
       <h1 id="title" class="display">—</h1>
       <p id="sub">RadyoAI</p>
+      <p id="giftLine" hidden></p>
       <div class="bars" id="bars"></div>
     </div>
   </section>
 
   <section class="controls">
-    <div class="seek"><time id="cur">0:00</time><input id="seek" type="range" disabled min="0" max="1000" value="0" aria-label="Şarkıda ilerle"><time id="dur">0:00</time></div>
+    <button type="button" class="giftwide" id="giftBtn" aria-label="Bu Şarkıyı Birine Yollamaya Ne Dersin" title="Bu Şarkıyı Birine Yollamaya Ne Dersin"><span>🎁</span> Bu Şarkıyı Birine Yollamaya Ne Dersin</button>
+    <div class="seek" hidden><time id="cur">0:00</time><input id="seek" type="range" disabled min="0" max="1000" value="0" aria-label="Şarkıda ilerle"><time id="dur">0:00</time></div>
     <div class="btns">
       <button class="ib play" id="toggle" aria-label="Çal / Duraklat"><svg id="ico" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
       <div class="vol"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4z"/></svg><input id="vol" type="range" min="0" max="100" value="100" aria-label="Ses"></div>
@@ -182,6 +204,30 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radiu
   </section>
 </div>
 
+<div id="giftModal" hidden>
+  <div class="gbox">
+    <button type="button" id="giftX" aria-label="Kapat">✕</button>
+    <h3 class="display">BU ŞARKIYI BİRİNE YOLLAMAYA NE DERSİN</h3>
+    <p class="gh">Şu an çalan şarkı, açanın ekranında baştan başlar ve adıyla birlikte görünür.</p>
+    <label>Kime? <input id="gTo" maxlength="30" placeholder="İsim" autocomplete="off"></label>
+    <label>Notun (isteğe bağlı) <input id="gNote" maxlength="140" placeholder="Seni seviyorum…" autocomplete="off"></label>
+    <label>Senin adın (isteğe bağlı) <input id="gFrom" maxlength="30" placeholder="Adın" autocomplete="off"></label>
+    <button type="button" id="gMake" class="gmain">Linki oluştur</button>
+    <div id="gOut" hidden>
+      <input id="gLink" readonly aria-label="Armağan linki">
+      <div class="grow">
+        <a id="gWa" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+        <button type="button" id="gIg" class="ig">Instagram</button>
+        <button type="button" id="gTt" class="tt">TikTok</button>
+      </div>
+      <div class="grow">
+        <button type="button" id="gCopy">Kopyala</button>
+        <button type="button" id="gShare" hidden>Diğer…</button>
+      </div>
+      <p id="gHint" class="gh" hidden></p>
+    </div>
+  </div>
+</div>
 <div id="ezanBar" hidden><span id="ezanTxt"></span><button id="ezanPause" type="button">Müziği duraklat</button><button id="ezanClose" type="button" aria-label="Kapat">✕</button></div>
 <div id="gate">
   <div class="vinyl spin"><div class="label display">R</div></div>
@@ -197,68 +243,45 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radiu
 const CONFIG = {
   // Gerçek mesajlaşma sunucusu (Cloudflare Worker adresi). Boşsa mesaj sadece yazanın ekranında sabitlenir ve otomatik cevap gelir.
   API: "",
-  // Player'da şarkı adı yerine çıkan sözler (her şarkıda farklı, sırası rastgele). Cümlede {u} yazarsan yerine sohbetten bir isim gelir.
-  DEDICATIONS: [
-    "Kişi Kendinden Bilirmiş İşi",
-    "Deveye Sormuşlar Neden Eğri ?",
-    "Adım Engin Yoktur Dengim",
-    "Ne Verdiysen Elinle O Gelmiştir Seninle",
-    "Körün Gözü Açılınca İlk Bastonunu Atar",
-    "Ne İngiliz Kralı Kadar Mütevaziyim",
-    "Ne De Celal Bayarın Ahır Uşağı Kadar Aristokrat",
-    "Ciğeri Beş Kuruş Etmez Çok İnsan Tanıdım Benimki De Etmeyince Anladımki Mesele Ciğer Değilmiş",
-    "Ben Utanırsın Diye Beklerken",
-    "Daha Çok Çekecem Demek Henüz Erken",
-    "Anlatayım Lan Şimdi Burdan Herkese Yediğin Naneleri Hee???",
-    "Artık Herkes Evinde Ama Kimse Değil Güvende",
-    "Sizinle Aynı Değiliz Biz Sizinle Mücadele Ederken Onurlu Olmak Zorundayız Sizin Böyle Bir Probleminiz Yok",
-    "Keşke Hiç Tanımasaydım Dediklerimden Olmayı Başaranlara Ödülüm Var Ama Bu Dünyada Değil",
-    "Bedenimin Bedeli Değil Bu! Alınteri",
-    "Sen Ne Anlarsın Be Metuş",
-    "Eşşeğe Altın Semer de Vursan Altın Semer Altın Semerdir",
-    "Ağzından Tek Kelime Hayır Duymadan Gömeceklerim Var Ve Bu Benim Suçum Değil",
-    "Tarihe Not Düşüyorum Ki Arkamdan Bile Yalan Konuşamayın!",
-    "İyileşmez Bıraktığım Hasarım",
-    "Hayatım Boyunca Kimi Sevdiysem Burada Göreceksiniz",
-    "Bitiş Çizgisinde Başardığım Zamanı Bekleyen Sana Diyorum ; NEREYE KADAR YOLUN OLDUĞUNU BİLİYOSUN❕"
-  ],
+  // Armağan linklerinin başında kullanılacak site adresi.
+  SITE_URL: "https://radioai.com.tr/",
   // Şarkıları iki şekilde ekleyebilirsin:
   //  1) drive: "Google Drive dosya kimliği"  (dosya "Bağlantıya sahip herkes" olarak paylaşılmış olmalı)
   //  2) file : "dosya-adi.mp3"             (şarkıyı index.html ile AYNI klasöre koyarsan önce o çalar, olmazsa Drive denenir)
   TRACKS: [
-    { title: "Azıcık ucundan", file: "azicikucundan.mp3" },
-    { title: "Bar bar", file: "bar-bar.mp3" },
-    { title: "Beddua helallik", file: "bedduahelallik.mp3" },
-    { title: "Bestie", file: "bestie.mp3" },
-    { title: "Bestie deep", file: "bestiedeep.mp3" },
-    { title: "Bilsen", file: "bilsen.mp3" },
-    { title: "Çuvaldız", file: "cuvaldiz.mp3" },
-    { title: "Düngitti", file: "dungitti.mp3" },
-    { title: "Elif", file: "elif.mp3" },
-    { title: "Fısıltı", file: "fisilti.mp3" },
-    { title: "İkimize", file: "ikimize.mp3" },
-    { title: "İki sorunlu", file: "ikisorunlu.mp3" },
-    { title: "İste böyle", file: "isteboyle.mp3" },
-    { title: "İstirahat", file: "istirahat.mp3" },
-    { title: "İstirahat (extended)", file: "istirahatextended.mp3" },
-    { title: "Kazulet", file: "kazulet.mp3" },
-    { title: "KRL", file: "krl.mp3" },
-    { title: "Lobo", file: "lobo.mp3" },
-    { title: "Mesein", file: "mesein.mp3" },
-    { title: "Metus", file: "metus.mp3" },
-    { title: "Mışılmışıl", file: "misilmisil.mp3" },
-    { title: "Naar", file: "naar.mp3" },
-    { title: "Ne anladın", file: "neanladın.mp3" },
-    { title: "Nefes nefes", file: "nefesnefes.mp3" },
-    { title: "Nefsim doyumsuz", file: "nefsim-doyumsuz.mp3" },
-    { title: "Para ve pul", file: "paravepul.mp3" },
-    { title: "Rabbi yesir", file: "RabbiYesir.mp3" },
-    { title: "Sen gibi", file: "sengibi.mp3" },
-    { title: "Sevgili", file: "sevgili.mp3" },
-    { title: "Talan", file: "talann.mp3" },
-    { title: "Toksik toksik", file: "toksiktoksik.mp3" },
-    { title: "What is real", file: "whatisreal.wav" },
-    { title: "Yaz geldi", file: "yazgeldi.mp3" }
+    { title: "Azıcık UcundaN", file: "azicikucundan.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "BarBar", file: "bar-bar.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "Ne Beddua Ne Helallik", file: "bedduahelallik.mp3", credit: "Söz: Gökçem Bengi Şakar · Müzik: Engin YAVRU" },
+    { title: "BestiE", file: "bestie.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "BestiEDeep", file: "bestiedeep.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "BilseN", file: "bilsen.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "ÇuvaldıZ", file: "cuvaldiz.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "Dün Gitti", file: "dungitti.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "elif", file: "elif.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "Fısıltı", file: "fisilti.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "İkimizE", file: "ikimize.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "İki Sorunlu", file: "ikisorunlu.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "Henüz Erken", file: "isteboyle.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "İstirahaT", file: "istirahat.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "İstirahaT Remix", file: "istirahatextended.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "KazuleT", file: "kazulet.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "Krallar Lobisi Remix", file: "krl.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "LOBO", file: "lobo.mp3", credit: "Dj Yavru" },
+    { title: "MenşeiN", file: "mesein.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "METUŞ", file: "metus.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "MIŞIL MIŞIL", file: "misilmisil.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "PINARR", file: "naar.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "NE ANLADIN", file: "neanladın.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "NEFES NEFES", file: "nefesnefes.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "NEFSİM DOYUMSUZ", file: "nefsim-doyumsuz.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "HUY remix", file: "paravepul.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "RABBİ YESİR", file: "RabbiYesir.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "OLAMAZLARMIŞ SEN GİBİ", file: "sengibi.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "SEVGİLİ", file: "sevgili.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "TALANN", file: "talann.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "TOKSİK ÇÖPLÜK", file: "toksiktoksik.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "HİLELİ-WHAT İS REAL", file: "whatisreal.wav", credit: "Dj YAVRU MİX" },
+    { title: "YAZ GELDİ", file: "yazgeldi.mp3", credit: "Söz & Müzik: Engin YAVRU" }
   ],
   ARTIST: "MyByYavRu"
 };
@@ -270,6 +293,18 @@ B.preload = 'auto'; B.setAttribute('playsinline','');
 let audio = A;                                   // şu an çalan eleman (geçiş sırasında A <-> B değişir)
 const bind = (ev, fn) => [A,B].forEach(el => el.addEventListener(ev, e => { if (el === audio) fn(e); }));
 const tracks = CONFIG.TRACKS;
+/* ---- Armağan linki: ?s=sarki&to=isim&f=gonderen&n=not  ---- */
+const baseOf = t => String(t.file||'').replace(/\.[^.]+$/,'').toLowerCase();
+let GIFT = null;
+(function(){
+  try{
+    const q = new URLSearchParams(location.search);
+    const clean = (v,m) => String(v||'').replace(/[\u0000-\u001f<>]/g,' ').replace(/\s+/g,' ').trim().slice(0,m);
+    const sid = (q.get('s')||'').toLowerCase(), to = clean(q.get('to'),30);
+    const gi = tracks.findIndex(t => baseOf(t) === sid);
+    if (gi >= 0 && to) GIFT = { idx: gi, to, from: clean(q.get('f'),30), note: clean(q.get('n'),140), active: true };
+  }catch(e){}
+})();
 let idx = 0, shuffle = false, wantPlay = false, srcTry = 0, failStreak = 0;
 const failed = new Set();
 
@@ -328,7 +363,7 @@ function ui(on){
   $('liveTxt').textContent = on ? 'CANLI' : 'DURAKLATILDI';
   if ('mediaSession' in navigator) navigator.mediaSession.playbackState = on ? 'playing' : 'paused';
 }
-bind('playing', ()=>{ failStreak = 0; $('sub').textContent = CONFIG.ARTIST + ' · RadyoAI'; });
+bind('playing', ()=>{ failStreak = 0; $('sub').textContent = tracks[idx].credit || CONFIG.ARTIST; });
 bind('waiting', ()=>{ $('sub').textContent = 'Yükleniyor…'; });
 bind('loadedmetadata', ()=>{ $('dur').textContent = fmt(audio.duration); });
 bind('timeupdate', ()=>{
@@ -409,6 +444,7 @@ function initLive(){
   try { r = JSON.parse(localStorage.getItem(RESUME_KEY)); } catch(e){}
   let i = 0, t = 0;
   if (r && r.sig === listSig() && r.i >= 0 && r.i < tracks.length){ i = r.i; t = r.t || 0; }
+  if (GIFT){ i = GIFT.idx; t = 0; }               // armağan linki: o şarkı baştan başlar
   livePos = i; liveN = tracks.length;
   pendingSeek = t > 2 ? t : 0;
   load(i);
@@ -441,23 +477,24 @@ function unlockB(){                           // ikinci elemanı kullanıcı dok
   } catch(e){}
 }
 function showMeta(){
-  newDedic();
-  const dl = CONFIG.DEDICATIONS && CONFIG.DEDICATIONS.length ? CONFIG.DEDICATIONS : ['🎁 {u} için armağan'];
-  if (!window._bag || !window._bag.length) {            // karıştırılmış torba: tüm cümleler bitmeden tekrar etmez
-    window._bag = dl.map((_, i) => i).sort(() => Math.random() - .5);
-    if (window._bag[window._bag.length-1] === window._lastDL && window._bag.length > 1) window._bag.unshift(window._bag.pop());
-  }
-  const di = window._bag.pop(); window._lastDL = di;
-  const label = dl[di].replace(/\{u\}/g, DED);
+  const T = tracks[idx];
+  if (GIFT && GIFT.active && idx !== GIFT.idx) GIFT.active = false;
+  const gift = GIFT && GIFT.active && idx === GIFT.idx;
+  const label = T.title;
   $('title').textContent = label;
-  $('title').style.fontSize = label.length > 100 ? '15px' : label.length > 60 ? '17px' : '';
+  $('title').style.fontSize = label.length > 60 ? '15px' : label.length > 36 ? '17px' : '';
   $('count').textContent = (livePos+1)+' / '+liveN;
-  $('sub').textContent = '🎁 ' + DED + " armağanıdır · Şarkının adını DJ YavRu'ya sor 💬";
+  $('sub').textContent = T.credit || CONFIG.ARTIST;
+  const gl = $('giftLine');
+  if (gift){
+    gl.textContent = '🎁 ' + GIFT.to + ' için armağan' + (GIFT.note ? ' — “' + GIFT.note + '”' : '') + (GIFT.from ? ' — ' + GIFT.from : '');
+    gl.hidden = false;
+  } else { gl.hidden = true; gl.textContent = ''; }
   $('seek').value = 0; setFill($('seek'));
   $('cur').textContent = '0:00'; $('dur').textContent = '0:00';
   document.title = label + ' · RadyoAI';
   if ('mediaSession' in navigator){
-    navigator.mediaSession.metadata = new MediaMetadata({ title: label, artist: CONFIG.ARTIST, album: 'RadyoAI' });
+    navigator.mediaSession.metadata = new MediaMetadata({ title: label, artist: T.credit ? 'Engin YAVRU' : CONFIG.ARTIST, album: 'RadyoAI' });
   }
 }
 function startXfade(){
@@ -490,6 +527,10 @@ setInterval(()=>{
 window.addEventListener('error', e=>{ if (e.message && e.message !== 'Script error.') $('sub').textContent = 'Hata: ' + e.message; });
 
 /* ---- Başlangıç kapısı (tarayıcılar otomatik çalmayı engeller) ---- */
+if (GIFT){
+  $('gate').querySelector('h2').textContent = 'SANA BİR ARMAĞAN VAR';
+  $('gateTxt').textContent = '🎁 ' + GIFT.to + ', sana bir şarkı armağan edildi' + (GIFT.from ? ' (' + GIFT.from + ')' : '') + '. Dinlemek için dokun.';
+}
 $('start').onclick = ()=>{ $('gate').classList.add('hide'); started = true; if (WA) unlockB(); play(); };
 if (!tracks.length){ $('gateTxt').textContent = 'Listede şarkı yok.'; $('start').style.display = 'none'; }
 else initLive();
@@ -625,15 +666,16 @@ else initLive();
   function flurry(n,pool){ for(let k=0;k<n;k++) setTimeout(()=>botSay(pick(users),nr(pool||shorts,'fl',6)),rnd(900,5500)); }
 
   /* ---- çalan şarkı duyurusu ---- */
-  const dedT=["Bu şarkı @{u} için armağan edildi 🎁 Adını merak edersen bana sor!","@{u} için özel bir armağan: şu an çalan şarkı onun! 🎁","Bu parça @{u} armağanıdır 🎁 Şarkının adını öğrenmek isteyen bana yazsın 💬","Sırada @{u} için armağan bir şarkı var 🎶 Adını sorarsanız söylerim","@{u} bu şarkı senin için, keyfini çıkar! 🎁 Diğerleri adını bana sorabilir 😉","Armağan zamanı! 🎁 Bu şarkı @{u} için çalıyor, adı gizli, sormayı unutmayın 😄"];
-  const dedThanks=["Vay be, bu şarkı benim için mi? Çok teşekkürler DJ 🥹","DJ YavRu bu armağan için sağ ol, çok mutlu oldum ❤️","Bu şarkı benim için mi?! Gözlerim doldu 😭","Teşekkürler DJ abi, günümü güzelleştirdin 🙏","Armağana bak ya, çok sağ ol DJ YavRu 🎁","Ben mi? Gerçekten mi? Teşekkürler ❤️","Şaşırdım valla, çok teşekkürler DJ 🥹","İyi ki yazmışım bugün, armağan bana çıktı 😄","Bu şarkı artık benim şarkım 😍 Teşekkürler DJ!"];
-  const dedReply=["Güle güle dinle @{u}! 🎁","@{u} hak ettin, keyfini çıkar ❤️","Rica ederim @{u}, bu şarkı senin! 🎶","@{u} sevindiysen ben de sevindim 🥹","Ne demek @{u}, sırayla hepiniz armağan alacaksınız 😉"];
+  const annT=["Şu an çalan: {t} 🎶","Sırada {t} var 🎧","{t} başlıyor, keyifli dinlemeler 🎶","Şimdi {t} çalıyor 🔊","{t} geldi, sesi açın 🔥","Yayında {t} 🎵"];
   let lastAnn=-1;
   bind('playing',()=>{
     if(lastAnn!==idx){
-      lastAnn=idx; const u=DED;
-      dj(fill(nr(dedT,'ded',3),{u}),600);
-      if(Math.random()<.8) setTimeout(()=>{ botSay(u,nr(dedThanks,'dth',4)); dj(fill(nr(dedReply,'drep',3),{u}),rnd(1500,3500)); },rnd(3500,7000));
+      lastAnn=idx;
+      if(GIFT && GIFT.active && idx===GIFT.idx){
+        dj('🎁 '+GIFT.to+', bu şarkı sana armağan edildi'+(GIFT.from?' — '+GIFT.from+' gönderdi':'')+'! Çalan: '+tracks[idx].title+' 🎶',600);
+      } else if(Math.random()<.85){
+        dj(fill(nr(annT,'ann',3),{t:tracks[idx].title}),600);
+      }
     }
   });
 
@@ -841,6 +883,51 @@ else initLive();
   $('ezanPause').onclick=()=>{ try{ if(!audio.paused) pause(); }catch(e){} bar.hidden=true; };
   const saved=ld(); if(saved&&saved.coords){ coords=saved.coords; if(saved.on){ setOn(true); load(); } }
   setInterval(check,15000);
+})();
+
+/* ---- Armağan et: çalan şarkıyı bir isme armağan eden link üretir ---- */
+(function(){
+  const M=$('giftModal');
+  const open=()=>{ $('gOut').hidden=true; M.hidden=false; setTimeout(()=>{ try{$('gTo').focus();}catch(e){} },50); };
+  $('giftBtn').onclick=open; $('giftX').onclick=()=>{ M.hidden=true; };
+  M.addEventListener('click',e=>{ if(e.target===M) M.hidden=true; });
+  $('gMake').onclick=()=>{
+    const to=$('gTo').value.trim(); if(!to){ $('gTo').focus(); return; }
+    const q=new URLSearchParams({ s: baseOf(tracks[idx]), to });
+    const f=$('gFrom').value.trim(), n=$('gNote').value.trim();
+    if(f) q.set('f',f); if(n) q.set('n',n);
+    const link=(CONFIG.SITE_URL||location.origin+'/')+'?'+q.toString();
+    const msg=to+', sana bir şarkı yolladım'+(f?' ('+f+')':'')+'. Dinlemek için dokun: '+link;
+    $('gLink').value=link; $('gOut').hidden=false; $('gHint').hidden=true;
+    $('gWa').href='https://wa.me/?text='+encodeURIComponent(msg);
+    $('gShare').hidden=!navigator.share;
+    $('gShare').onclick=()=>{ try{ navigator.share({title:'RadyoAI',text:to+', sana bir şarkı yolladım',url:link}); }catch(e){} };
+    const hint=t=>{ const h=$('gHint'); h.textContent=t; h.hidden=false; };
+    const copy=()=>{
+      try{ if(navigator.clipboard) return navigator.clipboard.writeText(msg).then(()=>true).catch(()=>fb()); }catch(e){}
+      return Promise.resolve(fb());
+    };
+    const fb=()=>{ try{ const l=$('gLink'); l.value=msg; l.focus(); l.select(); l.setSelectionRange(0,99999); const ok=document.execCommand('copy'); l.value=link; return ok; }catch(e){ return false; } };
+    $('gCopy').textContent='Kopyala';
+    $('gCopy').onclick=()=>{ copy().then(ok=>{ $('gCopy').textContent=ok?'Kopyalandı ✓':'Kopyalanamadı'; }); };
+    // mesajı hemen (jest sırasında) kopyala, sonra uygulamayı aç; uygulama yoksa web'e düş
+    const copyNow=()=>{ let ok=fb(); if(!ok && navigator.clipboard){ try{ navigator.clipboard.writeText(msg); ok=true; }catch(e){} } return ok; };
+    const ua=navigator.userAgent||'', isAndroid=/Android/i.test(ua), isIOS=/iPhone|iPad|iPod/i.test(ua);
+    function openApp(name, iosScheme, pkg, host, path, web){
+      const ok=copyNow();
+      hint(ok ? 'Mesaj kopyalandı. '+name+'’da kişiyi seçip yapıştır.' : 'Linki elle kopyalayıp '+name+'’da yapıştır.');
+      if(isAndroid){
+        location.href='intent://'+host+path+'#Intent;scheme=https;package='+pkg+';S.browser_fallback_url='+encodeURIComponent(web)+';end';
+      } else if(isIOS){
+        location.href=iosScheme;
+        setTimeout(()=>{ if(!document.hidden) window.open(web,'_blank','noopener'); },1500);
+      } else {
+        window.open(web,'_blank','noopener');
+      }
+    }
+    $('gIg').onclick=()=>openApp('Instagram','instagram://mailbox','com.instagram.android','www.instagram.com','/direct/inbox/','https://www.instagram.com/direct/inbox/');
+    $('gTt').onclick=()=>openApp('TikTok','tiktok://','com.zhiliaoapp.musically','www.tiktok.com','/messages','https://www.tiktok.com/messages');
+  };
 })();
 </script>
 </body>
