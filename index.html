@@ -217,7 +217,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radiu
       <input id="gLink" readonly aria-label="Armağan linki">
       <div class="grow">
         <a id="gWa" target="_blank" rel="noopener noreferrer">WhatsApp</a>
-        <button type="button" id="gIg" class="ig">Instagram</button>
+        <button type="button" id="gIg" class="ig">Instagram Hikâye</button>
         <button type="button" id="gTt" class="tt">TikTok</button>
       </div>
       <div class="grow">
@@ -910,23 +910,95 @@ else initLive();
     const fb=()=>{ try{ const l=$('gLink'); l.value=msg; l.focus(); l.select(); l.setSelectionRange(0,99999); const ok=document.execCommand('copy'); l.value=link; return ok; }catch(e){ return false; } };
     $('gCopy').textContent='Kopyala';
     $('gCopy').onclick=()=>{ copy().then(ok=>{ $('gCopy').textContent=ok?'Kopyalandı ✓':'Kopyalanamadı'; }); };
-    // mesajı hemen (jest sırasında) kopyala, sonra uygulamayı aç; uygulama yoksa web'e düş
-    const copyNow=()=>{ let ok=fb(); if(!ok && navigator.clipboard){ try{ navigator.clipboard.writeText(msg); ok=true; }catch(e){} } return ok; };
-    const ua=navigator.userAgent||'', isAndroid=/Android/i.test(ua), isIOS=/iPhone|iPad|iPod/i.test(ua);
-    function openApp(name, iosScheme, pkg, host, path, web){
-      const ok=copyNow();
-      hint(ok ? 'Mesaj kopyalandı. '+name+'’da kişiyi seçip yapıştır.' : 'Linki elle kopyalayıp '+name+'’da yapıştır.');
-      if(isAndroid){
-        location.href='intent://'+host+path+'#Intent;scheme=https;package='+pkg+';S.browser_fallback_url='+encodeURIComponent(web)+';end';
-      } else if(isIOS){
-        location.href=iosScheme;
-        setTimeout(()=>{ if(!document.hidden) window.open(web,'_blank','noopener'); },1500);
-      } else {
-        window.open(web,'_blank','noopener');
+    // ---- Hikâye kartı: şarkı adı + isim içeren 1080x1920 görsel ----
+    const wrap=(c,text,x,y,maxW,lh,maxLines)=>{
+      const words=String(text).split(' '); let line='', n=0;
+      for(let i=0;i<words.length;i++){
+        const t=line?line+' '+words[i]:words[i];
+        if(c.measureText(t).width>maxW && line){ c.fillText(line,x,y); y+=lh; line=words[i]; if(++n>=maxLines-1){ line=words.slice(i).join(' '); break; } }
+        else line=t;
       }
+      if(c.measureText(line).width>maxW){ while(line.length>1 && c.measureText(line+'…').width>maxW) line=line.slice(0,-1); line+='…'; }
+      c.fillText(line,x,y); return y+lh;
+    };
+    function makeCard(){
+      const W=1080,H=1920, cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+      const c=cv.getContext('2d'); if(!c) return null;
+      const F="'Space Grotesk',Inter,Arial,sans-serif";
+      const to=$('gTo').value.trim(), from=$('gFrom').value.trim(), note=$('gNote').value.trim(), T=tracks[idx];
+      const rr=(x,y,w,h,r)=>{ c.beginPath(); if(c.roundRect) c.roundRect(x,y,w,h,r); else c.rect(x,y,w,h); };
+      // --- arka plan: koyu zemin + renkli ışık küreleri
+      let g=c.createLinearGradient(0,0,0,H); g.addColorStop(0,'#0a0a12'); g.addColorStop(.55,'#150c27'); g.addColorStop(1,'#07070c'); c.fillStyle=g; c.fillRect(0,0,W,H);
+      const orb=(x,y,r,col)=>{ const o=c.createRadialGradient(x,y,0,x,y,r); o.addColorStop(0,col); o.addColorStop(1,'rgba(0,0,0,0)'); c.fillStyle=o; c.fillRect(0,0,W,H); };
+      orb(540,560,760,'rgba(168,85,247,.50)'); orb(1000,1500,620,'rgba(236,72,153,.22)'); orb(60,1100,560,'rgba(46,229,166,.14)');
+      c.textAlign='center'; c.textBaseline='alphabetic';
+      // --- üst etiket
+      rr(380,92,320,64,32); c.fillStyle='rgba(255,255,255,.08)'; c.fill(); c.strokeStyle='rgba(255,255,255,.18)'; c.lineWidth=2; c.stroke();
+      c.beginPath(); c.arc(424,124,9,0,Math.PI*2); c.fillStyle='#2ee5a6'; c.shadowColor='#2ee5a6'; c.shadowBlur=18; c.fill(); c.shadowBlur=0;
+      c.fillStyle='#fff'; c.font='700 30px '+F; c.letterSpacing='6px'; c.textAlign='left'; c.fillText('RADYOAI',448,135); c.letterSpacing='0px'; c.textAlign='center';
+      // --- büyük plak
+      const cx=540, cy=450, R=225;
+      c.save(); c.shadowColor='rgba(168,85,247,.8)'; c.shadowBlur=90; c.beginPath(); c.arc(cx,cy,R,0,Math.PI*2); c.fillStyle='#07070b'; c.fill(); c.restore();
+      g=c.createRadialGradient(cx,cy,40,cx,cy,R); g.addColorStop(0,'#17171f'); g.addColorStop(.6,'#0b0b11'); g.addColorStop(1,'#000'); c.beginPath(); c.arc(cx,cy,R,0,Math.PI*2); c.fillStyle=g; c.fill();
+      for(let r=100;r<R-6;r+=13){ c.beginPath(); c.arc(cx,cy,r,0,Math.PI*2); c.strokeStyle='rgba(255,255,255,'+(r%28?'.035':'.07')+')'; c.lineWidth=2; c.stroke(); }
+      if(c.createConicGradient){ const cg=c.createConicGradient(-0.6,cx,cy); cg.addColorStop(0,'rgba(255,255,255,0)'); cg.addColorStop(.08,'rgba(255,255,255,.20)'); cg.addColorStop(.16,'rgba(255,255,255,0)'); cg.addColorStop(.5,'rgba(255,255,255,0)'); cg.addColorStop(.58,'rgba(168,85,247,.28)'); cg.addColorStop(.66,'rgba(255,255,255,0)'); cg.addColorStop(1,'rgba(255,255,255,0)'); c.beginPath(); c.arc(cx,cy,R-4,0,Math.PI*2); c.fillStyle=cg; c.fill(); }
+      c.beginPath(); c.arc(cx,cy,R,0,Math.PI*2); c.strokeStyle='rgba(255,255,255,.22)'; c.lineWidth=4; c.stroke();
+      g=c.createLinearGradient(cx-100,cy-100,cx+100,cy+100); g.addColorStop(0,'#c084fc'); g.addColorStop(1,'#7c3aed'); c.beginPath(); c.arc(cx,cy,88,0,Math.PI*2); c.fillStyle=g; c.fill();
+      c.beginPath(); c.arc(cx,cy,12,0,Math.PI*2); c.fillStyle='#0a0a12'; c.fill();
+      c.fillStyle='#fff'; c.font='700 56px '+F; c.fillText('R',cx,cy-28);
+      c.font='600 18px '+F; c.letterSpacing='5px'; c.fillText('RADYOAI',cx+2,cy+56); c.letterSpacing='0px';
+      // --- "sana bir şarkı yolladı" + isim
+      c.fillStyle='#d8b4fe'; c.font='600 38px '+F; c.letterSpacing='9px'; c.fillText('SANA BİR ŞARKI YOLLADI',cx+4,792); c.letterSpacing='0px';
+      c.fillStyle='#fff'; c.font='700 112px '+F; c.shadowColor='rgba(168,85,247,.55)'; c.shadowBlur=40;
+      let y=wrap(c,to,cx,918,900,120,2); c.shadowBlur=0;
+      if(from){ c.fillStyle='rgba(255,255,255,.72)'; c.font='500 46px '+F; c.fillText('— '+from,cx,y+4); y+=62; }
+      if(note){ c.fillStyle='rgba(255,255,255,.92)'; c.font='italic 500 46px '+F; y=wrap(c,'“'+note+'”',cx,y+34,880,62,3)-6; }
+      // --- şarkı paneli (cam efekti)
+      const by=Math.max(y+40,1160), bh=250;
+      rr(80,by,920,bh,44); g=c.createLinearGradient(0,by,0,by+bh); g.addColorStop(0,'rgba(168,85,247,.34)'); g.addColorStop(1,'rgba(124,58,237,.14)'); c.fillStyle=g; c.fill(); c.strokeStyle='rgba(216,180,254,.65)'; c.lineWidth=3; c.stroke();
+      c.fillStyle='#d8b4fe'; c.font='600 28px '+F; c.letterSpacing='6px'; c.fillText('♪  ŞARKI',cx+3,by+56); c.letterSpacing='0px';
+      c.fillStyle='#fff'; c.font='700 70px '+F; wrap(c,T.title,cx,by+142,840,76,2);
+      c.fillStyle='rgba(255,255,255,.72)'; c.font='500 34px '+F; wrap(c,T.credit||CONFIG.ARTIST,cx,by+214,840,42,1);
+      // --- ekolayzer çubukları
+      let seed=0; for(const ch of (T.title+to)) seed=(seed*31+ch.charCodeAt(0))>>>0;
+      const rnd=()=>{ seed=(seed*1664525+1013904223)>>>0; return seed/4294967296; };
+      const py=1740, avail=py-(by+bh)-50;
+      if(avail>=90){
+        const n=36, bw=14, gap=12, tw=n*bw+(n-1)*gap, bx0=(W-tw)/2, mid=by+bh+50+avail/2, mx=avail/2-6;
+        for(let i=0;i<n;i++){ const hh=Math.max(8,(0.25+0.75*rnd())*mx*(0.55+0.45*Math.sin(i/(n-1)*Math.PI))); const x=bx0+i*(bw+gap);
+          const gg=c.createLinearGradient(0,mid-hh,0,mid+hh); gg.addColorStop(0,'#c084fc'); gg.addColorStop(1,'#ec4899'); c.fillStyle=gg; rr(x,mid-hh,bw,hh*2,7); c.fill(); }
+      }
+      // --- alt buton: dinle
+      rr(230,py,620,104,52); g=c.createLinearGradient(230,0,850,0); g.addColorStop(0,'#a855f7'); g.addColorStop(1,'#ec4899'); c.fillStyle=g; c.fill();
+      c.fillStyle='#fff'; c.font='700 44px '+F; c.fillText('▶  radioai.com.tr',cx,py+66);
+      c.fillStyle='rgba(255,255,255,.55)'; c.font='500 30px '+F; c.fillText('Dinlemek için bağlantıya dokun',cx,1884);
+      return cv;
     }
-    $('gIg').onclick=()=>openApp('Instagram','instagram://mailbox','com.instagram.android','www.instagram.com','/direct/inbox/','https://www.instagram.com/direct/inbox/');
-    $('gTt').onclick=()=>openApp('TikTok','tiktok://','com.zhiliaoapp.musically','www.tiktok.com','/messages','https://www.tiktok.com/messages');
+    window.__makeCard=makeCard;
+    let cardFile=null;
+    try{ const cv=makeCard(); if(cv && cv.toBlob) cv.toBlob(bl=>{ if(bl){ try{ cardFile=new File([bl],'radyoai-sarki.png',{type:'image/png'}); }catch(e){ cardFile=null; } } },'image/png'); }catch(e){}
+    function copyNow(){ let ok=fb(); if(!ok && navigator.clipboard){ try{ navigator.clipboard.writeText(link); ok=true; }catch(e){} } return ok; }
+    const ua=navigator.userAgent||'', isAndroid=/Android/i.test(ua), isIOS=/iPhone|iPad|iPod/i.test(ua);
+    function story(name, iosScheme, androidIntent, web){
+      const ok=copyNow();
+      const how=name==='Instagram' ? 'Hikâyeye eklerken “Bağlantı” çıkartması koyup yapıştır.' : 'Paylaşırken açıklamaya yapıştır.';
+      // 1) Telefonun paylaş menüsü: görsel dosyasıyla birlikte (Instagram Hikâye / TikTok orada çıkar)
+      if(cardFile && navigator.canShare && navigator.canShare({files:[cardFile]})){
+        hint((ok?'Link kopyalandı. ':'')+'Açılan menüden '+(name==='Instagram'?'Instagram → Hikâyen':'TikTok')+' seç. '+how);
+        navigator.share({files:[cardFile], text:msg}).catch(()=>{});
+        return;
+      }
+      // 2) Paylaş menüsü yoksa: görseli indir, uygulamayı aç
+      try{ const cv=makeCard(); if(cv){ const a=document.createElement('a'); a.download='radyoai-sarki.png'; a.href=cv.toDataURL('image/png'); document.body.appendChild(a); a.click(); a.remove(); } }catch(e){}
+      hint((ok?'Link kopyalandı, ':'')+'görsel indirildi. '+name+'’da hikâyene ekle. '+how);
+      setTimeout(()=>{
+        if(isAndroid) location.href=androidIntent;
+        else if(isIOS){ location.href=iosScheme; setTimeout(()=>{ if(!document.hidden) window.open(web,'_blank','noopener'); },2500); }
+        else window.open(web,'_blank','noopener');
+      },500);
+    }
+    $('gIg').onclick=()=>story('Instagram','instagram://story-camera','intent://story-camera#Intent;scheme=instagram;package=com.instagram.android;S.browser_fallback_url='+encodeURIComponent('https://www.instagram.com/')+';end','https://www.instagram.com/');
+    $('gTt').onclick=()=>story('TikTok','tiktok://','intent://#Intent;scheme=tiktok;package=com.zhiliaoapp.musically;S.browser_fallback_url='+encodeURIComponent('https://www.tiktok.com/')+';end','https://www.tiktok.com/');
   };
 })();
 </script>
