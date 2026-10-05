@@ -977,25 +977,33 @@ else initLive();
     window.__makeCard=makeCard;
     let cardFile=null;
     try{ const cv=makeCard(); if(cv && cv.toBlob) cv.toBlob(bl=>{ if(bl){ try{ cardFile=new File([bl],'radyoai-sarki.png',{type:'image/png'}); }catch(e){ cardFile=null; } } },'image/png'); }catch(e){}
-    function copyNow(){ let ok=fb(); if(!ok && navigator.clipboard){ try{ navigator.clipboard.writeText(link); ok=true; }catch(e){} } return ok; }
+    function copyNow(){
+      // Hikâye çıkartması için yalnızca LİNK kopyalanır
+      let ok=false;
+      try{ const t=document.createElement('textarea'); t.value=link; t.setAttribute('readonly',''); t.style.cssText='position:fixed;top:0;left:0;opacity:0;font-size:16px'; document.body.appendChild(t); t.focus(); t.select(); t.setSelectionRange(0,99999); ok=document.execCommand('copy'); t.remove(); }catch(e){}
+      try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(link).catch(()=>{}); ok=true; } }catch(e){}
+      return ok;
+    }
     const ua=navigator.userAgent||'', isAndroid=/Android/i.test(ua), isIOS=/iPhone|iPad|iPod/i.test(ua);
     function story(name, iosScheme, androidIntent, web){
-      const ok=copyNow();
-      const how=name==='Instagram' ? 'Hikâyeye eklerken “Bağlantı” çıkartması koyup yapıştır.' : 'Paylaşırken açıklamaya yapıştır.';
-      // 1) Telefonun paylaş menüsü: görsel dosyasıyla birlikte (Instagram Hikâye / TikTok orada çıkar)
+      const ok=copyNow();   // 1) link önce kopyalanır
+      const btn=name==='Instagram'?$('gIg'):$('gTt'), old=btn.textContent;
+      if(ok){ btn.textContent='Link kopyalandı ✓'; setTimeout(()=>{ btn.textContent=old; },2500); }
+      const how=name==='Instagram' ? 'Hikâyeye “Bağlantı” çıkartması ekleyip yapıştır.' : 'Açıklamaya yapıştır.';
+      // 2) Kart görseli telefonun paylaş menüsüne gider (Instagram → Hikâyen / TikTok)
       if(cardFile && navigator.canShare && navigator.canShare({files:[cardFile]})){
-        hint((ok?'Link kopyalandı. ':'')+'Açılan menüden '+(name==='Instagram'?'Instagram → Hikâyen':'TikTok')+' seç. '+how);
-        navigator.share({files:[cardFile], text:msg}).catch(()=>{});
+        hint((ok?'✓ Link kopyalandı. ':'')+'Kart hazır: menüden '+(name==='Instagram'?'Instagram → Hikâyen':'TikTok')+' seç. '+how);
+        navigator.share({files:[cardFile]}).catch(()=>{});
         return;
       }
-      // 2) Paylaş menüsü yoksa: görseli indir, uygulamayı aç
+      // 3) Menü yoksa: kartı indir, sonra uygulamayı aç
       try{ const cv=makeCard(); if(cv){ const a=document.createElement('a'); a.download='radyoai-sarki.png'; a.href=cv.toDataURL('image/png'); document.body.appendChild(a); a.click(); a.remove(); } }catch(e){}
-      hint((ok?'Link kopyalandı, ':'')+'görsel indirildi. '+name+'’da hikâyene ekle. '+how);
+      hint((ok?'✓ Link kopyalandı. ':'')+'Kart görseli indirildi (Galeri/İndirilenler). '+name+'’da hikâyene kartı seç. '+how);
       setTimeout(()=>{
         if(isAndroid) location.href=androidIntent;
         else if(isIOS){ location.href=iosScheme; setTimeout(()=>{ if(!document.hidden) window.open(web,'_blank','noopener'); },2500); }
         else window.open(web,'_blank','noopener');
-      },500);
+      },1200);
     }
     $('gIg').onclick=()=>story('Instagram','instagram://story-camera','intent://story-camera#Intent;scheme=instagram;package=com.instagram.android;S.browser_fallback_url='+encodeURIComponent('https://www.instagram.com/')+';end','https://www.instagram.com/');
     $('gTt').onclick=()=>story('TikTok','tiktok://','intent://#Intent;scheme=tiktok;package=com.zhiliaoapp.musically;S.browser_fallback_url='+encodeURIComponent('https://www.tiktok.com/')+';end','https://www.tiktok.com/');
