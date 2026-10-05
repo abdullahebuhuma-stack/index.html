@@ -47,7 +47,7 @@ header{height:54px;flex:none;display:flex;align-items:center;justify-content:spa
 .playing .badge{display:block}
 .info{flex:1;min-width:0}
 .kicker{font-size:10px;letter-spacing:.18em;color:var(--faint);font-weight:600;margin-bottom:4px}
-#title{font-size:20px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#title{font-size:20px;line-height:1.25;white-space:normal;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow-wrap:anywhere}
 #sub{font-size:11px;color:var(--faint);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bars{display:flex;align-items:flex-end;gap:3px;height:26px;margin-top:10px}
 .bars span{width:4px;height:4px;border-radius:9px;background:rgba(255,255,255,.14);transition:height .11s}
@@ -189,12 +189,30 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radiu
 const CONFIG = {
   // Gerçek mesajlaşma sunucusu (Cloudflare Worker adresi). Boşsa mesaj sadece yazanın ekranında sabitlenir ve otomatik cevap gelir.
   API: "",
-  // Player'da şarkı adı yerine çıkan armağan cümleleri. {u} yerine sohbetten bir isim gelir. İstediğin kadar cümle ekleyebilir/değiştirebilirsin.
+  // Player'da şarkı adı yerine çıkan sözler (her şarkıda farklı, sırası rastgele). Cümlede {u} yazarsan yerine sohbetten bir isim gelir.
   DEDICATIONS: [
-    "🎁 {u} için armağan",
-    "🎁 Bu şarkı {u} armağanıdır",
-    "🎁 {u} için özel bir şarkı",
-    "🎁 {u}'e armağan edildi"
+    "Kişi Kendinden Bilirmiş İşi",
+    "Deveye Sormuşlar Neden Eğri ?",
+    "Adım Engin Yoktur Dengim",
+    "Ne Verdiysen Elinle O Gelmiştir Seninle",
+    "Körün Gözü Açılınca İlk Bastonunu Atar",
+    "Ne İngiliz Kralı Kadar Mütevaziyim",
+    "Ne De Celal Bayarın Ahır Uşağı Kadar Aristokrat",
+    "Ciğeri Beş Kuruş Etmez Çok İnsan Tanıdım Benimki De Etmeyince Anladımki Mesele Ciğer Değilmiş",
+    "Ben Utanırsın Diye Beklerken",
+    "Daha Çok Çekecem Demek Henüz Erken",
+    "Anlatayım Lan Şimdi Burdan Herkese Yediğin Naneleri Hee???",
+    "Artık Herkes Evinde Ama Kimse Değil Güvende",
+    "Sizinle Aynı Değiliz Biz Sizinle Mücadele Ederken Onurlu Olmak Zorundayız Sizin Böyle Bir Probleminiz Yok",
+    "Keşke Hiç Tanımasaydım Dediklerimden Olmayı Başaranlara Ödülüm Var Ama Bu Dünyada Değil",
+    "Bedenimin Bedeli Değil Bu! Alınteri",
+    "Sen Ne Anlarsın Be Metuş",
+    "Eşşeğe Altın Semer de Vursan Altın Semer Altın Semerdir",
+    "Ağzından Tek Kelime Hayır Duymadan Gömeceklerim Var Ve Bu Benim Suçum Değil",
+    "Tarihe Not Düşüyorum Ki Arkamdan Bile Yalan Konuşamayın!",
+    "İyileşmez Bıraktığım Hasarım",
+    "Hayatım Boyunca Kimi Sevdiysem Burada Göreceksiniz",
+    "Bitiş Çizgisinde Başardığım Zamanı Bekleyen Sana Diyorum ; NEREYE KADAR YOLUN OLDUĞUNU BİLİYOSUN❕"
   ],
   // Şarkıları iki şekilde ekleyebilirsin:
   //  1) drive: "Google Drive dosya kimliği"  (dosya "Bağlantıya sahip herkes" olarak paylaşılmış olmalı)
@@ -417,13 +435,16 @@ function unlockB(){                           // ikinci elemanı kullanıcı dok
 function showMeta(){
   newDedic();
   const dl = CONFIG.DEDICATIONS && CONFIG.DEDICATIONS.length ? CONFIG.DEDICATIONS : ['🎁 {u} için armağan'];
-  let di, dg = 0;
-  do { di = Math.floor(Math.random()*dl.length); dg++; } while (di === window._lastDL && dl.length > 1 && dg < 10);
-  window._lastDL = di;
+  if (!window._bag || !window._bag.length) {            // karıştırılmış torba: tüm cümleler bitmeden tekrar etmez
+    window._bag = dl.map((_, i) => i).sort(() => Math.random() - .5);
+    if (window._bag[window._bag.length-1] === window._lastDL && window._bag.length > 1) window._bag.unshift(window._bag.pop());
+  }
+  const di = window._bag.pop(); window._lastDL = di;
   const label = dl[di].replace(/\{u\}/g, DED);
   $('title').textContent = label;
+  $('title').style.fontSize = label.length > 100 ? '15px' : label.length > 60 ? '17px' : '';
   $('count').textContent = (livePos+1)+' / '+liveN;
-  $('sub').textContent = "Şarkının adını DJ YavRu'ya sor 💬";
+  $('sub').textContent = '🎁 ' + DED + " armağanıdır · Şarkının adını DJ YavRu'ya sor 💬";
   $('seek').value = 0; setFill($('seek'));
   $('cur').textContent = '0:00'; $('dur').textContent = '0:00';
   document.title = label + ' · RadyoAI';
