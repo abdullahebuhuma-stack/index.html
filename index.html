@@ -947,12 +947,12 @@ else initLive();
       c.beginPath(); c.arc(cx,cy,12,0,Math.PI*2); c.fillStyle='#0a0a12'; c.fill();
       c.fillStyle='#fff'; c.font='700 56px '+F; c.fillText('R',cx,cy-28);
       c.font='600 18px '+F; c.letterSpacing='5px'; c.fillText('RADYOAI',cx+2,cy+56); c.letterSpacing='0px';
-      // --- "sana bir şarkı yolladı" + isim
-      c.fillStyle='#d8b4fe'; c.font='600 38px '+F; c.letterSpacing='9px'; c.fillText('SANA BİR ŞARKI YOLLADI',cx+4,792); c.letterSpacing='0px';
-      c.fillStyle='#fff'; c.font='700 112px '+F; c.shadowColor='rgba(168,85,247,.55)'; c.shadowBlur=40;
-      let y=wrap(c,to,cx,918,900,120,2); c.shadowBlur=0;
-      if(from){ c.fillStyle='rgba(255,255,255,.72)'; c.font='500 46px '+F; c.fillText('— '+from,cx,y+4); y+=62; }
-      if(note){ c.fillStyle='rgba(255,255,255,.92)'; c.font='italic 500 46px '+F; y=wrap(c,'“'+note+'”',cx,y+34,880,62,3)-6; }
+      // --- "<GÖNDEREN> sana bir şarkı yolladı" + not
+      c.fillStyle='#fff'; c.font='700 104px '+F; c.shadowColor='rgba(168,85,247,.55)'; c.shadowBlur=40;
+      let y=wrap(c,(from||'Bir dost').toLocaleUpperCase('tr'),cx,860,920,116,2); c.shadowBlur=0;
+      c.fillStyle='rgba(255,255,255,.88)'; c.font='600 58px '+F; c.fillText('sana bir şarkı yolladı',cx,y+10); y+=76;
+      if(note){ c.fillStyle='#d8b4fe'; c.font='600 34px '+F; c.letterSpacing='6px'; c.fillText('NOT',cx+3,y+30); c.letterSpacing='0px';
+        c.fillStyle='rgba(255,255,255,.94)'; c.font='italic 500 48px '+F; y=wrap(c,'“'+note+'”',cx,y+96,880,64,3)-6; }
       // --- şarkı paneli (cam efekti)
       const by=Math.max(y+40,1160), bh=250;
       rr(80,by,920,bh,44); g=c.createLinearGradient(0,by,0,by+bh); g.addColorStop(0,'rgba(168,85,247,.34)'); g.addColorStop(1,'rgba(124,58,237,.14)'); c.fillStyle=g; c.fill(); c.strokeStyle='rgba(216,180,254,.65)'; c.lineWidth=3; c.stroke();
