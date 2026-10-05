@@ -138,6 +138,12 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radiu
 .pin .wait{font-size:11px;color:var(--faint);padding:0 4px}
 .msg.special{background:linear-gradient(135deg,rgba(168,85,247,.32),rgba(46,229,166,.16));border:1px solid rgba(168,85,247,.85);box-shadow:0 0 18px rgba(168,85,247,.28);padding:11px 14px}
 .msg.special b{color:#e6d0ff}.msg.special p{color:#fff;font-weight:600;font-size:13.5px}
+.ib.on span{filter:none!important;opacity:1!important}
+.ib.on{background:rgba(46,229,166,.16);color:var(--mint)}
+#ezanBar{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:8px;max-width:calc(100% - 20px);background:#0f1f1a;border:1px solid rgba(46,229,166,.6);border-radius:14px;padding:10px 12px;box-shadow:0 8px 30px rgba(0,0,0,.5);color:#fff;font-size:13px;font-weight:600}
+#ezanBar[hidden]{display:none}
+#ezanBar button{background:rgba(255,255,255,.1);color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;white-space:nowrap}
+#ezanTxt{flex:1}
 </style>
 </head>
 <body>
@@ -164,6 +170,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radiu
     <div class="btns">
       <button class="ib play" id="toggle" aria-label="Çal / Duraklat"><svg id="ico" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
       <div class="vol"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4z"/></svg><input id="vol" type="range" min="0" max="100" value="100" aria-label="Ses"></div>
+      <button class="ib" id="ezan" aria-label="Ezan vakti uyarısı" title="Ezan vakti uyarısı"><span style="font-size:19px;filter:grayscale(1);opacity:.7">🕌</span></button>
     </div>
   </section>
 
@@ -175,6 +182,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radiu
   </section>
 </div>
 
+<div id="ezanBar" hidden><span id="ezanTxt"></span><button id="ezanPause" type="button">Müziği duraklat</button><button id="ezanClose" type="button" aria-label="Kapat">✕</button></div>
 <div id="gate">
   <div class="vinyl spin"><div class="label display">R</div></div>
   <h2 class="display">RADYOAI HAZIR</h2>
@@ -697,9 +705,18 @@ else initLive();
   /* ---- DJ'in ara sıra yazdığı belirgin teşekkür mesajı ---- */
   const specials=["İlginiz için müteşekkirim 🙏 Her mesaja cevap yazamıyorum ama her birini okuyorum. Yazmaya devam edin, sizi seviyorum 🫶"];
   (function special(){
-    setTimeout(()=>{ add('DJ YavRu',nr(specials,'spc',1),'dj special'); special(); }, rnd(480000,840000));
+    setTimeout(()=>{ showSpecial(nr(specials,'spc',1)); special(); }, rnd(480000,840000));
   })();
-  setTimeout(()=>add('DJ YavRu',specials[0],'dj special'),rnd(70000,110000));
+  setTimeout(()=>showSpecial(specials[0]),rnd(70000,110000));
+  // belirgin DJ mesajı önce ~25 sn pencerenin üstünde sabit kalır, sonra akışa karışır
+  function showSpecial(text){
+    const d=document.createElement('div'); d.className='msg dj special';
+    d.innerHTML='<small class="pn"></small><b></b><p></p>';
+    d.querySelector('.pn').textContent='📌 DJ YavRu';
+    d.querySelector('b').textContent='DJ YavRu'; d.querySelector('p').textContent=text;
+    const pinEl=$('pin'); pinEl.insertBefore(d,pinEl.firstChild); pinEl.hidden=false;
+    setTimeout(()=>{ d.remove(); add('DJ YavRu',text,'dj special'); if(!pinEl.children.length) pinEl.hidden=true; },25000);
+  }
 
   /* ---- dinleyiciler çalan şarkıyı sorar ---- */
   const askQ=["Çalan şarkı ne?","Bu şarkının adı ne?","Şu an ne çalıyor?","Bu parça kimin?","Şarkı adını yazar mısın?","Bu şarkı çok güzel, adı neydi?","Az önce başlayan şarkı hangisi?"];
@@ -722,12 +739,12 @@ else initLive();
     d.querySelector('.pn').textContent='📌 '+(label||'Sabitlendi');
     d.querySelector('b').textContent=name; d.querySelector('p').textContent=text;
     pin.appendChild(d); pin.hidden=false; pin.scrollTop=pin.scrollHeight;
-    pinned.push({name,text,cls}); return d;
+    pinned.push({name,text,cls,el:d}); return d;
   }
   function unpinAll(){
     if(!pinned.length) return;
-    pinned.forEach(m=>add(m.name,m.text,m.cls));
-    pinned=[]; pin.innerHTML=''; pin.hidden=true;
+    pinned.forEach(m=>{ add(m.name,m.text,m.cls); if(m.el) m.el.remove(); });
+    pinned=[]; if(!pin.children.length) pin.hidden=true;
   }
   $('ci').addEventListener('input',()=>{ if(pinned.length) unpinAll(); });   // yeni mesaja başlayınca eskiler akışa karışır
   $('cf').addEventListener('submit',e=>{
@@ -770,6 +787,60 @@ else initLive();
     else if(lvl<=top-300){ top=lvl; }     // sayı düştüyse yeniden artışta tekrar duyur
   }
   upd(); setInterval(upd,2000);
+})();
+
+/* ---- Ezan vakti uyarısı: dinleyicinin bulunduğu konuma ve saatine göre ---- */
+(function(){
+  const btn=$('ezan'), bar=$('ezanBar'), KEY='radyoai_ezan_v1';
+  const NAMES=[['Fajr','Sabah'],['Dhuhr','Öğle'],['Asr','İkindi'],['Maghrib','Akşam'],['Isha','Yatsı']];
+  let on=false, coords=null, timings=null, tz='', loadedDate='', fired={}, hideT=null;
+  const sv=o=>{ try{ localStorage.setItem(KEY,JSON.stringify(o)); }catch(e){} };
+  const ld=()=>{ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } };
+  function nowIn(){
+    const f=new Intl.DateTimeFormat('en-GB',{timeZone:tz||undefined,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+    const p={}; f.formatToParts(new Date()).forEach(x=>p[x.type]=x.value);
+    return {date:p.year+'-'+p.month+'-'+p.day, dmy:p.day+'-'+p.month+'-'+p.year, min:(+p.hour)*60+(+p.minute)};
+  }
+  async function load(){
+    if(!coords) return;
+    const n=nowIn();
+    try{
+      const r=await fetch('https://api.aladhan.com/v1/timings/'+n.dmy+'?latitude='+coords.lat+'&longitude='+coords.lon+'&method=13');
+      const j=await r.json();
+      timings=j.data.timings; tz=j.data.meta.timezone||tz; loadedDate=nowIn().date;
+    }catch(e){ timings=null; }
+  }
+  function show(name){
+    $('ezanTxt').textContent='🕌 '+name+' ezanı vakti girdi';
+    bar.hidden=false; clearTimeout(hideT); hideT=setTimeout(()=>{ bar.hidden=true; },120000);
+    try{ if('Notification' in window && Notification.permission==='granted' && document.hidden) new Notification('RadyoAI',{body:name+' ezanı vakti girdi 🕌'}); }catch(e){}
+  }
+  async function check(){
+    if(!on||!coords) return;
+    const n=nowIn();
+    if(!timings||loadedDate!==n.date) await load();
+    if(!timings) return;
+    NAMES.forEach(([k,name])=>{
+      const t=(timings[k]||'').slice(0,5).split(':'); if(t.length<2) return;
+      const m=(+t[0])*60+(+t[1]), key=n.date+k;
+      if(n.min>=m && n.min<=m+1 && !fired[key]){ fired[key]=1; show(name); }
+    });
+  }
+  function setOn(v){ on=v; btn.classList.toggle('on',v); btn.title=v?'Ezan vakti uyarısı açık':'Ezan vakti uyarısı'; sv({on:v,coords}); }
+  function ask(){
+    if(!navigator.geolocation){ alert('Bu cihaz konum bilgisini desteklemiyor.'); return; }
+    navigator.geolocation.getCurrentPosition(async pos=>{
+      coords={lat:+pos.coords.latitude.toFixed(2),lon:+pos.coords.longitude.toFixed(2)};
+      setOn(true); await load(); check();
+      try{ if('Notification' in window && Notification.permission==='default') Notification.requestPermission(); }catch(e){}
+      $('ezanTxt').textContent='🕌 Ezan vakti uyarısı açıldı'; bar.hidden=false; clearTimeout(hideT); hideT=setTimeout(()=>{ bar.hidden=true; },4000);
+    },()=>{ alert('Ezan vakti uyarısı için konum izni gerekli. Tarayıcı ayarlarından konuma izin verebilirsin.'); },{timeout:15000,maximumAge:3600000});
+  }
+  btn.onclick=()=>{ if(on){ setOn(false); } else if(coords){ setOn(true); load().then(check); } else ask(); };
+  $('ezanClose').onclick=()=>{ bar.hidden=true; };
+  $('ezanPause').onclick=()=>{ try{ if(!audio.paused) pause(); }catch(e){} bar.hidden=true; };
+  const saved=ld(); if(saved&&saved.coords){ coords=saved.coords; if(saved.on){ setOn(true); load(); } }
+  setInterval(check,15000);
 })();
 </script>
 </body>
