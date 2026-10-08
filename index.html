@@ -822,6 +822,25 @@ else initLive();
   }
   (function(){ const nx=new Date(); nx.setHours(nx.getHours()+1,0,2,0); setTimeout(hourly, nx-new Date()); })();
 
+  /* ---- Sponsor anonsu: DJ YavRu açıkça sponsor olarak anar (her saat :30'da + açılıştan ~3 dk sonra bir kez) ---- */
+  const sponsorCalls=[
+    "Bu saatler Seda Baharat'ın katkısıyla sizlerle 🌶️ Adapazarı Katlı Pazar Yeri, zemin kat",
+    "Radyomuzun sponsoru Seda Baharat'a teşekkürler 🙏 Yıllardır Sakarya sofralarının tadı onlardan",
+    "Yayınımızı destekleyen Seda Baharat'a selam olsun 🌿 Katlı Pazar Yeri'ne yolu düşen uğrasın",
+    "Müzik bizden, tat Seda Baharat'tan 😄 Sponsorumuza teşekkürler",
+    "Seda Baharat'ın katkılarıyla yayındayız 🎧 Sayfanın üstündeki karttan arayabilir, yol tarifi alabilirsiniz",
+    "Baharat, aktar ürünleri arayan Sakaryalılar: sponsorumuz Seda Baharat, Katlı Pazar Yeri zemin kat 📍",
+    "Bu yayın Seda Baharat'ın desteğiyle 🌶️ Sizin de işletmeniz burada yer alsın isterseniz kartın köşesinden yazın"
+  ];
+  function sponsorSay(){ if(!locMode) add('DJ YavRu','🎧 '+nr(sponsorCalls,'spc',3),'dj'); }
+  function sponsorHalf(){
+    sponsorSay();
+    const nx=new Date(); nx.setHours(nx.getHours()+(nx.getMinutes()>=30?1:0),30,5,0);
+    setTimeout(sponsorHalf, nx-new Date());
+  }
+  setTimeout(sponsorSay, 180000);
+  (function(){ const nx=new Date(); nx.setHours(nx.getHours()+(nx.getMinutes()>=30?1:0),30,5,0); setTimeout(sponsorHalf, nx-new Date()); })();
+
 
   /* ---- DJ'in ara sıra yazdığı belirgin teşekkür mesajı ---- */
   const specials=["İlginiz için müteşekkirim 🙏 Her mesaja cevap yazamıyorum ama her birini okuyorum. Yazmaya devam edin, sizi seviyorum 🫶"];
