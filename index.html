@@ -425,8 +425,8 @@ bind('timeupdate', ()=>{
   if (audio.duration){ $('seek').value = audio.currentTime/audio.duration*1000; setFill($('seek')); }
 });
 /* ---- Reklam arası: her ADS.EVERY şarkıda bir jingle + spot ---- */
-const ADS = { EVERY: 3, BREAK: ['jingle.mp3', 'spot-seda-baharat.mp3'], NAME: 'Seda Baharat' };
-let songsSinceAd = 0, adQ = [], inAd = false;
+const ADS = { EVERY: 3, BREAK: [['Jingle.mp3','jingle.mp3'], ['Seda Baharat.mp3','spot-seda-baharat.mp3']], NAME: 'Seda Baharat' };   // her reklam için olası dosya adları
+let songsSinceAd = 0, adQ = [], inAd = false, adAlt = [];
 const adDue = () => ADS.BREAK.length > 0 && songsSinceAd + 1 >= ADS.EVERY;
 function sponsorParla(on){ const s = $('sponsor'); if (s) s.classList.toggle('parla', !!on); }
 function startAdBreak(){
@@ -440,9 +440,10 @@ function startAdBreak(){
 }
 function nextAd(){
   if (!adQ.length){ inAd = false; sponsorParla(false); load(nextIndex(1)); if (wantPlay) play(); return; }
-  srcTry = 0; audio.src = encodeURI(adQ.shift());
+  adAlt = [].concat(adQ.shift()); srcTry = 0; audio.src = encodeURI(adAlt.shift());
   if (wantPlay) play();
 }
+function adError(){ if (adAlt.length){ audio.src = encodeURI(adAlt.shift()); if (wantPlay) play(); } else nextAd(); }
 bind('ended', ()=>{
   if (inAd){ nextAd(); return; }
   songsSinceAd++;
@@ -450,7 +451,7 @@ bind('ended', ()=>{
   else skip(1);
 });
 bind('error', ()=>{
-  if (inAd){ nextAd(); return; }
+  if (inAd){ adError(); return; }
   const list = sources(tracks[idx]);
   if (srcTry < list.length-1){            // yedek adresi dene
     srcTry++;
