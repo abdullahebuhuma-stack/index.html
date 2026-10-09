@@ -170,6 +170,23 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radiu
 .grow button.tt{background:#000;color:#fff;border:1px solid #25f4ee;box-shadow:inset 0 0 0 1px #fe2c55}
 
 
+/* ===== Yayın görünümü (?yayin): sosyal medya canlı yayını için temiz ekran ===== */
+#yayinInfo{display:none}
+body.yayin #n,body.yayin .controls,body.yayin #listWrap,body.yayin .sponsor-davet{display:none!important}
+body.yayin .player{flex:1;flex-direction:column;justify-content:center;text-align:center;gap:22px;padding:24px 20px}
+body.yayin .player .vinyl{width:min(56vw,240px);height:min(56vw,240px);box-shadow:0 10px 50px rgba(168,85,247,.35)}
+body.yayin .player .vinyl::before{inset:14px}body.yayin .player .vinyl::after{inset:34%}
+body.yayin .player .vinyl .label{width:30%;height:30%;font-size:26px}
+body.yayin .player .badge{font-size:11px;padding:3px 10px;bottom:-10px}
+body.yayin .player .info{flex:none;width:100%}
+body.yayin .player .kicker{font-size:12px;margin-bottom:8px}
+body.yayin .player #title{font-size:30px;-webkit-line-clamp:3}
+body.yayin .player #sub{font-size:14px;margin-top:6px}
+body.yayin .player .bars{height:34px;justify-content:center;margin-top:16px}
+body.yayin .player .bars span{max-height:34px;width:6px}
+body.yayin #yayinInfo{display:block;flex:none;text-align:center;padding:14px 16px 18px;background:var(--panel)}
+#yayinInfo .u{font-size:26px;font-weight:800;letter-spacing:.04em;background:linear-gradient(90deg,var(--purple),var(--mint));-webkit-background-clip:text;background-clip:text;color:transparent}
+#yayinInfo .t{font-size:13px;color:var(--dim);margin-top:4px;letter-spacing:.06em}
 /* ===== Kompakt player (sohbete yer açmak için) ===== */
 .player{padding:10px 16px;gap:12px}
 .player .vinyl{width:64px;height:64px;box-shadow:0 4px 16px rgba(0,0,0,.6)}
