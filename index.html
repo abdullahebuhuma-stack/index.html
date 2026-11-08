@@ -582,8 +582,10 @@ function newDedic(){
   DED = n;
 }
 
-/* ---- Sıralı liste: baştan 1. şarkıdan başlar, çıkıp girince kaldığı yerden devam eder ---- */
+/* ---- Sıralı liste: 10 dakika içinde kaldığı yer; sonra bir sonraki şarkı ---- */
 const RESUME_KEY = 'radyoai_resume_v1';
+const RESUME_WINDOW_MS = 10 * 60 * 1000;
+let resumeFromVisit = false;
 let pendingSeek = 0, started = false, livePos = 0, liveN = tracks.length;
 const fileOf = i => tracks[i].file || tracks[i].title;
 const listSig = () => tracks.map((_,i)=>fileOf(i)).join('|');
@@ -596,20 +598,29 @@ function initLive(){
   let r = null;
   try { r = JSON.parse(localStorage.getItem(RESUME_KEY)); } catch(e){}
   let i = 0, t = 0;
-  if (r && r.sig === listSig() && r.i >= 0 && r.i < tracks.length){ i = r.i; t = r.t || 0; }
+  // Eski (zamansız) kayıtlar ve reklam sırasında çıkış normal açılışı kullanır.
+  const age = r ? Date.now() - r.savedAt : NaN;
+  const explicitJingle = new URLSearchParams(location.search).has('jingle');
+  if (!GIFT && !explicitJingle && r && !r.inAd && r.sig === listSig()
+      && Number.isInteger(r.i) && r.i >= 0 && r.i < tracks.length
+      && Number.isFinite(r.savedAt) && age >= 0){
+    resumeFromVisit = true;
+    i = age < RESUME_WINDOW_MS ? r.i : (r.i + 1) % tracks.length;
+    t = age < RESUME_WINDOW_MS && Number.isFinite(r.t) && r.t > 0 ? r.t : 0;
+  }
   if (GIFT){ i = GIFT.idx; t = 0; }               // armağan linki: o şarkı baştan başlar
   livePos = i; liveN = tracks.length;
-  pendingSeek = t > 2 ? t : 0;
+  pendingSeek = t;
   load(i);
 }
 function saveLive(){
-  if (!started || pendingSeek > 0 || inAd) return;
-  try { localStorage.setItem(RESUME_KEY, JSON.stringify({ sig: listSig(), i: idx, t: audio.currentTime || 0 })); } catch(e){}
+  if (!started || pendingSeek > 0) return;
+  try { localStorage.setItem(RESUME_KEY, JSON.stringify({ sig: listSig(), i: idx, t: audio.currentTime || 0, savedAt: Date.now(), inAd: inAd })); } catch(e){}
 }
 bind('loadedmetadata', ()=>{
   if (pendingSeek > 0){
     const d = audio.duration;
-    if (isFinite(d) && pendingSeek < d - 1){ try { audio.currentTime = pendingSeek; } catch(e){} }
+    if (isFinite(d) && d > 0){ try { audio.currentTime = Math.min(pendingSeek, Math.max(0, d - 0.05)); } catch(e){} }
     pendingSeek = 0;
   }
 });
@@ -742,7 +753,7 @@ const entryJingles = {
 const entryParams = new URLSearchParams(location.search);
 const requestedJingle = entryParams.get('jingle') || 'radyo';
 const entryJingle = requestedJingle === 'oguzhan' ? 'radyo' : requestedJingle;
-if (!GIFT && tracks.length && Object.prototype.hasOwnProperty.call(entryJingles, entryJingle)){
+if (!GIFT && !resumeFromVisit && tracks.length && Object.prototype.hasOwnProperty.call(entryJingles, entryJingle)){
   pendingSeek = 0;
   openingJingle = true; inAd = true;
   adQ = entryJingles[entryJingle].map(files=>files.slice());
