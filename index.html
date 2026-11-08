@@ -385,6 +385,7 @@ const $ = id => document.getElementById(id);
 try { if (new URLSearchParams(location.search).has('yayin')) document.body.classList.add('yayin'); } catch(e){}   // ?yayin: sosyal medya yayını için temiz görünüm
 const A = $('audio'), B = new Audio();
 B.preload = 'auto'; B.setAttribute('playsinline','');
+B.id = 'audio-buffer'; B.hidden = true; document.body.appendChild(B);
 let audio = A;                                   // şu an çalan eleman (geçiş sırasında A <-> B değişir)
 const bind = (ev, fn) => [A,B].forEach(el => el.addEventListener(ev, e => { if (el === audio) fn(e); }));
 const tracks = CONFIG.TRACKS;
@@ -436,7 +437,7 @@ setInterval(()=>{
 function load(i){
   idx = (i + tracks.length) % tracks.length;
   srcTry = 0;
-  audio.src = sources(tracks[idx])[0];
+  useSource(sources(tracks[idx])[0]);
   showMeta();
 }
 function play(){
@@ -444,7 +445,7 @@ function play(){
   const p = audio.play();
   if (p && p.catch) p.catch(()=>{});
 }
-function pause(){ wantPlay = false; audio.pause(); }
+function pause(){ wantPlay = false; cancelFade(); A.pause(); B.pause(); }
 function skip(dir){ load(nextIndex(dir)); if (wantPlay) play(); }
 
 /* ---- Olaylar ---- */
@@ -515,7 +516,7 @@ function nextAd(){
   if(oguzhanAd){sponsorParla(false);$('title').textContent='Oğuzhan Market';$('sub').textContent='Sponsor: Oğuzhan Market';document.title='Oğuzhan Market · RadyoAI';}
   if(masalAd){sponsorParla(false);$('title').textContent='Masal Çay Evi';$('sub').textContent='Sponsor: Masal Çay Evi';document.title='Masal Çay Evi · RadyoAI';}
   if ('mediaSession' in navigator){ try { navigator.mediaSession.metadata = new MediaMetadata({ title: oguzhanAd ? 'Oğuzhan Market' : masalAd ? 'Masal Çay Evi' : isIdent ? 'DJ YavRu' : 'Reklam Arası', artist: oguzhanAd ? 'Oğuzhan Market' : masalAd ? 'Masal Çay Evi' : isIdent ? 'RadyoAI' : ADS.NAME, album: 'RadyoAI' }); } catch(e){} }
-  audio.src = encodeURI(adAlt.shift());
+  useSource(encodeURI(adAlt.shift()));
   if (wantPlay) play();
 }
 function adError(){ if (adAlt.length){ audio.src = encodeURI(adAlt.shift()); if (wantPlay) play(); } else nextAd(); }
@@ -545,12 +546,12 @@ bind('error', ()=>{
 
 let seeking = false;
 const seekEl = $('seek');
-seekEl.addEventListener('input', ()=>{ seeking = true; setFill(seekEl); $('cur').textContent = fmt(seekEl.value/1000*(audio.duration||0)); });
+seekEl.addEventListener('input', ()=>{ cancelFade(); seeking = true; setFill(seekEl); $('cur').textContent = fmt(seekEl.value/1000*(audio.duration||0)); });
 seekEl.addEventListener('change', ()=>{ if (audio.duration) audio.currentTime = seekEl.value/1000*audio.duration; seeking = false; });
 
 $('toggle').onclick = ()=> audio.paused ? play() : pause();
 const volEl = $('vol');
-volEl.addEventListener('input', ()=>{ const v = volEl.value/100; try { A.volume = v; B.volume = v; } catch(e){} setFill(volEl); });
+volEl.addEventListener('input', ()=>{ const v = volEl.value/100; try { if (fade) applyFade(); else if (xfading) { audio.volume = v; otherDeck().volume = 0; } else { A.volume = v; B.volume = v; } } catch(e){} setFill(volEl); });
 setFill(volEl);
 
 document.addEventListener('keydown', e=>{
@@ -622,14 +623,53 @@ window.addEventListener('pagehide', saveLive);
 /* ---- Mix geçiş (crossfade): ses seviyesi ayarlanabilen cihazlarda çalışır; WebAudio kullanılmaz, arka plan/kilit ekranı çalması bozulmaz ---- */
 const XF = 6;                                  // geçiş süresi (sn)
 const WA = (()=>{ try { const a = new Audio(); a.volume = 0.5; return a.volume === 0.5; } catch(e){ return false; } })();   // iPhone'da false: orada ses seviyesi koddan ayarlanamaz
-let xfading = false, xfIdx = -1;
-const SILENT = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
-function unlockB(){                           // ikinci elemanı kullanıcı dokunuşunda "uyandır"
-  try {
-    B.src = SILENT;
-    const pr = B.play();
-    if (pr && pr.then) pr.then(()=>{ B.pause(); B.removeAttribute('src'); }).catch(()=>{});
-  } catch(e){}
+let xfading = false, xfIdx = -1, fade = null, prepared = null, unlocking = false, fadeAttempt = 0;
+function otherDeck(){ return audio === A ? B : A; }
+function releaseDeck(el){ try { el.pause(); el.removeAttribute('src'); el.load(); } catch(e){} }
+function useSource(src){
+  cancelFade();
+  if (WA && prepared && prepared.src === src && prepared.el.readyState >= 3){
+    const old = audio;
+    audio = prepared.el; prepared = null;
+    releaseDeck(old);
+    audio.volume = volEl.value/100;
+  } else {
+    audio.src = src;
+  }
+  $('dur').textContent = fmt(audio.duration);
+  $('cur').textContent = fmt(audio.currentTime);
+}
+function prepareNext(){
+  if (xfading || unlocking || !tracks.length) return;
+  let src;
+  if (inAd) src = adQ.length ? encodeURI(adQ[0][0]) : sources(tracks[openingJingle ? idx : (idx+1)%tracks.length])[0];
+  else if (adDue()) src = encodeURI(ADS.BREAK[0][0]);
+  else if (identDue()) src = encodeURI(IDENT.FILE);
+  else src = sources(tracks[(idx+1)%tracks.length])[0];
+  const el = otherDeck();
+  if (prepared && prepared.el === el && prepared.src === src) return;
+  el.pause(); el.preload = 'auto'; el.src = src;
+  prepared = { el, src };
+}
+function unlockB(){
+  // Unlock the already preloaded deck without replacing its source or audible playback.
+  if (B === audio || xfading) return;
+  prepareNext();
+  unlocking = true;
+  const wasMuted = B.muted; B.muted = true;
+  const done = ()=>{ if (B !== audio && !xfading) { B.pause(); try { B.currentTime = 0; } catch(e){} } B.muted = wasMuted; unlocking = false; };
+  try { const pr = B.play(); if (pr && pr.then) pr.then(done, done); else done(); } catch(e){ done(); }
+}
+function applyFade(){
+  if (!fade) return;
+  const v = volEl.value/100, x = fade.k*Math.PI/2;
+  fade.old.volume = Math.cos(x)*v; fade.nw.volume = Math.sin(x)*v;
+}
+function cancelFade(){
+  fadeAttempt++;
+  if (xfading && !fade) otherDeck().pause();
+  if (fade){ clearInterval(fade.timer); releaseDeck(fade.old); audio.volume = volEl.value/100; }
+  fade = null; xfading = false; xfIdx = -1;
 }
 function showMeta(){
   const T = tracks[idx];
@@ -646,37 +686,43 @@ function showMeta(){
     gl.hidden = false;
   } else { gl.hidden = true; gl.textContent = ''; }
   $('seek').value = 0; setFill($('seek'));
-  $('cur').textContent = '0:00'; $('dur').textContent = '0:00';
+  $('cur').textContent = fmt(audio.currentTime); $('dur').textContent = fmt(audio.duration);
   document.title = label + ' · RadyoAI';
   if ('mediaSession' in navigator){
     navigator.mediaSession.metadata = new MediaMetadata({ title: label, artist: T.credit ? 'Engin YAVRU' : CONFIG.ARTIST, album: 'RadyoAI' });
   }
 }
 function startXfade(){
-  if (!WA || xfading) return;
-  songsSinceAd++; totalSongs++;
-  const old = audio, prevIdx = idx;
-  const rem = Math.max(0, audio.duration - audio.currentTime), len = Math.max(1, Math.min(XF, rem));
-  const nxt = nextIndex(1);
-  pendingSeek = 0;
-  const nw = old === A ? B : A, vmax = volEl.value/100;
-  xfading = true; xfIdx = prevIdx;
-  nw.volume = 0; nw.src = sources(tracks[nxt])[0];
-  idx = nxt; srcTry = 0; audio = nw; showMeta();
-  const pr = nw.play(); if (pr && pr.catch) pr.catch(()=>{});
-  const t0 = performance.now();
-  const iv = setInterval(()=>{
-    const k = Math.min(1, (performance.now() - t0)/(len*1000)), x = k*Math.PI/2;
-    try { old.volume = Math.cos(x)*vmax; nw.volume = Math.sin(x)*vmax; } catch(e){}
-    if (k >= 1){
-      clearInterval(iv);
-      try { old.pause(); old.removeAttribute('src'); old.load(); old.volume = vmax; nw.volume = vmax; } catch(e){}
-      xfading = false; xfIdx = -1;
-    }
-  }, 50);
+  if (!WA || xfading || unlocking || !prepared || prepared.el.readyState < 3) return;
+  const old = audio, prevIdx = idx, nw = prepared.el;
+  const next = (idx+1)%tracks.length;
+  if (prepared.src !== sources(tracks[next])[0]) return;
+  const expected = prepared, attempt = ++fadeAttempt;
+  xfading = true; nw.volume = 0;
+  const begin = ()=>{
+    if (attempt !== fadeAttempt) return;
+    if (!xfading || audio !== old || prepared !== expected || !wantPlay){ if (nw !== audio) nw.pause(); return; }
+    prepared = null;
+    songsSinceAd++; totalSongs++;
+    idx = nextIndex(1); srcTry = 0; audio = nw; xfIdx = prevIdx;
+    showMeta(); ui(true);
+    const len = Math.max(0.05, Math.min(XF, old.duration-old.currentTime));
+    fade = { old, nw, k: 0, start: nw.currentTime, len, timer: null };
+    applyFade();
+    fade.timer = setInterval(()=>{
+      if (!fade) return;
+      // Follow actual incoming media progress, never fade a song out while its replacement is loading.
+      fade.k = Math.min(1, Math.max(0, (nw.currentTime-fade.start)/fade.len));
+      applyFade();
+      if (fade.k >= 1) cancelFade();
+    }, 50);
+  };
+  const rejected = ()=>{ if (attempt !== fadeAttempt) return; nw.pause(); nw.volume = volEl.value/100; xfading = false; };
+  try { const pr = nw.play(); if (pr && pr.then) pr.then(begin, rejected); else if (!nw.paused) begin(); else rejected(); } catch(e){ rejected(); }
 }
 setInterval(()=>{
-  if (started && WA && !xfading && !audio.paused && isFinite(audio.duration) && audio.duration > XF*3
+  prepareNext();
+  if (started && WA && !xfading && !seeking && !audio.paused && isFinite(audio.duration) && audio.duration > XF*3
       && audio.duration - audio.currentTime <= XF + 0.2 && pendingSeek === 0 && xfIdx !== idx && !inAd && !adDue() && !identDue()) startXfade();
 }, 250);
 
@@ -1228,5 +1274,6 @@ if (!GIFT && tracks.length && Object.prototype.hasOwnProperty.call(entryJingles,
 <script src="akis.js" defer></script>
 </body>
 </html>
+
 
 
