@@ -875,7 +875,7 @@ if (!GIFT && tracks.length && Object.prototype.hasOwnProperty.call(entryJingles,
     const d=document.createElement('div');
     d.className='msg '+(cls||'');
     d.innerHTML='<b></b><p></p>';
-    const b=d.querySelector('b'); b.textContent=cls==='dj' ? name+' · otomatik' : name; if(color)b.style.color=color;
+    const b=d.querySelector('b'); b.textContent=name; if(color)b.style.color=color;
     d.querySelector('p').textContent=text;
     const stick=chat.scrollHeight-chat.scrollTop-chat.clientHeight<80;
     chat.appendChild(d);
@@ -888,7 +888,7 @@ if (!GIFT && tracks.length && Object.prototype.hasOwnProperty.call(entryJingles,
   const botSay=(u,text)=>{
     if(recentBotTexts.includes(text)) return;
     recentBotTexts.push(text); if(recentBotTexts.length>100)recentBotTexts.shift();
-    add(u+' · otomatik',text,'',colors[u.length%colors.length]);
+    add(u,text,'',colors[u.length%colors.length]);
     recent.push(u); if(recent.length>12)recent.shift();
   };
   function flurry(n,pool){ for(let k=0;k<n;k++) setTimeout(()=>botSay(pick(users),nr(pool||shorts,'fl',6)),rnd(900,5500)); }
