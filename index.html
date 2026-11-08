@@ -585,6 +585,10 @@ function newDedic(){
 /* ---- Sıralı liste: 10 dakika içinde kaldığı yer; sonra bir sonraki şarkı ---- */
 const RESUME_KEY = 'radyoai_resume_v1';
 const RESUME_WINDOW_MS = 10 * 60 * 1000;
+// TV ana sayfası her açılışta Masal reklamından başlar; diğer cihazların dönüş kuralı korunur.
+const tvEntryParams = new URLSearchParams(location.search);
+const isTvBrowser = /Smart[- _]?TV|Tizen|Web0S|WebOS|NetCast|HbbTV|Android TV|GoogleTV|Viera|BRAVIA|AFT[A-Z0-9]+|\bTV\b/i.test(navigator.userAgent || '');
+const tvMasalOpening = !GIFT && !tvEntryParams.has('jingle') && isTvBrowser;
 let resumeFromVisit = false;
 let pendingSeek = 0, started = false, livePos = 0, liveN = tracks.length;
 const fileOf = i => tracks[i].file || tracks[i].title;
@@ -601,7 +605,7 @@ function initLive(){
   // Eski (zamansız) kayıtlar ve reklam sırasında çıkış normal açılışı kullanır.
   const age = r ? Date.now() - r.savedAt : NaN;
   const explicitJingle = new URLSearchParams(location.search).has('jingle');
-  if (!GIFT && !explicitJingle && r && !r.inAd && r.sig === listSig()
+  if (!GIFT && !explicitJingle && !tvMasalOpening && r && !r.inAd && r.sig === listSig()
       && Number.isInteger(r.i) && r.i >= 0 && r.i < tracks.length
       && Number.isFinite(r.savedAt) && age >= 0){
     resumeFromVisit = true;
@@ -751,7 +755,7 @@ const entryJingles = {
   masal: [['masal-cay-evi.mp3']]
 };
 const entryParams = new URLSearchParams(location.search);
-const requestedJingle = entryParams.get('jingle') || 'radyo';
+const requestedJingle = entryParams.get('jingle') || (tvMasalOpening ? 'masal' : 'radyo');
 const entryJingle = requestedJingle === 'oguzhan' ? 'radyo' : requestedJingle;
 if (!GIFT && !resumeFromVisit && tracks.length && Object.prototype.hasOwnProperty.call(entryJingles, entryJingle)){
   pendingSeek = 0;
@@ -763,7 +767,8 @@ if (!GIFT && !resumeFromVisit && tracks.length && Object.prototype.hasOwnPropert
   $('gateTxt').textContent = (entryJingle === 'masal' ? 'Masal Çay Evi reklamı' : 'YavRu jingle') + ' sonrası müzik devam eder. Dinlemek için bir kez dokun.';
   $('start').innerHTML = '<i></i>YAYINI DİNLE';
   bind('playing', ()=>{ $('gate').classList.add('hide'); started = true; });
-  if (entryParams.has('jingle')) play();
+  if (tvMasalOpening) $('start').focus();
+  if (entryParams.has('jingle') || tvMasalOpening) play();
 }
 
 
