@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>RadyoAI</title>
 <meta name="description" content="RadyoAI — MyByYavRu şarkıları kesintisiz çalıyor.">
-<link rel="preload" as="image" href="oguzhan-sponsor.png">
 <meta name="theme-color" content="#08080c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -320,7 +319,7 @@ body.yayin #yayinInfo{display:block;flex:none;text-align:center;padding:14px 16p
 </div>
 <div id="ezanBar" hidden><span id="ezanTxt"></span><button id="ezanPause" type="button">Müziği duraklat</button><button id="ezanClose" type="button" aria-label="Kapat">✕</button></div>
 <div id="gate">
-  <img id="openingSponsorImage" hidden alt="Oğuzhan Market — Sofralarda bereket" fetchpriority="high">
+
   <div class="vinyl spin"><div class="label display">R</div></div>
   <h2 class="display">RADYOAI HAZIR</h2>
   <p id="gateTxt">Şarkılar kesintisiz çalacak. Başlamak için dokun.</p>
@@ -459,7 +458,7 @@ function ui(on){
   $('liveTxt').textContent = on ? 'CANLI' : 'DURAKLATILDI';
   if ('mediaSession' in navigator) navigator.mediaSession.playbackState = on ? 'playing' : 'paused';
 }
-bind('playing', ()=>{ if((masalAd || oguzhanAd) && !masalDismissed) showMasal(true); failStreak = 0; $('sub').textContent = inAd ? (isIdent ? 'RadyoAI' : 'Sponsor: ' + (oguzhanAd ? 'Oğuzhan Market' : masalAd ? 'Masal Çay Evi' : ADS.NAME)) : (tracks[idx].credit || CONFIG.ARTIST); });
+bind('playing', ()=>{ if(masalAd && !masalDismissed) showMasal(true); failStreak = 0; $('sub').textContent = inAd ? (isIdent ? 'RadyoAI' : 'Sponsor: ' + (masalAd ? 'Masal Çay Evi' : ADS.NAME)) : (tracks[idx].credit || CONFIG.ARTIST); });
 bind('waiting', ()=>{ $('sub').textContent = 'Yükleniyor…'; });
 bind('loadedmetadata', ()=>{ $('dur').textContent = fmt(audio.duration); });
 bind('timeupdate', ()=>{
@@ -473,7 +472,7 @@ let songsSinceAd = 0, adQ = [], inAd = false, adAlt = [], isIdent = false, total
 const IDENT = { EVERY: 2, FILE: 'kisa-jingle.mp3' };   // reklamsız aralarda her 2 şarkıda bir kısa jingle
 try { if (new URLSearchParams(location.search).has('reklamtest')) ADS.EVERY = 1; } catch(e){}   // test: ?reklamtest ile her şarkıdan sonra reklam
 const adDue = () => ADS.BREAK.length > 0 && songsSinceAd + 1 >= ADS.EVERY;
-const identDue = () => totalSongs >= 2 && !adDue() && IDENT.EVERY > 0 && (totalSongs + 1) % IDENT.EVERY === 0;
+const identDue = () => totalSongs + 1 > 2 && !adDue() && IDENT.EVERY > 0 && (totalSongs + 1) % IDENT.EVERY === 0;
 function startIdent(){
   inAd = true; isIdent = true; adQ = [[IDENT.FILE]];
   $('title').textContent = '📻 Radyo AI'; $('title').style.fontSize = '';
@@ -491,14 +490,14 @@ function startAdBreak(){
   nextAd();
 }
 
-let masalAd=false, oguzhanAd=false, masalDismissed=false, masalHideTimer;
+let masalAd=false, masalDismissed=false, masalHideTimer;
 function showMasal(on){
  const el=$('masalOverlay');clearTimeout(masalHideTimer);
  if(on){
   const img=el.querySelector('img');
-  img.src=oguzhanAd ? 'oguzhan-sponsor.png' : 'masal-sponsor.png';
-  img.alt=oguzhanAd ? 'Oğuzhan Market — Sofralarda bereket' : 'Masal Çay Evi — Her sohbette bir masal';
-  el.setAttribute('aria-label',oguzhanAd ? 'Oğuzhan Market sponsor reklamı' : 'Masal Çay Evi sponsor reklamı');
+  img.src='masal-sponsor.png';
+  img.alt='Masal Çay Evi — Her sohbette bir masal';
+  el.setAttribute('aria-label','Masal Çay Evi sponsor reklamı');
   el.classList.remove('leaving');el.hidden=false;
  }
  else if(!el.hidden){el.classList.add('leaving');masalHideTimer=setTimeout(()=>{el.hidden=true;el.classList.remove('leaving');},550);}
@@ -506,16 +505,14 @@ function showMasal(on){
 $('masalClose').onclick=()=>{masalDismissed=true;showMasal(false);};
 let openingJingle = false;
 function nextAd(){
-  showMasal(false);masalAd=false;oguzhanAd=false;masalDismissed=false;
+  showMasal(false);masalAd=false;masalDismissed=false;
   if (!adQ.length){ inAd = false; isIdent = false; sponsorParla(false); const next = openingJingle ? idx : nextIndex(1); openingJingle = false; load(next); if (wantPlay) play(); return; }
   adAlt = [].concat(adQ.shift()); srcTry = 0;
   masalAd=adAlt[0]==='masal-cay-evi.mp3';
-  oguzhanAd=adAlt[0]==='oguzhan-market.mp3';
   isIdent=/jingle/i.test(adAlt[0]);
   if(isIdent){sponsorParla(false);$('title').textContent='DJ YavRu';$('sub').textContent='RadyoAI';document.title='DJ YavRu · RadyoAI';}
-  if(oguzhanAd){sponsorParla(false);$('title').textContent='Oğuzhan Market';$('sub').textContent='Sponsor: Oğuzhan Market';document.title='Oğuzhan Market · RadyoAI';}
   if(masalAd){sponsorParla(false);$('title').textContent='Masal Çay Evi';$('sub').textContent='Sponsor: Masal Çay Evi';document.title='Masal Çay Evi · RadyoAI';}
-  if ('mediaSession' in navigator){ try { navigator.mediaSession.metadata = new MediaMetadata({ title: oguzhanAd ? 'Oğuzhan Market' : masalAd ? 'Masal Çay Evi' : isIdent ? 'DJ YavRu' : 'Reklam Arası', artist: oguzhanAd ? 'Oğuzhan Market' : masalAd ? 'Masal Çay Evi' : isIdent ? 'RadyoAI' : ADS.NAME, album: 'RadyoAI' }); } catch(e){} }
+  if ('mediaSession' in navigator){ try { navigator.mediaSession.metadata = new MediaMetadata({ title: masalAd ? 'Masal Çay Evi' : isIdent ? 'DJ YavRu' : 'Reklam Arası', artist: masalAd ? 'Masal Çay Evi' : isIdent ? 'RadyoAI' : ADS.NAME, album: 'RadyoAI' }); } catch(e){} }
   useSource(encodeURI(adAlt.shift()));
   if (wantPlay) play();
 }
@@ -592,7 +589,7 @@ const fileOf = i => tracks[i].file || tracks[i].title;
 const listSig = () => tracks.map((_,i)=>fileOf(i)).join('|');
 function nextIndex(dir){
   pendingSeek = 0;
-  livePos = (idx + 1) % tracks.length; liveN = tracks.length;
+  livePos = (idx + dir + tracks.length) % tracks.length; liveN = tracks.length;
   return livePos;
 }
 function initLive(){
@@ -737,43 +734,25 @@ $('start').onclick = ()=>{ $('gate').classList.add('hide'); started = true; if (
 if (!tracks.length){ $('gateTxt').textContent = 'Listede şarkı yok.'; $('start').style.display = 'none'; }
 else initLive();
 
-/* Başlangıç: Oğuzhan Market → YavRu jingle → Çuvaldız → Yedi 77 → BarBar.
-   Özel Masal ve radyo jingle bağlantıları bağımsız kalır. */
+/* Açılışta radyo jingle'ı; eski Oğuzhan bağlantıları da normal yayına açılır. */
 const entryJingles = {
   radyo: [['Jingle.mp3','jingle.mp3']],
-  masal: [['masal-cay-evi.mp3']],
-  oguzhan: [['oguzhan-market.mp3'], ['Jingle.mp3','jingle.mp3']]
+  masal: [['masal-cay-evi.mp3']]
 };
 const entryParams = new URLSearchParams(location.search);
-const entryJingle = entryParams.get('jingle') || 'oguzhan';
+const requestedJingle = entryParams.get('jingle') || 'radyo';
+const entryJingle = requestedJingle === 'oguzhan' ? 'radyo' : requestedJingle;
 if (!GIFT && tracks.length && Object.prototype.hasOwnProperty.call(entryJingles, entryJingle)){
   pendingSeek = 0;
-  if (entryJingle === 'oguzhan'){
-    $('openingSponsorImage').src = 'oguzhan-sponsor.png';
-    $('openingSponsorImage').hidden = false;
-    $('gate').classList.add('sponsor-opening');
-    const first = tracks.findIndex(t=>t.file === 'cuvaldiz.mp3');
-    if (first >= 0){ idx = first; livePos = first; }
-  }
   openingJingle = true; inAd = true;
   adQ = entryJingles[entryJingle].map(files=>files.slice());
   $('giftLine').hidden = true;
   nextAd();
-  const entryName = entryJingle === 'oguzhan' ? 'OĞUZHAN MARKET' : entryJingle === 'masal' ? 'MASAL ÇAY EVİ' : 'RADYO AI JINGLE';
-  $('gate').querySelector('h2').textContent = entryName;
-  $('gateTxt').textContent = entryJingle === 'oguzhan'
-    ? 'Oğuzhan Market → YavRu jingle → Çuvaldız → Yedi 77 → BarBar. Dinlemek için bir kez dokun.'
-    : (entryJingle === 'masal' ? 'Masal Çay Evi reklamı' : 'Jingle') + ' hazır. Tarayıcın sesi otomatik başlatmazsa dinlemek için bir kez dokun.';
-  $('start').innerHTML = '<i></i>' + (entryJingle === 'radyo' ? 'JINGLE’I DİNLE' : 'YAYINI DİNLE');
+  $('gate').querySelector('h2').textContent = entryJingle === 'masal' ? 'MASAL ÇAY EVİ' : 'RADYO AI';
+  $('gateTxt').textContent = (entryJingle === 'masal' ? 'Masal Çay Evi reklamı' : 'YavRu jingle') + ' sonrası müzik devam eder. Dinlemek için bir kez dokun.';
+  $('start').innerHTML = '<i></i>YAYINI DİNLE';
   bind('playing', ()=>{ $('gate').classList.add('hide'); started = true; });
-  if (entryParams.has('jingle')){
-    const poster = $('openingSponsorImage');
-    if (entryJingle === 'oguzhan' && !poster.complete){
-      const attempt = ()=>{ if (!started) play(); };
-      poster.addEventListener('load', attempt, {once:true});
-      poster.addEventListener('error', attempt, {once:true});
-    } else play();
-  }
+  if (entryParams.has('jingle')) play();
 }
 
 
