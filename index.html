@@ -440,6 +440,8 @@ function load(i){
   showMeta();
 }
 function play(){
+  // Reklam/jingle sırasında arka müzik deck'i kesinlikle oynatılmaz.
+  if (inAd){ cancelFade(); otherDeck().pause(); }
   wantPlay = true;
   const p = audio.play();
   if (p && p.catch) p.catch(()=>{});
@@ -639,6 +641,7 @@ function otherDeck(){ return audio === A ? B : A; }
 function releaseDeck(el){ try { el.pause(); el.removeAttribute('src'); el.load(); } catch(e){} }
 function useSource(src){
   cancelFade();
+  otherDeck().pause();
   if (WA && prepared && prepared.src === src && prepared.el.readyState >= 3){
     const old = audio;
     audio = prepared.el; prepared = null;
@@ -662,15 +665,10 @@ function prepareNext(){
   el.pause(); el.preload = 'auto'; el.src = src;
   prepared = { el, src };
 }
-function unlockB(){
-  // Unlock the already preloaded deck without replacing its source or audible playback.
-  if (B === audio || xfading) return;
-  prepareNext();
-  unlocking = true;
-  const wasMuted = B.muted; B.muted = true;
-  const done = ()=>{ if (B !== audio && !xfading) { B.pause(); try { B.currentTime = 0; } catch(e){} } B.muted = wasMuted; unlocking = false; };
-  try { const pr = B.play(); if (pr && pr.then) pr.then(done, done); else done(); } catch(e){ done(); }
-}
+// Arka deck'i gerçek bir şarkıyı oynatarak unlock etme: reklamla örtüşebilir.
+[A,B].forEach(el => el.addEventListener('play', ()=>{
+  if (inAd && el !== audio) el.pause();
+}));
 function applyFade(){
   if (!fade) return;
   const v = volEl.value/100, x = fade.k*Math.PI/2;
@@ -744,7 +742,7 @@ if (GIFT){
   $('gate').querySelector('h2').textContent = 'SANA BİR ARMAĞAN VAR';
   $('gateTxt').textContent = '🎁 ' + GIFT.to + ', sana bir şarkı armağan edildi' + (GIFT.from ? ' (' + GIFT.from + ')' : '') + '. Dinlemek için dokun.';
 }
-$('start').onclick = ()=>{ $('gate').classList.add('hide'); started = true; if (WA) unlockB(); play(); };
+$('start').onclick = ()=>{ $('gate').classList.add('hide'); started = true; play(); };
 if (!tracks.length){ $('gateTxt').textContent = 'Listede şarkı yok.'; $('start').style.display = 'none'; }
 else initLive();
 
