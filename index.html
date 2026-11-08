@@ -569,7 +569,7 @@ function getUsers(){
   const first=["Ahmet","Mehmet","Ayşe","Fatma","Emre","Burak","Elif","Zeynep","Can","Cem","Deniz","Ece","Eren","Gizem","Hakan","İrem","Kaan","Melis","Mert","Nazlı","Onur","Özge","Selin","Serkan","Tuğba","Uğur","Yasemin","Yusuf","Berk","Defne","Ege","Furkan","Gökhan","Hande","Kerem","Lale","Murat","Nehir","Oğuz","Pelin","Rüya","Sinan","Tolga","Utku","Volkan","Yağmur","Zafer","Barış","Ceren","Doruk"];
   const tails=["","_","34","06","35","61","tr","_official","x","music","_dj","1907","_beat","07","99"];
   const set=new Set();
-  while(set.size<220){
+  while(set.size<360){
     const base=pk(first).toLowerCase().replace(/ç/g,"c").replace(/ğ/g,"g").replace(/ı/g,"i").replace(/ö/g,"o").replace(/ş/g,"s").replace(/ü/g,"u").replace(/i̇/g,"i");
     set.add(base+pk(tails)+(Math.random()<.4?r(1,99):""));
   }
@@ -816,6 +816,7 @@ if (!GIFT && tracks.length && Object.prototype.hasOwnProperty.call(entryJingles,
     const dj2=["selam!","eline sağlık","bugün çok iyisin","yayın süper gidiyor","bir selam versene","hayranınız","seni seviyoruz","naber?","sağ ol bu yayın için","harikasın","enerji tavan","bu akşam kurtardın","mikser başında usta 🎛️","nasılsın?","bu gece uyumak yok 😄","bu sıralama çok iyi","kral yayın 🔥","iyi ki varsın","tebrikler, çok güzel olmuş","hoş geldin yayına","emeğine sağlık","sesin çok güzel","bu şarkıyı kim yaptı?","bu şarkının adı neydi?","bize bir şarkı armağan et 😄","bizi de duyuyor musun?","beni fark ettin mi 😄","buradayız, sen devam et"];
     toDJ.push(...cross(dj1,dj2.map(x=>" "+x)).map(x=>x.trim()));
   })();
+  react.push(...["Bir şarkının en çok girişini mi nakaratını mı beklersiniz?","Ritme masada parmaklarımla eşlik ediyorum 🎶","Bu akışa bir fincan çay yakışır ☕","Bugünün temposunu biraz müzikle dengeleyelim","Melodiyi mırıldanmaya başladım bile","Kulaklığı taktım, küçük bir müzik molası 🎧","Bazen tek bir melodi bütün günü hatırlatıyor","Söz mü daha önce yakalar sizi, melodi mi?","Uzun versiyonları dinlemek ayrı keyif","Bir parçayı tekrar dinleyince başka ayrıntılar duyuluyor","Müzikte küçük susuşlar da güzel","Nakarat gelene kadar ritmi takip ediyorum","Bu saatin fonuna biraz müzik bırakalım","Bugünün rengi hangi şarkı olurdu?","Çay mı kahve mi, müzik molasında hangisi?","Melodiler bazen bir fotoğraf gibi geliyor","Kısa bir mola, biraz müzik ✨","Yeni bir şarkıyla tanışmak güzel","Biraz ritim, biraz hayal 🎵","Müzik açıkken yol daha kısa geliyor","Şarkıların hikâyelerini merak ediyorum","Enstrümantal bölümlere de kulak veriyorum","Ritimden çok melodiyi takip edenlerdenim","Ben önce davullara dikkat ediyorum","Bir şarkıyı ilk dinleyişinizle sonrakiler aynı olmuyor","Sözleri dinlerken aklıma başka anılar geldi","Müzik molasına eşlik edenlere selam 👋","Bir şarkı bir şehir hatırlatır mı size?","Kulaklıkla mı hoparlörle mi dinlemeyi seversiniz?","Az konuşup biraz müzik dinleyelim 🎧"]);
   function botText(){
     const x=Math.random();
     if(x<.38){
@@ -874,7 +875,7 @@ if (!GIFT && tracks.length && Object.prototype.hasOwnProperty.call(entryJingles,
     const d=document.createElement('div');
     d.className='msg '+(cls||'');
     d.innerHTML='<b></b><p></p>';
-    const b=d.querySelector('b'); b.textContent=name; if(color)b.style.color=color;
+    const b=d.querySelector('b'); b.textContent=cls==='dj' ? name+' · otomatik' : name; if(color)b.style.color=color;
     d.querySelector('p').textContent=text;
     const stick=chat.scrollHeight-chat.scrollTop-chat.clientHeight<80;
     chat.appendChild(d);
@@ -883,7 +884,13 @@ if (!GIFT && tracks.length && Object.prototype.hasOwnProperty.call(entryJingles,
   }
   const dj=(text,delay)=>setTimeout(()=>add('DJ YavRu','🎧 '+text,'dj'),delay||0);
   const recent=[]; window.RADIO_RECENT=recent;
-  const botSay=(u,text)=>{ add(u,text,'',colors[u.length%colors.length]); recent.push(u); if(recent.length>12)recent.shift(); };
+  const recentBotTexts=[];
+  const botSay=(u,text)=>{
+    if(recentBotTexts.includes(text)) return;
+    recentBotTexts.push(text); if(recentBotTexts.length>100)recentBotTexts.shift();
+    add(u+' · otomatik',text,'',colors[u.length%colors.length]);
+    recent.push(u); if(recent.length>12)recent.shift();
+  };
   function flurry(n,pool){ for(let k=0;k<n;k++) setTimeout(()=>botSay(pick(users),nr(pool||shorts,'fl',6)),rnd(900,5500)); }
 
   /* ---- çalan şarkı duyurusu ---- */
@@ -912,7 +919,7 @@ if (!GIFT && tracks.length && Object.prototype.hasOwnProperty.call(entryJingles,
       if(meta.toDJ && Math.random()<.06) dj(reply(txt,u),rnd(5000,11000));          // DJ'e hitap edilene bizzat cevap + teşekkür
       else if(meta.q && Math.random()<.03) dj(reply(txt,u),rnd(5000,11000));
     }
-    setTimeout(tick, locMode ? rnd(350,900) : rnd(500,2000));
+    setTimeout(tick, locMode ? rnd(350,900) : rnd(500,1600));
   })();
   for(let k=0;k<6;k++) botSay(pick(users),nr(react,'react',250));
 
