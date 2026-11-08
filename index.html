@@ -336,14 +336,14 @@ const CONFIG = {
   //  1) drive: "Google Drive dosya kimliği"  (dosya "Bağlantıya sahip herkes" olarak paylaşılmış olmalı)
   //  2) file : "dosya-adi.mp3"             (şarkıyı index.html ile AYNI klasöre koyarsan önce o çalar, olmazsa Drive denenir)
   TRACKS: [
+    { title: "ÇuvaldıZ", file: "cuvaldiz.mp3", credit: "Söz & Müzik: Engin YAVRU" },
     { title: "YEDİ 77", file: "yedi-77.mp3", credit: "Söz & Müzik: Engin YAVRU" },
-    { title: "Azıcık UcundaN", file: "azicikucundan.mp3", credit: "Söz & Müzik: Engin YAVRU" },
     { title: "BarBar", file: "bar-bar.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "Azıcık UcundaN", file: "azicikucundan.mp3", credit: "Söz & Müzik: Engin YAVRU" },
     { title: "Ne Beddua Ne Helallik", file: "bedduahelallik.mp3", credit: "Söz: Gökçem Bengi Şakar · Müzik: Engin YAVRU" },
     { title: "BestiE", file: "bestie.mp3", credit: "Söz & Müzik: Engin YAVRU" },
     { title: "BestiEDeep", file: "bestiedeep.mp3", credit: "Söz & Müzik: Engin YAVRU" },
     { title: "BilseN", file: "bilsen.mp3", credit: "Söz & Müzik: Engin YAVRU" },
-    { title: "ÇuvaldıZ", file: "cuvaldiz.mp3", credit: "Söz & Müzik: Engin YAVRU" },
     { title: "Dün Gitti", file: "dungitti.mp3", credit: "Söz & Müzik: Engin YAVRU" },
     { title: "elif", file: "elif.mp3", credit: "Söz & Müzik: Engin YAVRU" },
     { title: "Fısıltı", file: "fisilti.mp3", credit: "Söz & Müzik: Engin YAVRU" },
@@ -453,7 +453,7 @@ function ui(on){
   $('liveTxt').textContent = on ? 'CANLI' : 'DURAKLATILDI';
   if ('mediaSession' in navigator) navigator.mediaSession.playbackState = on ? 'playing' : 'paused';
 }
-bind('playing', ()=>{ if(masalAd && !masalDismissed) showMasal(true); failStreak = 0; $('sub').textContent = inAd ? (isIdent ? 'RadyoAI' : 'Sponsor: ' + (masalAd ? 'Masal Çay Evi' : ADS.NAME)) : (tracks[idx].credit || CONFIG.ARTIST); });
+bind('playing', ()=>{ if((masalAd || oguzhanAd) && !masalDismissed) showMasal(true); failStreak = 0; $('sub').textContent = inAd ? (isIdent ? 'RadyoAI' : 'Sponsor: ' + (oguzhanAd ? 'Oğuzhan Market' : masalAd ? 'Masal Çay Evi' : ADS.NAME)) : (tracks[idx].credit || CONFIG.ARTIST); });
 bind('waiting', ()=>{ $('sub').textContent = 'Yükleniyor…'; });
 bind('loadedmetadata', ()=>{ $('dur').textContent = fmt(audio.duration); });
 bind('timeupdate', ()=>{
@@ -467,7 +467,7 @@ let songsSinceAd = 0, adQ = [], inAd = false, adAlt = [], isIdent = false, total
 const IDENT = { EVERY: 2, FILE: 'kisa-jingle.mp3' };   // reklamsız aralarda her 2 şarkıda bir kısa jingle
 try { if (new URLSearchParams(location.search).has('reklamtest')) ADS.EVERY = 1; } catch(e){}   // test: ?reklamtest ile her şarkıdan sonra reklam
 const adDue = () => ADS.BREAK.length > 0 && songsSinceAd + 1 >= ADS.EVERY;
-const identDue = () => !adDue() && IDENT.EVERY > 0 && (totalSongs + 1) % IDENT.EVERY === 0;
+const identDue = () => totalSongs >= 2 && !adDue() && IDENT.EVERY > 0 && (totalSongs + 1) % IDENT.EVERY === 0;
 function startIdent(){
   inAd = true; isIdent = true; adQ = [[IDENT.FILE]];
   $('title').textContent = '📻 Radyo AI'; $('title').style.fontSize = '';
@@ -485,23 +485,31 @@ function startAdBreak(){
   nextAd();
 }
 
-let masalAd=false, masalDismissed=false, masalHideTimer;
+let masalAd=false, oguzhanAd=false, masalDismissed=false, masalHideTimer;
 function showMasal(on){
  const el=$('masalOverlay');clearTimeout(masalHideTimer);
- if(on){el.classList.remove('leaving');el.hidden=false;}
+ if(on){
+  const img=el.querySelector('img');
+  img.src=oguzhanAd ? 'oguzhan-sponsor.png' : 'masal-sponsor.png';
+  img.alt=oguzhanAd ? 'Oğuzhan Market — Sofralarda bereket' : 'Masal Çay Evi — Her sohbette bir masal';
+  el.setAttribute('aria-label',oguzhanAd ? 'Oğuzhan Market sponsor reklamı' : 'Masal Çay Evi sponsor reklamı');
+  el.classList.remove('leaving');el.hidden=false;
+ }
  else if(!el.hidden){el.classList.add('leaving');masalHideTimer=setTimeout(()=>{el.hidden=true;el.classList.remove('leaving');},550);}
 }
 $('masalClose').onclick=()=>{masalDismissed=true;showMasal(false);};
 let openingJingle = false;
 function nextAd(){
-  showMasal(false);masalAd=false;masalDismissed=false;
+  showMasal(false);masalAd=false;oguzhanAd=false;masalDismissed=false;
   if (!adQ.length){ inAd = false; isIdent = false; sponsorParla(false); const next = openingJingle ? idx : nextIndex(1); openingJingle = false; load(next); if (wantPlay) play(); return; }
   adAlt = [].concat(adQ.shift()); srcTry = 0;
   masalAd=adAlt[0]==='masal-cay-evi.mp3';
+  oguzhanAd=adAlt[0]==='oguzhan-market.mp3';
   isIdent=/jingle/i.test(adAlt[0]);
   if(isIdent){sponsorParla(false);$('title').textContent='DJ YavRu';$('sub').textContent='RadyoAI';document.title='DJ YavRu · RadyoAI';}
+  if(oguzhanAd){sponsorParla(false);$('title').textContent='Oğuzhan Market';$('sub').textContent='Sponsor: Oğuzhan Market';document.title='Oğuzhan Market · RadyoAI';}
   if(masalAd){sponsorParla(false);$('title').textContent='Masal Çay Evi';$('sub').textContent='Sponsor: Masal Çay Evi';document.title='Masal Çay Evi · RadyoAI';}
-  if ('mediaSession' in navigator){ try { navigator.mediaSession.metadata = new MediaMetadata({ title: masalAd ? 'Masal Çay Evi' : isIdent ? 'DJ YavRu' : 'Reklam Arası', artist: masalAd ? 'Masal Çay Evi' : isIdent ? 'RadyoAI' : ADS.NAME, album: 'RadyoAI' }); } catch(e){} }
+  if ('mediaSession' in navigator){ try { navigator.mediaSession.metadata = new MediaMetadata({ title: oguzhanAd ? 'Oğuzhan Market' : masalAd ? 'Masal Çay Evi' : isIdent ? 'DJ YavRu' : 'Reklam Arası', artist: oguzhanAd ? 'Oğuzhan Market' : masalAd ? 'Masal Çay Evi' : isIdent ? 'RadyoAI' : ADS.NAME, album: 'RadyoAI' }); } catch(e){} }
   audio.src = encodeURI(adAlt.shift());
   if (wantPlay) play();
 }
@@ -510,7 +518,7 @@ bind('ended', ()=>{
   if (inAd){ nextAd(); return; }
   songsSinceAd++; totalSongs++;
   if (ADS.BREAK.length && songsSinceAd >= ADS.EVERY){ songsSinceAd = 0; startAdBreak(); }
-  else if (IDENT.EVERY > 0 && totalSongs % IDENT.EVERY === 0) startIdent();
+  else if (totalSongs > 2 && IDENT.EVERY > 0 && totalSongs % IDENT.EVERY === 0) startIdent();
   else skip(1);
 });
 bind('error', ()=>{
@@ -678,26 +686,34 @@ $('start').onclick = ()=>{ $('gate').classList.add('hide'); started = true; if (
 if (!tracks.length){ $('gateTxt').textContent = 'Listede şarkı yok.'; $('start').style.display = 'none'; }
 else initLive();
 
-/* Paylaşım linki: jingle baştan çalar, ardından normal yayına döner. */
+/* Başlangıç: Oğuzhan Market → YavRu jingle → Çuvaldız → Yedi 77 → BarBar.
+   Özel Masal ve radyo jingle bağlantıları bağımsız kalır. */
 const entryJingles = {
-  radyo: ['Jingle.mp3','jingle.mp3'],
-  masal: ['masal-cay-evi.mp3']
+  radyo: [['Jingle.mp3','jingle.mp3']],
+  masal: [['masal-cay-evi.mp3']],
+  oguzhan: [['oguzhan-market.mp3'], ['Jingle.mp3','jingle.mp3']]
 };
-const entryJingle = new URLSearchParams(location.search).get('jingle');
+const entryParams = new URLSearchParams(location.search);
+const entryJingle = entryParams.get('jingle') || 'oguzhan';
 if (!GIFT && tracks.length && Object.prototype.hasOwnProperty.call(entryJingles, entryJingle)){
   pendingSeek = 0;
+  if (entryJingle === 'oguzhan'){
+    const first = tracks.findIndex(t=>t.file === 'cuvaldiz.mp3');
+    if (first >= 0){ idx = first; livePos = first; }
+  }
   openingJingle = true; inAd = true;
-  adQ = [entryJingles[entryJingle].slice()];
+  adQ = entryJingles[entryJingle].map(files=>files.slice());
   $('giftLine').hidden = true;
-  $('title').textContent = 'Jingle';
   nextAd();
-  $('gate').querySelector('h2').textContent = entryJingle === 'masal' ? 'MASAL ÇAY EVİ' : 'RADYO AI JINGLE';
-  $('gateTxt').textContent = (entryJingle === 'masal' ? 'Masal Çay Evi reklamı' : 'Jingle') + ' hazır. Tarayıcın sesi otomatik başlatmazsa dinlemek için bir kez dokun.';
-  $('start').innerHTML = '<i></i>' + (entryJingle === 'masal' ? 'REKLAMI DİNLE' : 'JINGLE’I DİNLE');
+  const entryName = entryJingle === 'oguzhan' ? 'OĞUZHAN MARKET' : entryJingle === 'masal' ? 'MASAL ÇAY EVİ' : 'RADYO AI JINGLE';
+  $('gate').querySelector('h2').textContent = entryName;
+  $('gateTxt').textContent = entryJingle === 'oguzhan'
+    ? 'Oğuzhan Market → YavRu jingle → Çuvaldız → Yedi 77 → BarBar. Dinlemek için bir kez dokun.'
+    : (entryJingle === 'masal' ? 'Masal Çay Evi reklamı' : 'Jingle') + ' hazır. Tarayıcın sesi otomatik başlatmazsa dinlemek için bir kez dokun.';
+  $('start').innerHTML = '<i></i>' + (entryJingle === 'radyo' ? 'JINGLE’I DİNLE' : 'YAYINI DİNLE');
   bind('playing', ()=>{ $('gate').classList.add('hide'); started = true; });
-  play();
+  if (entryParams.has('jingle')) play();
 }
-
 
 
 /* ---- Radyo sohbeti: dinleyici şarkı seçemez, DJ çalanı duyurur ---- */
