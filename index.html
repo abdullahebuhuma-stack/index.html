@@ -221,6 +221,16 @@ body.yayin #yayinInfo{display:block;flex:none;text-align:center;padding:14px 16p
 @keyframes sponsorNabiz{0%,100%{box-shadow:0 0 0 0 rgba(242,140,5,.6)}50%{box-shadow:0 0 22px 6px rgba(242,140,5,.6)}}
 @media (max-width:380px){.sponsor-logo img{height:40px}.sponsor-slogan{font-size:13px}}
 @media (prefers-reduced-motion:reduce){.sponsor-cerceve,.sponsor-kart::after{animation:none}}
+
+#masalOverlay{position:fixed;inset:0;z-index:65;display:grid;place-items:center;pointer-events:none;overflow:hidden}
+#masalOverlay[hidden]{display:none}
+#masalOverlay img{width:min(96vw,560px);max-height:86dvh;object-fit:contain;filter:drop-shadow(0 0 22px #f5aa3060);animation:masalEnter .7s cubic-bezier(.16,1,.3,1) both,masalFloat 3s .7s ease-in-out infinite}
+#masalOverlay.leaving img{animation:masalExit .55s ease-in both}
+#masalClose{position:absolute;right:16px;top:16px;pointer-events:auto;background:#341513;color:white;border:1px solid #efc367;border-radius:50%;width:40px;height:40px;font-size:24px}
+@keyframes masalEnter{from{opacity:0;transform:translateY(120px) scale(.35)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes masalFloat{50%{transform:translateY(-8px)}}
+@keyframes masalExit{to{opacity:0;transform:translateY(60px) scale(.65)}}
+@media(prefers-reduced-motion:reduce){#masalOverlay img,#masalOverlay.leaving img{animation:none}}
 </style>
 </head>
 <body>
@@ -314,6 +324,7 @@ body.yayin #yayinInfo{display:block;flex:none;text-align:center;padding:14px 16p
 
 <audio id="audio" preload="metadata" playsinline></audio>
 
+<div id="masalOverlay" hidden aria-label="Masal Çay Evi sponsor reklamı"><img src="masal-sponsor.png" alt="Masal Çay Evi — Her sohbette bir masal"><button id="masalClose" type="button" aria-label="Görseli kapat">×</button></div>
 <script>
 /* ============ AYARLAR — burayı düzenle ============ */
 const CONFIG = {
@@ -442,7 +453,7 @@ function ui(on){
   $('liveTxt').textContent = on ? 'CANLI' : 'DURAKLATILDI';
   if ('mediaSession' in navigator) navigator.mediaSession.playbackState = on ? 'playing' : 'paused';
 }
-bind('playing', ()=>{ failStreak = 0; $('sub').textContent = inAd ? (isIdent ? 'RadyoAI' : 'Sponsor: ' + ADS.NAME) : (tracks[idx].credit || CONFIG.ARTIST); });
+bind('playing', ()=>{ if(masalAd && !masalDismissed) showMasal(true); failStreak = 0; $('sub').textContent = inAd ? (isIdent ? 'RadyoAI' : 'Sponsor: ' + (masalAd ? 'Masal Çay Evi' : ADS.NAME)) : (tracks[idx].credit || CONFIG.ARTIST); });
 bind('waiting', ()=>{ $('sub').textContent = 'Yükleniyor…'; });
 bind('loadedmetadata', ()=>{ $('dur').textContent = fmt(audio.duration); });
 bind('timeupdate', ()=>{
@@ -451,7 +462,7 @@ bind('timeupdate', ()=>{
   if (audio.duration){ $('seek').value = audio.currentTime/audio.duration*1000; setFill($('seek')); }
 });
 /* ---- Reklam arası: her ADS.EVERY şarkıda bir jingle + spot ---- */
-const ADS = { EVERY: 3, BREAK: [['Jingle.mp3','jingle.mp3'], ['Seda Baharat.mp3','spot-seda-baharat.mp3']], NAME: 'Seda Baharat' };   // her reklam için olası dosya adları
+const ADS = { EVERY: 3, BREAK: [['Seda Baharat.mp3','spot-seda-baharat.mp3'], ['masal-cay-evi.mp3'], ['Jingle.mp3','jingle.mp3']], NAME: 'Seda Baharat' };   // her reklam için olası dosya adları
 let songsSinceAd = 0, adQ = [], inAd = false, adAlt = [], isIdent = false, totalSongs = 0;
 const IDENT = { EVERY: 2, FILE: 'kisa-jingle.mp3' };   // reklamsız aralarda her 2 şarkıda bir kısa jingle
 try { if (new URLSearchParams(location.search).has('reklamtest')) ADS.EVERY = 1; } catch(e){}   // test: ?reklamtest ile her şarkıdan sonra reklam
@@ -473,9 +484,24 @@ function startAdBreak(){
   if ('mediaSession' in navigator){ try { navigator.mediaSession.metadata = new MediaMetadata({ title: 'Reklam Arası', artist: ADS.NAME, album: 'RadyoAI' }); } catch(e){} }
   nextAd();
 }
+
+let masalAd=false, masalDismissed=false, masalHideTimer;
+function showMasal(on){
+ const el=$('masalOverlay');clearTimeout(masalHideTimer);
+ if(on){el.classList.remove('leaving');el.hidden=false;}
+ else if(!el.hidden){el.classList.add('leaving');masalHideTimer=setTimeout(()=>{el.hidden=true;el.classList.remove('leaving');},550);}
+}
+$('masalClose').onclick=()=>{masalDismissed=true;showMasal(false);};
 function nextAd(){
+  showMasal(false);masalAd=false;masalDismissed=false;
   if (!adQ.length){ inAd = false; isIdent = false; sponsorParla(false); load(nextIndex(1)); if (wantPlay) play(); return; }
-  adAlt = [].concat(adQ.shift()); srcTry = 0; audio.src = encodeURI(adAlt.shift());
+  adAlt = [].concat(adQ.shift()); srcTry = 0;
+  masalAd=adAlt[0]==='masal-cay-evi.mp3';
+  isIdent=/jingle/i.test(adAlt[0]);
+  if(isIdent){sponsorParla(false);$('title').textContent='DJ YavRu';$('sub').textContent='RadyoAI';document.title='DJ YavRu · RadyoAI';}
+  if(masalAd){sponsorParla(false);$('title').textContent='Masal Çay Evi';$('sub').textContent='Sponsor: Masal Çay Evi';document.title='Masal Çay Evi · RadyoAI';}
+  if ('mediaSession' in navigator){ try { navigator.mediaSession.metadata = new MediaMetadata({ title: masalAd ? 'Masal Çay Evi' : isIdent ? 'DJ YavRu' : 'Reklam Arası', artist: masalAd ? 'Masal Çay Evi' : isIdent ? 'RadyoAI' : ADS.NAME, album: 'RadyoAI' }); } catch(e){} }
+  audio.src = encodeURI(adAlt.shift());
   if (wantPlay) play();
 }
 function adError(){ if (adAlt.length){ audio.src = encodeURI(adAlt.shift()); if (wantPlay) play(); } else nextAd(); }
@@ -1149,3 +1175,4 @@ else initLive();
 <script src="akis.js" defer></script>
 </body>
 </html>
+
