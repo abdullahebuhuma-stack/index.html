@@ -492,9 +492,10 @@ function showMasal(on){
  else if(!el.hidden){el.classList.add('leaving');masalHideTimer=setTimeout(()=>{el.hidden=true;el.classList.remove('leaving');},550);}
 }
 $('masalClose').onclick=()=>{masalDismissed=true;showMasal(false);};
+let openingJingle = false;
 function nextAd(){
   showMasal(false);masalAd=false;masalDismissed=false;
-  if (!adQ.length){ inAd = false; isIdent = false; sponsorParla(false); load(nextIndex(1)); if (wantPlay) play(); return; }
+  if (!adQ.length){ inAd = false; isIdent = false; sponsorParla(false); const next = openingJingle ? idx : nextIndex(1); openingJingle = false; load(next); if (wantPlay) play(); return; }
   adAlt = [].concat(adQ.shift()); srcTry = 0;
   masalAd=adAlt[0]==='masal-cay-evi.mp3';
   isIdent=/jingle/i.test(adAlt[0]);
@@ -676,6 +677,27 @@ if (GIFT){
 $('start').onclick = ()=>{ $('gate').classList.add('hide'); started = true; if (WA) unlockB(); play(); };
 if (!tracks.length){ $('gateTxt').textContent = 'Listede şarkı yok.'; $('start').style.display = 'none'; }
 else initLive();
+
+/* Paylaşım linki: jingle baştan çalar, ardından normal yayına döner. */
+const entryJingles = {
+  radyo: ['Jingle.mp3','jingle.mp3'],
+  masal: ['masal-cay-evi.mp3']
+};
+const entryJingle = new URLSearchParams(location.search).get('jingle');
+if (!GIFT && tracks.length && Object.prototype.hasOwnProperty.call(entryJingles, entryJingle)){
+  pendingSeek = 0;
+  openingJingle = true; inAd = true;
+  adQ = [entryJingles[entryJingle].slice()];
+  $('giftLine').hidden = true;
+  $('title').textContent = 'Jingle';
+  nextAd();
+  $('gate').querySelector('h2').textContent = entryJingle === 'masal' ? 'MASAL ÇAY EVİ' : 'RADYO AI JINGLE';
+  $('gateTxt').textContent = (entryJingle === 'masal' ? 'Masal Çay Evi reklamı' : 'Jingle') + ' hazır. Tarayıcın sesi otomatik başlatmazsa dinlemek için bir kez dokun.';
+  $('start').innerHTML = '<i></i>' + (entryJingle === 'masal' ? 'REKLAMI DİNLE' : 'JINGLE’I DİNLE');
+  bind('playing', ()=>{ $('gate').classList.add('hide'); started = true; });
+  play();
+}
+
 
 
 /* ---- Radyo sohbeti: dinleyici şarkı seçemez, DJ çalanı duyurur ---- */
@@ -1175,4 +1197,5 @@ else initLive();
 <script src="akis.js" defer></script>
 </body>
 </html>
+
 
