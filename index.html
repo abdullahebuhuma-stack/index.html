@@ -772,26 +772,17 @@ $('start').onclick = ()=>{ $('gate').classList.add('hide'); started = true; play
 if (!tracks.length){ $('gateTxt').textContent = 'Listede şarkı yok.'; $('start').style.display = 'none'; }
 else initLive();
 
-/* Yeni ziyarette yalnızca YavRu jingle; sonra müzik. Sponsorla açılış yok. */
-const entryJingles = {
-  radyo: [['Jingle.mp3','jingle.mp3']]
-};
-const entryParams = new URLSearchParams(location.search);
-const requestedJingle = 'radyo';
-const entryJingle = requestedJingle === 'oguzhan' ? 'radyo' : requestedJingle;
-if (!GIFT && !resumeFromVisit && tracks.length && Object.prototype.hasOwnProperty.call(entryJingles, entryJingle)){
+/* Açılış: Seda → Masal → YavRu → müzik. Sonra her üç şarkıda aynı kuşak. */
+if (!GIFT && tracks.length){
   pendingSeek = 0;
-  openingJingle = true; inAd = true;
-  adQ = entryJingles[entryJingle].map(files=>files.slice());
-  $('giftLine').hidden = true;
-  nextAd();
-  $('gate').querySelector('h2').textContent = entryJingle === 'masal' ? 'MASAL ÇAY EVİ' : 'RADYO AI';
-  $('gateTxt').textContent = (entryJingle === 'masal' ? 'Masal Çay Evi reklamı' : 'YavRu jingle') + ' sonrası müzik devam eder. Dinlemek için bir kez dokun.';
+  openingJingle = true;
+  songsSinceAd = 0;
+  startAdBreak();
+  $('gate').querySelector('h2').textContent = 'RADYO AI';
+  $('gateTxt').textContent = 'Seda Baharat ve Masal Çay Evi reklamlarının ardından YavRu jingle ve müzik. Dinlemek için dokun.';
   $('start').innerHTML = '<i></i>YAYINI DİNLE';
   bind('playing', ()=>{ $('gate').classList.add('hide'); started = true; });
-  // Kullanıcı dokunmadan reklam veya jingle başlatılmaz.
 }
-
 
 /* ---- Radyo sohbeti: dinleyici şarkı seçemez, DJ çalanı duyurur ---- */
 (function(){
