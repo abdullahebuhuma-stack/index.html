@@ -484,7 +484,7 @@ bind('timeupdate', ()=>{
   if (audio.duration){ $('seek').value = audio.currentTime/audio.duration*1000; setFill($('seek')); }
 });
 /* ---- Reklam arası: her ADS.EVERY şarkıda bir jingle + spot ---- */
-const ADS = { EVERY: 3, BREAK: [['Seda Baharat.mp3','spot-seda-baharat.mp3'], ['masal-cay-evi.mp3'], ['Jingle.mp3','jingle.mp3']], NAME: 'Seda Baharat' };   // her reklam için olası dosya adları
+const ADS = { EVERY: 3, BREAK: [['masal-cay-evi.mp3'], ['Seda Baharat.mp3','spot-seda-baharat.mp3'], ['Jingle.mp3','jingle.mp3']], NAME: 'Seda Baharat' };   // her reklam için olası dosya adları
 let songsSinceAd = 0, adQ = [], inAd = false, adAlt = [], isIdent = false, totalSongs = 0;
 const IDENT = { EVERY: 0, FILE: 'kisa-jingle.mp3' };   // reklamsız aralarda her 2 şarkıda bir kısa jingle
 // Reklam aralığı her adreste üç şarkıdır; URL parametresiyle değiştirilmez.
@@ -772,14 +772,14 @@ $('start').onclick = ()=>{ $('gate').classList.add('hide'); started = true; play
 if (!tracks.length){ $('gateTxt').textContent = 'Listede şarkı yok.'; $('start').style.display = 'none'; }
 else initLive();
 
-/* Açılış: Seda → Masal → YavRu → müzik. Sonra her üç şarkıda aynı kuşak. */
+/* Açılış: Masal → Seda → YavRu → müzik. Sonra her üç şarkıda aynı kuşak. */
 if (!GIFT && tracks.length){
   pendingSeek = 0;
   openingJingle = true;
   songsSinceAd = 0;
   startAdBreak();
   $('gate').querySelector('h2').textContent = 'RADYO AI';
-  $('gateTxt').textContent = 'Seda Baharat ve Masal Çay Evi reklamlarının ardından YavRu jingle ve müzik. Dinlemek için dokun.';
+  $('gateTxt').textContent = 'Masal Çay Evi ve Seda Baharat reklamlarının ardından YavRu jingle ve müzik. Dinlemek için dokun.';
   $('start').innerHTML = '<i></i>YAYINI DİNLE';
   bind('playing', ()=>{ $('gate').classList.add('hide'); started = true; });
 }
