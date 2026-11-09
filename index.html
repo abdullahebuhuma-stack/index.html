@@ -454,14 +454,33 @@ function load(i){
   showMeta();
   saveLive();
 }
+let playAttempt = 0;
 function play(){
   // Reklam/jingle sırasında arka müzik deck'i kesinlikle oynatılmaz.
   if (inAd){ cancelFade(); otherDeck().pause(); }
   wantPlay = true;
-  const p = audio.play();
-  if (p && p.catch) p.catch(()=>{});
+  const el = audio, src = el.src, attempt = ++playAttempt;
+  const rejected = err => {
+    if (attempt !== playAttempt || !wantPlay || audio !== el || el.src !== src) return;
+    if (err && err.name === 'NotAllowedError'){
+      // Some browsers permit a silent crossfade deck but not its next audible source.
+      crossfadeBlocked = true;
+      if (el !== A){
+        const position = el.currentTime;
+        cancelFade(); el.pause(); audio = A;
+        useSource(src);
+        if (position > 0) pendingSeek = position;
+        play();
+      } else {
+        ui(false);
+        $('sub').textContent = 'Tarayıcı sesi durdurdu. Devam etmek için Play’e basın.';
+      }
+    }
+  };
+  try { const p = el.play(); if (p && p.catch) p.catch(rejected); }
+  catch (err){ rejected(err); }
 }
-function pause(){ wantPlay = false; cancelFade(); A.pause(); B.pause(); }
+function pause(){ playAttempt++; wantPlay = false; cancelFade(); A.pause(); B.pause(); }
 function skip(dir){ load(nextIndex(dir)); if (wantPlay) play(); }
 
 /* ---- Olaylar ---- */
@@ -547,7 +566,7 @@ function nextAd(){
   if (sedaAd) showSeda(true);
   if (wantPlay) play();
 }
-function adError(){ if (adAlt.length){ audio.src = encodeURI(adAlt.shift()); if (wantPlay) play(); } else nextAd(); }
+function adError(){ if (adAlt.length){ useSource(encodeURI(adAlt.shift())); if (wantPlay) play(); } else nextAd(); }
 bind('ended', ()=>{
   if (inAd){ nextAd(); return; }
   songsSinceAd++; totalSongs++;
@@ -560,7 +579,7 @@ bind('error', ()=>{
   const list = sources(tracks[idx]);
   if (srcTry < list.length-1){            // yedek adresi dene
     srcTry++;
-    audio.src = list[srcTry];
+    useSource(list[srcTry]);
     if (wantPlay) play();
     return;
   }
@@ -664,10 +683,14 @@ window.addEventListener('pagehide', saveLive);
 /* ---- Mix geçiş (crossfade): ses seviyesi ayarlanabilen cihazlarda çalışır; WebAudio kullanılmaz, arka plan/kilit ekranı çalması bozulmaz ---- */
 const XF = 6;                                  // geçiş süresi (sn)
 const WA = (()=>{ try { const a = new Audio(); a.volume = 0.5; return a.volume === 0.5; } catch(e){ return false; } })();   // iPhone'da false: orada ses seviyesi koddan ayarlanamaz
+// TVs keep the user-activated audio element; their silent-play permission is unreliable.
+const TV_AUDIO = /Smart[- ]?TV|HbbTV|Tizen|Web0S|WebOS|NetCast|Viera|BRAVIA|GoogleTV|Android TV|AFT[A-Z0-9]+|CrKey/i.test(navigator.userAgent || '');
+let crossfadeBlocked = TV_AUDIO;
 let xfading = false, xfIdx = -1, fade = null, prepared = null, unlocking = false, fadeAttempt = 0;
 function otherDeck(){ return audio === A ? B : A; }
 function releaseDeck(el){ try { el.pause(); el.removeAttribute('src'); el.load(); } catch(e){} }
 function useSource(src){
+  playAttempt++;
   cancelFade();
   otherDeck().pause();
   // Reuse the user-activated element for every hard transition. A buffered
@@ -680,7 +703,7 @@ function useSource(src){
   $('cur').textContent = fmt(audio.currentTime);
 }
 function prepareNext(){
-  if (xfading || unlocking || !tracks.length) return;
+  if (crossfadeBlocked || xfading || unlocking || !tracks.length) return;
   let src;
   if (inAd) src = adQ.length ? encodeURI(adQ[0][0]) : sources(tracks[openingJingle ? idx : (idx+1)%tracks.length])[0];
   else if (adDue()) src = encodeURI(ADS.BREAK[0][0]);
@@ -728,7 +751,7 @@ function showMeta(){
   }
 }
 function startXfade(){
-  if (!WA || xfading || unlocking || !prepared || prepared.el.readyState < 3) return;
+  if (crossfadeBlocked || !WA || xfading || unlocking || !prepared || prepared.el.readyState < 3) return;
   const old = audio, prevIdx = idx, nw = prepared.el;
   const next = (idx+1)%tracks.length;
   if (prepared.src !== sources(tracks[next])[0]) return;
@@ -752,8 +775,8 @@ function startXfade(){
       if (fade.k >= 1) cancelFade();
     }, 50);
   };
-  const rejected = ()=>{ if (attempt !== fadeAttempt) return; nw.pause(); nw.volume = volEl.value/100; xfading = false; };
-  try { const pr = nw.play(); if (pr && pr.then) pr.then(begin, rejected); else if (!nw.paused) begin(); else rejected(); } catch(e){ rejected(); }
+  const rejected = err=>{ if (attempt !== fadeAttempt) return; if (err && err.name === 'NotAllowedError') crossfadeBlocked = true; nw.pause(); nw.volume = volEl.value/100; xfading = false; };
+  try { const pr = nw.play(); if (pr && pr.then) pr.then(begin, rejected); else if (!nw.paused) begin(); else rejected(); } catch(e){ rejected(e); }
 }
 setInterval(()=>{
   prepareNext();
@@ -1288,6 +1311,7 @@ if (!GIFT && tracks.length){
 <script src="akis.js" defer></script>
 </body>
 </html>
+
 
 
 
