@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RadyoAI</title>
+<meta name="description" content="RadyoAI — MyByYavRu şarkıları kesintisiz çalıyor.">
+<meta name="theme-color" content="#08080c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RadyoAI">
+<meta property="og:title" content="RadyoAI">
+<meta property="og:description" content="MyByYavRu şarkıları kesintisiz çalıyor.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23a855f7'/%3E%3Ctext x='32' y='45' font-size='38' font-family='Arial' font-weight='700' text-anchor='middle' fill='white'%3ER%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08080c; --panel:#0f0f16; --card:#12121a; --line:rgba(255,255,255,.07);
+  --text:#fff; --dim:rgba(255,255,255,.55); --faint:rgba(255,255,255,.32);
+  --purple:#a855f7; --mint:#2ee5a6; --pink:#ff69b4;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;-webkit-tap-highlight-color:transparent;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:focus-visible,input:focus-visible,.track:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+.display{font-family:'Space Grotesk',Inter,sans-serif}
+
+#app{height:100dvh;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+header{height:54px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:#0e0e14;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:32px;height:32px;border-radius:9px;background:var(--purple);display:grid;place-items:center;font-weight:700;font-size:18px;box-shadow:0 0 18px rgba(168,85,247,.5)}
+.brand b{letter-spacing:.18em;font-size:15px}
+.live{display:flex;align-items:center;gap:8px;background:#15151d;border:1px solid rgba(255,255,255,.1);border-radius:99px;padding:6px 14px;font-size:11px;font-weight:600;letter-spacing:.1em}
+.live i{width:8px;height:8px;border-radius:50%;background:#34d399;box-shadow:0 0 8px rgba(16,185,129,.8);animation:pulse 1.2s ease-in-out infinite}
+.live i.off{background:#555;box-shadow:none;animation:none}
+.live em{font-style:normal;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:0}
+.banner{flex:none;text-align:center;padding:9px 12px;font-size:10px;letter-spacing:.16em;font-weight:700;line-height:1.35;background:linear-gradient(90deg,rgba(168,85,247,.16),rgba(168,85,247,.08),rgba(46,229,166,.1));border-bottom:1px solid rgba(168,85,247,.2)}
+
+.player{flex:none;background:var(--panel);border-bottom:1px solid var(--line);padding:16px;display:flex;gap:16px;align-items:center}
+.vinyl{position:relative;flex:none;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,#1a1a24 0,#0d0d12 45%,#000 70%);border:1px solid rgba(255,255,255,.1);box-shadow:0 8px 30px rgba(0,0,0,.6);display:grid;place-items:center}
+.vinyl::before,.vinyl::after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.04)}
+.vinyl::before{inset:10px}.vinyl::after{inset:26px}
+.vinyl .label{width:38px;height:38px;border-radius:50%;background:var(--purple);display:grid;place-items:center;font-weight:700;font-size:16px;box-shadow:0 0 15px rgba(168,85,247,.6)}
+.vinyl.spin{animation:spin 3.2s linear infinite}
+.wrap-vinyl{position:relative;flex:none}
+.badge{position:absolute;top:-8px;right:-8px;background:var(--mint);color:#000;font-size:9px;font-weight:700;letter-spacing:.1em;padding:2px 8px;border-radius:99px;box-shadow:0 0 12px rgba(46,229,166,.6);display:none}
+.playing .badge{display:block}
+.info{flex:1;min-width:0}
+.kicker{font-size:10px;letter-spacing:.18em;color:var(--faint);font-weight:600;margin-bottom:4px}
+#title{font-size:20px;line-height:1.25;white-space:normal;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+#sub{font-size:11px;color:var(--faint);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bars{display:flex;align-items:flex-end;gap:3px;height:26px;margin-top:10px}
+.bars span{width:4px;height:4px;border-radius:9px;background:rgba(255,255,255,.14);transition:height .11s}
+.playing .bars span{background:linear-gradient(to top,var(--purple),var(--mint))}
+.playing .bars span:nth-child(even){background:linear-gradient(to top,var(--purple),var(--pink))}
+
+.controls{flex:none;background:var(--panel);padding:12px 16px 14px;border-bottom:1px solid var(--line)}
+.seek{display:flex;align-items:center;gap:10px;font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums}
+.seek time{width:36px}.seek time:last-child{text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:22px;background:transparent;cursor:pointer;--p:0%}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:9px;background:linear-gradient(90deg,var(--purple) var(--p),rgba(255,255,255,.12) var(--p))}
+input[type=range]::-moz-range-track{height:4px;border-radius:9px;background:rgba(255,255,255,.12)}
+input[type=range]::-moz-range-progress{height:4px;border-radius:9px;background:var(--purple)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;margin-top:-5px;box-shadow:0 0 10px rgba(168,85,247,.7)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radius:50%;background:#fff}
+.btns{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:6px}
+.ib{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:var(--dim);transition:color .15s,background .15s}
+.ib:hover{color:#fff;background:rgba(255,255,255,.06)}
+.ib.on{color:var(--mint)}
+.ib svg{width:20px;height:20px;fill:currentColor}
+.play{width:56px;height:56px;background:#fff;color:#000;box-shadow:0 0 30px rgba(255,255,255,.22)}
+.play:hover{background:#fff;color:#000;box-shadow:0 0 42px rgba(255,255,255,.35)}
+.play svg{width:24px;height:24px}
+.play:active{transform:scale(.96)}
+.vol{display:flex;align-items:center;gap:6px;margin-left:8px;color:var(--faint)}
+.vol svg{width:16px;height:16px;fill:currentColor}
+.vol input{width:80px;flex:none}
+
+.list{flex:1;min-height:0;display:flex;flex-direction:column}
+.list h2{flex:none;height:36px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:11px;letter-spacing:.16em;font-weight:700;color:var(--dim);border-bottom:1px solid rgba(255,255,255,.05);background:rgba(10,10,18,.8)}
+.list h2 span{font-weight:500;letter-spacing:0;color:var(--faint)}
+.scroll{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:6px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.14) transparent}
+.track{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;background:var(--card);border:1px solid var(--line);text-align:left;width:100%;transition:background .15s}
+.track:hover{background:#171722}
+.track.active{border-color:rgba(168,85,247,.45);background:#15101f;box-shadow:0 0 18px rgba(168,85,247,.14)}
+.track .n{width:22px;text-align:center;font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums}
+.track.active .n{color:var(--mint)}
+.track .t{flex:1;min-width:0;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track.err .t{color:var(--faint);text-decoration:line-through}
+.track .tag{font-size:10px;color:#f87171}
+
+.chat{display:none}
+.chat.show{display:flex;flex-direction:column;min-height:0;flex:1}
+.msg{padding:9px 12px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:13px;line-height:1.35}
+.msg b{font-size:12px;margin-right:6px}.msg small{color:var(--faint);font-size:10px}
+.msg p{margin-top:2px;color:rgba(255,255,255,.85);overflow-wrap:anywhere}
+.msg.dj{border-color:rgba(168,85,247,.4);background:#15101f}
+
+#gate{position:fixed;inset:0;z-index:50;background:rgba(8,8,12,.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+#gate.hide{display:none}
+#openingSponsorImage{width:min(65vw,260px);max-height:36dvh;object-fit:contain;margin-bottom:12px}
+#openingSponsorImage[hidden]{display:none}
+#gate.sponsor-opening .vinyl{display:none}
+#gate .vinyl{margin-bottom:24px;box-shadow:0 0 50px rgba(168,85,247,.25)}
+#gate h2{font-size:22px;letter-spacing:.06em;margin-bottom:8px}
+#gate p{font-size:13px;color:var(--dim);max-width:290px;line-height:1.55;margin-bottom:24px}
+#start{padding:14px 32px;border-radius:99px;background:#fff;color:#000;font-weight:700;letter-spacing:.14em;font-size:13px;display:flex;align-items:center;gap:10px;box-shadow:0 0 30px rgba(255,255,255,.25);transition:transform .1s}
+#start:active{transform:scale(.97)}
+#start i{border-left:8px solid #000;border-top:5px solid transparent;border-bottom:5px solid transparent}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{50%{opacity:.55;transform:scale(.9)}}
+@media (min-width:768px){
+  .player,.controls{padding-left:24px;padding-right:24px}
+  header{padding:0 24px}.scroll{padding:12px 24px}.list h2{padding:0 24px}
+  #title{font-size:24px}.banner{font-size:11px}
+}
+@media (max-width:380px){.vol{display:none}.vinyl{width:92px;height:92px}.vinyl::after{inset:20px}}
+@media (prefers-reduced-motion:reduce){.vinyl.spin,.live i{animation:none}}
+
+#seek:disabled{pointer-events:none;cursor:default}
+#seek::-webkit-slider-thumb{opacity:0}
+#seek::-moz-range-thumb{opacity:0}
+.msg.me{border-color:rgba(46,229,166,.35)}
+.msg.me b{color:var(--mint)}
+#cf{flex:none;display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line);background:var(--panel)}
+#ci{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:99px;padding:10px 14px;font:inherit;font-size:16px;outline:none}
+#cf button{background:var(--purple);color:#fff;font-weight:700;border-radius:99px;padding:0 18px;font-size:14px}
+.gdot{width:8px;height:8px;border-radius:50%;background:#2ee56a;box-shadow:0 0 8px #2ee56a;display:inline-block;animation:gp 1.8s ease-in-out infinite}@keyframes gp{50%{opacity:.35}}
+.soc{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;min-width:0}
+.sc{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:0;text-transform:none;text-decoration:none;color:#fff;white-space:nowrap}
+.sc svg{width:13px;height:13px;fill:currentColor;flex:none}
+.sc:active{transform:scale(.96)}
+.sc.wa{background:#25d366;color:#07210f}
+.sc.ig{background:linear-gradient(45deg,#f9a03c,#e1306c 55%,#8a3ab9)}
+.list h2 .sc span{color:inherit;font-weight:700}
+@media(max-width:360px){.sc span{display:none}.sc{padding:0 8px}}
+.pin{flex:none;max-height:40%;overflow-y:auto;padding:8px 12px;display:flex;flex-direction:column;gap:6px;background:rgba(168,85,247,.08);border-bottom:1px solid rgba(168,85,247,.35)}
+.pin[hidden]{display:none}
+.pin .msg small.pn{display:block;color:#c9a2ff;font-size:10px;letter-spacing:.06em;margin-bottom:2px}
+.pin .wait{font-size:11px;color:var(--faint);padding:0 4px}
+.msg.special{background:linear-gradient(135deg,rgba(168,85,247,.32),rgba(46,229,166,.16));border:1px solid rgba(168,85,247,.85);box-shadow:0 0 18px rgba(168,85,247,.28);padding:11px 14px}
+.msg.special b{color:#e6d0ff}.msg.special p{color:#fff;font-weight:600;font-size:13.5px}
+.ib.on span{filter:none!important;opacity:1!important}
+.ib.on{background:rgba(46,229,166,.16);color:var(--mint)}
+#ezanBar{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:8px;max-width:calc(100% - 20px);background:#0f1f1a;border:1px solid rgba(46,229,166,.6);border-radius:14px;padding:10px 12px;box-shadow:0 8px 30px rgba(0,0,0,.5);color:#fff;font-size:13px;font-weight:600}
+#ezanBar[hidden]{display:none}
+#ezanBar button{background:rgba(255,255,255,.1);color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;white-space:nowrap}
+#ezanTxt{flex:1}
+#giftModal{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.65);display:grid;place-items:center;padding:16px}
+#giftModal[hidden]{display:none}
+.gbox{position:relative;width:100%;max-width:380px;background:#12121a;border:1px solid rgba(168,85,247,.5);border-radius:18px;padding:18px 16px;display:flex;flex-direction:column;gap:10px;max-height:92vh;overflow-y:auto}
+.gbox h3{font-size:14px;letter-spacing:.14em;padding-right:28px}
+.gbox .gh{font-size:12px;color:var(--faint);line-height:1.4}
+.gbox label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--dim)}
+.gbox input{background:#0b0b11;border:1px solid var(--line);border-radius:10px;color:#fff;padding:10px 12px;font-size:16px;width:100%}
+#giftX{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.08)}
+.gmain{background:var(--purple);color:#fff;border-radius:12px;padding:12px;font-weight:700}
+.grow{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.grow a,.grow button{flex:1;text-align:center;background:#25d366;color:#07210f;border-radius:10px;padding:10px;font-size:13px;font-weight:700;text-decoration:none;min-width:90px}
+.grow button{background:rgba(255,255,255,.1);color:#fff}
+#giftLine{margin-top:4px;font-size:12px;line-height:1.35;color:#e6c8ff;font-weight:600;overflow-wrap:anywhere}
+#giftLine[hidden]{display:none}
+.seek[hidden]{display:none}
+.giftwide{width:100%;height:40px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;font-size:13px;font-weight:700;letter-spacing:.02em;color:#fff;background:linear-gradient(90deg,rgba(168,85,247,.38),rgba(168,85,247,.16));border:1px solid rgba(168,85,247,.55)}
+.giftwide span{font-size:17px}
+.giftwide:active{transform:scale(.98)}
+.grow button.ig{background:linear-gradient(45deg,#f9a03c,#e1306c 55%,#8a3ab9);color:#fff}
+.grow button.tt{background:#000;color:#fff;border:1px solid #25f4ee;box-shadow:inset 0 0 0 1px #fe2c55}
+
+
+/* ===== Yayın görünümü (?yayin): sosyal medya canlı yayını için temiz ekran ===== */
+#yayinInfo{display:none}
+body.yayin #n,body.yayin .controls,body.yayin #listWrap,body.yayin .sponsor-davet{display:none!important}
+body.yayin .player{flex:1;flex-direction:column;justify-content:center;text-align:center;gap:22px;padding:24px 20px}
+body.yayin .player .vinyl{width:min(56vw,240px);height:min(56vw,240px);box-shadow:0 10px 50px rgba(168,85,247,.35)}
+body.yayin .player .vinyl::before{inset:14px}body.yayin .player .vinyl::after{inset:34%}
+body.yayin .player .vinyl .label{width:30%;height:30%;font-size:26px}
+body.yayin .player .badge{font-size:11px;padding:3px 10px;bottom:-10px}
+body.yayin .player .info{flex:none;width:100%}
+body.yayin .player .kicker{font-size:12px;margin-bottom:8px}
+body.yayin .player #title{font-size:30px;-webkit-line-clamp:3}
+body.yayin .player #sub{font-size:14px;margin-top:6px}
+body.yayin .player .bars{height:34px;justify-content:center;margin-top:16px}
+body.yayin .player .bars span{max-height:34px;width:6px}
+body.yayin #yayinInfo{display:block;flex:none;text-align:center;padding:14px 16px 18px;background:var(--panel)}
+#yayinInfo .u{font-size:26px;font-weight:800;letter-spacing:.04em;background:linear-gradient(90deg,var(--purple),var(--mint));-webkit-background-clip:text;background-clip:text;color:transparent}
+#yayinInfo .t{font-size:13px;color:var(--dim);margin-top:4px;letter-spacing:.06em}
+/* ===== Kompakt player (sohbete yer açmak için) ===== */
+.player{padding:10px 16px;gap:12px}
+.player .vinyl{width:64px;height:64px;box-shadow:0 4px 16px rgba(0,0,0,.6)}
+.player .vinyl::before{inset:6px}.player .vinyl::after{inset:16px}
+.player .vinyl .label{width:24px;height:24px;font-size:11px}
+.player .badge{top:auto;right:auto;bottom:-6px;left:50%;transform:translateX(-50%);font-size:8px;padding:1px 6px}
+.player .kicker{margin-bottom:2px}
+.player #title{font-size:18px;-webkit-line-clamp:2}
+.player #sub{margin-top:2px}
+.player .bars{height:14px;margin-top:5px}
+.player .bars span{max-height:14px}
+/* ===== Sponsor banner (Seda Baharat) ===== */
+.sponsorbox{flex:none;background:var(--panel);padding:14px 16px 10px;border-bottom:1px solid var(--line)}
+.sponsor{position:relative;max-width:560px;margin:0 auto}
+.sponsor-cerceve{position:relative;padding:3px;border-radius:16px;background:linear-gradient(120deg,#c8102e,#e8781a,#f2b705,#8a9a2b,#c8102e);background-size:300% 300%;animation:sponsorRenk 9s ease-in-out infinite;box-shadow:0 4px 14px rgba(0,0,0,.45)}
+@keyframes sponsorRenk{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.sponsor-kart{position:relative;overflow:hidden;border-radius:13px;padding:8px 10px;background:radial-gradient(circle at 92% 18%,rgba(242,183,5,.18) 0 22px,transparent 23px),radial-gradient(circle at 78% 88%,rgba(232,120,26,.14) 0 16px,transparent 17px),radial-gradient(rgba(200,16,46,.07) 1.2px,transparent 1.5px) 0 0/12px 12px,linear-gradient(180deg,#fffaf2,#fff3e2)}
+.sponsor-kart::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.75),transparent);transform:skewX(-20deg);animation:sponsorIsik 6s ease-in-out infinite;pointer-events:none}
+@keyframes sponsorIsik{0%,70%{left:-60%}100%{left:130%}}
+.sponsor-rozet{position:absolute;top:-9px;left:14px;z-index:2;font-size:9px;font-weight:700;letter-spacing:.14em;color:#fff;background:#c8102e;padding:3px 9px;border-radius:999px;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.sponsor-ust{display:flex;align-items:center;gap:10px}
+.sponsor-logo{flex:0 0 auto;background:#fff;border-radius:10px;padding:3px 5px;box-shadow:0 1px 5px rgba(122,20,20,.18)}
+.sponsor-logo img{height:48px;width:auto;display:block}
+.sponsor-yazi{flex:1;min-width:0;color:#7a1414}
+.sponsor-slogan{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:700;font-size:14px;line-height:1.2;margin:0 0 6px}
+.sponsor-slogan span{color:#c8102e}
+.sponsor-butonlar{display:flex;gap:6px;flex-wrap:wrap}
+.sponsor-butonlar a{font-size:12px;font-weight:700;text-decoration:none;padding:5px 10px;border-radius:999px;background:linear-gradient(180deg,#e0263f,#b00d26);color:#fff;white-space:nowrap;box-shadow:0 2px 5px rgba(176,13,38,.35)}
+.sponsor-butonlar a.ikincil{background:#fff;color:#c8102e;border:1px solid #c8102e;box-shadow:none}
+.sponsor-davet{position:absolute;top:-9px;right:14px;z-index:2;font-size:9.5px;font-weight:700;color:#7a1414;background:#fff3e2;border:1px solid #e8781a;padding:2px 8px;border-radius:999px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.sponsor.parla .sponsor-cerceve{animation:sponsorRenk 2s linear infinite,sponsorNabiz 1.2s ease-in-out infinite}
+@keyframes sponsorNabiz{0%,100%{box-shadow:0 0 0 0 rgba(242,140,5,.6)}50%{box-shadow:0 0 22px 6px rgba(242,140,5,.6)}}
+@media (max-width:380px){.sponsor-logo img{height:40px}.sponsor-slogan{font-size:13px}}
+@media (prefers-reduced-motion:reduce){.sponsor-cerceve,.sponsor-kart::after{animation:none}}
+
+#masalOverlay{position:fixed;top:0;right:0;bottom:0;left:0;inset:0;z-index:65;display:flex;align-items:center;justify-content:center;display:grid;place-items:center;pointer-events:none;overflow:hidden}
+#masalOverlay[hidden]{display:none}
+#masalOverlay img{width:96vw;max-width:560px;height:auto;max-height:86vh;width:min(96vw,560px);max-height:86dvh;object-fit:contain;filter:drop-shadow(0 0 22px #f5aa3060);animation:masalEnter .7s cubic-bezier(.16,1,.3,1) both,masalFloat 3s .7s ease-in-out infinite}
+#masalOverlay.leaving img{animation:masalExit .55s ease-in both}
+#masalClose{position:absolute;right:16px;top:16px;pointer-events:auto;background:#341513;color:white;border:1px solid #efc367;border-radius:50%;width:40px;height:40px;font-size:24px}
+@keyframes masalEnter{from{opacity:0;transform:translateY(120px) scale(.35)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes masalFloat{50%{transform:translateY(-8px)}}
+@keyframes masalExit{to{opacity:0;transform:translateY(60px) scale(.65)}}
+@media(prefers-reduced-motion:reduce){#masalOverlay img,#masalOverlay.leaving img{animation:none}}
+
+#sedaOverlay{position:fixed;top:0;right:0;bottom:0;left:0;inset:0;z-index:65;display:flex;align-items:center;justify-content:center;display:grid;place-items:center;pointer-events:none;overflow:hidden}
+#sedaOverlay[hidden]{display:none}
+.sedaGift{position:relative;width:88vw;max-width:430px;width:min(88vw,430px);text-align:center;animation:masalEnter .7s cubic-bezier(.16,1,.3,1) both,masalFloat 3s .7s ease-in-out infinite;filter:drop-shadow(0 0 24px #ffbf5470)}
+.sedaMedal{position:relative;height:350px;height:min(88vw,430px);aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border:7px solid #f5c35a;border-radius:50%;background:radial-gradient(circle at 35% 28%,#fff2b0,#d99a30 60%,#995114);box-shadow:inset 0 0 30px #fff6b9,0 0 36px #efa62d80;color:#8b1121}
+.sedaMedal::before{content:'';position:absolute;inset:-18px;border:2px solid #ffde86;border-radius:50%;box-shadow:0 0 15px #ffcd67;animation:sedaGlow 2s ease-in-out infinite}
+.sedaBrand{width:62%;max-height:70px;object-fit:contain;mix-blend-mode:multiply;margin:0 0 12px}
+.sedaMedal strong{font-family:Georgia,serif;font-size:40px;font-size:clamp(30px,9vw,50px);line-height:1.05;text-shadow:0 1px #fff0b3}
+.sedaSpices{position:absolute;right:-12px;bottom:10%;font-size:60px;font-size:clamp(40px,14vw,72px);transform:rotate(-15deg);filter:drop-shadow(0 3px 4px #69200c80)}
+.sedaRibbon{position:relative;margin:-18px -5px 0;padding:14px 12px;border:2px solid #f7d773;border-radius:12px;background:linear-gradient(#ad2630,#6c1020);color:#fff0b3;font:italic bold 22px Georgia,serif;font:italic bold clamp(17px,5vw,25px) Georgia,serif;box-shadow:0 4px 15px #0008}
+#sedaClose{position:absolute;right:16px;top:16px;pointer-events:auto;background:#341513;color:#fff;border:1px solid #efc367;border-radius:50%;width:40px;height:40px;font-size:24px}
+@keyframes sedaGlow{50%{transform:scale(1.03);opacity:.5}}
+@media(prefers-reduced-motion:reduce){.sedaGift,.sedaMedal::before{animation:none}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="brand"><div class="logo display">R</div><b class="display">RADYOAI</b></div>
+    <div class="live"><i id="dot" class="off"></i><span id="liveTxt">HAZIR</span><em id="n"></em></div>
+  </header>
+  <div id="akis" class="banner" role="status" hidden></div>
+  
+
+  <section class="player" id="player">
+    <div class="wrap-vinyl"><div class="vinyl" id="vinyl"><div class="label display">R</div></div><div class="badge">ÇALIYOR</div></div>
+    <div class="info">
+      <div class="kicker">ŞİMDİ ÇALIYOR<span id="count" hidden>1 / 1</span></div>
+      <h1 id="title" class="display">—</h1>
+      <p id="sub">RadyoAI</p>
+      <p id="giftLine" hidden></p>
+      <div class="bars" id="bars"></div>
+    </div>
+  </section>
+
+  <section class="controls">
+    <button type="button" class="giftwide" id="giftBtn" aria-label="Bu Şarkıyı Birine Yollamaya Ne Dersin" title="Bu Şarkıyı Birine Yollamaya Ne Dersin"><span>🎁</span> Bu Şarkıyı Birine Yollamaya Ne Dersin</button>
+    <div class="seek" hidden><time id="cur">0:00</time><input id="seek" type="range" disabled min="0" max="1000" value="0" aria-label="Şarkıda ilerle"><time id="dur">0:00</time></div>
+    <div class="btns">
+      <button class="ib play" id="toggle" aria-label="Çal / Duraklat"><svg id="ico" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+      <div class="vol"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4z"/></svg><input id="vol" type="range" min="0" max="100" value="100" aria-label="Ses"></div>
+      <button class="ib" id="ezan" aria-label="Ezan vakti uyarısı" title="Ezan vakti uyarısı"><span style="font-size:19px;filter:grayscale(1);opacity:.7">🕌</span></button>
+    </div>
+  </section>
+
+  <section class="sponsorbox">
+    <div class="sponsor" id="sponsor">
+      <span class="sponsor-rozet">SPONSOR</span>
+      <a class="sponsor-davet" href="https://wa.me/905388153632?text=Merhaba%2C%20RadyoAI%27de%20reklam%20vermek%20istiyorum." target="_blank" rel="noopener">Burada sen de yer al →</a>
+      <div class="sponsor-cerceve"><div class="sponsor-kart"><div class="sponsor-ust">
+        <div class="sponsor-logo"><img src="data:image/jpeg;base64,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" alt="Seda Baharat – Aktar Çeşitleri"></div>
+        <div class="sponsor-yazi">
+          <p class="sponsor-slogan">Sakarya'nın <span>yıllardır</span> sofralarındaki tat</p>
+          <div class="sponsor-butonlar">
+            <a href="tel:+902642787435">📞 Ara</a>
+            <a class="ikincil" href="https://www.google.com/maps/search/?api=1&query=Seda+Baharat+Katl%C4%B1+Pazar+Yeri+Adapazar%C4%B1" target="_blank" rel="noopener">📍 Yol tarifi</a>
+          </div>
+        </div>
+      </div></div></div>
+    </div>
+  </section>
+
+  <div id="yayinInfo"><div class="u">radioai.com.tr</div><div class="t">Sen de dinle · Instagram @MyByYavRu</div></div>
+
+  <section class="list" id="listWrap">
+    <h2 class="display"><span style="color:inherit;font-weight:700;letter-spacing:.16em">CANLI SOHBET</span><div class="soc"><a class="sc ig" href="https://instagram.com/MyByYavRu" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2zm0 1.8A4 4 0 0 0 3.8 7.8v8.4a4 4 0 0 0 4 4h8.4a4 4 0 0 0 4-4V7.8a4 4 0 0 0-4-4H7.8zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 1.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4zM17.3 5.6a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4z"/></svg><span>Instagram</span></a><a class="sc wa" href="https://wa.me/905388153632?text=Merhaba%20DJ%20YavRu%2C%20RadyoAI%27yi%20dinliyorum.%20Size%20bir%20mesaj%C4%B1m%20var." target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2a9.9 9.9 0 0 0-8.5 14.95L2 22l5.2-1.5A9.9 9.9 0 1 0 12.04 2zm0 1.8a8.1 8.1 0 1 1-4.3 15l-.3-.2-3 .9.9-2.9-.2-.3a8.1 8.1 0 0 1 6.9-12.5zM8.6 7.3c-.2 0-.5.1-.7.4-.3.3-1 1-1 2.4s1.1 2.8 1.2 3c.2.2 2.1 3.3 5.2 4.5 2.5 1 3.1.8 3.6.7.6-.1 1.8-.7 2-1.5.3-.7.3-1.3.2-1.5-.1-.1-.3-.2-.7-.4l-2-1c-.3-.1-.5-.1-.7.1l-.9 1.1c-.2.2-.3.2-.6.1-.9-.4-1.9-1-2.8-2.1-.3-.4-.9-1.2-1-1.5-.1-.3 0-.4.2-.6l.4-.5.3-.5c.1-.2 0-.4 0-.5l-.9-2.1c-.2-.5-.4-.4-.6-.4z"/></svg><span>WhatsApp</span></a></div><span id="active" style="display:inline-flex;align-items:center;gap:6px;letter-spacing:.04em;text-transform:none;color:#7ff0b0"><i class="gdot"></i><b id="actN">0</b> aktif</span></h2>
+    <div class="pin" id="pin" hidden></div>
+    <div class="scroll" id="chat"></div>
+    <form id="cf" autocomplete="off"><input id="ci" maxlength="200" placeholder="Mesaj yaz…" aria-label="Mesaj"><button type="submit">Gönder</button></form>
+  </section>
+</div>
+
+<div id="giftModal" hidden>
+  <div class="gbox">
+    <button type="button" id="giftX" aria-label="Kapat">✕</button>
+    <h3 class="display">BU ŞARKIYI BİRİNE YOLLAMAYA NE DERSİN</h3>
+    <p class="gh">Şu an çalan şarkı, açanın ekranında baştan başlar ve adıyla birlikte görünür.</p>
+    <label>Kime? <input id="gTo" maxlength="30" placeholder="İsim" autocomplete="off"></label>
+    <label>Notun (isteğe bağlı) <input id="gNote" maxlength="140" placeholder="Seni seviyorum…" autocomplete="off"></label>
+    <label>Senin adın (isteğe bağlı) <input id="gFrom" maxlength="30" placeholder="Adın" autocomplete="off"></label>
+    <button type="button" id="gMake" class="gmain">Linki oluştur</button>
+    <div id="gOut" hidden>
+      <input id="gLink" readonly aria-label="Armağan linki">
+      <div class="grow">
+        <a id="gWa" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+        <button type="button" id="gIg" class="ig">Instagram Hikâye</button>
+        <button type="button" id="gTt" class="tt">TikTok</button>
+      </div>
+      <div class="grow">
+        <button type="button" id="gCopy">Kopyala</button>
+        <button type="button" id="gShare" hidden>Diğer…</button>
+      </div>
+      <p id="gHint" class="gh" hidden></p>
+    </div>
+  </div>
+</div>
+<div id="ezanBar" hidden><span id="ezanTxt"></span><button id="ezanPause" type="button">Müziği duraklat</button><button id="ezanClose" type="button" aria-label="Kapat">✕</button></div>
+<div id="gate">
+
+  <div class="vinyl spin"><div class="label display">R</div></div>
+  <h2 class="display">RADYOAI HAZIR</h2>
+  <p id="gateTxt">Şarkılar kesintisiz çalacak. Başlamak için dokun.</p>
+  <button id="start" class="display"><i></i>DOKUN VE DİNLE</button>
+</div>
+
+<audio id="audio" preload="metadata" playsinline></audio>
+
+<div id="sedaOverlay" hidden aria-label="Seda Baharat sponsor reklamı"><div class="sedaGift"><div class="sedaMedal"><img class="sedaBrand" alt="Seda Baharat"><strong>SEDA<br>BAHARAT</strong><span class="sedaSpices" aria-hidden="true">🌶️ 🌿</span></div><p class="sedaRibbon">Lezzetinize renk katın</p></div><button id="sedaClose" type="button" aria-label="Görseli kapat">×</button></div>
+<div id="masalOverlay" hidden aria-label="Masal Çay Evi sponsor reklamı"><img src="masal-sponsor.png" alt="Masal Çay Evi — Her sohbette bir masal"><button id="masalClose" type="button" aria-label="Görseli kapat">×</button></div>
+<script>
+/* ============ AYARLAR — burayı düzenle ============ */
+const CONFIG = {
+  // Gerçek mesajlaşma sunucusu (Cloudflare Worker adresi). Boşsa mesaj sadece yazanın ekranında sabitlenir ve otomatik cevap gelir.
+  API: "",
+  // Armağan linklerinin başında kullanılacak site adresi.
+  SITE_URL: "https://radioai.com.tr/",
+  // Şarkıları iki şekilde ekleyebilirsin:
+  //  1) drive: "Google Drive dosya kimliği"  (dosya "Bağlantıya sahip herkes" olarak paylaşılmış olmalı)
+  //  2) file : "dosya-adi.mp3"             (şarkıyı index.html ile AYNI klasöre koyarsan önce o çalar, olmazsa Drive denenir)
+  TRACKS: [
+    { title: "ÇuvaldıZ", file: "cuvaldiz.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "YEDİ 77", file: "yedi-77.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "BarBar", file: "bar-bar.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "Azıcık UcundaN", file: "azicikucundan.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "Ne Beddua Ne Helallik", file: "bedduahelallik.mp3", credit: "Söz: Gökçem Bengi Şakar · Müzik: Engin YAVRU" },
+    { title: "BestiE", file: "bestie.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "BestiEDeep", file: "bestiedeep.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "BilseN", file: "bilsen.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "Dün Gitti", file: "dungitti.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "elif", file: "elif.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "Fısıltı", file: "fisilti.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "İkimizE", file: "ikimize.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "İki Sorunlu", file: "ikisorunlu.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "Henüz Erken", file: "isteboyle.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "İstirahaT", file: "istirahat.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "İstirahaT Remix", file: "istirahatextended.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "KazuleT", file: "kazulet.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "Krallar Lobisi Remix", file: "krl.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "LOBO", file: "lobo.mp3", credit: "Dj Yavru" },
+    { title: "MenşeiN", file: "mesein.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "METUŞ", file: "metus.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "MIŞIL MIŞIL", file: "misilmisil.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "MIŞIL MIŞIL", file: "misil.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "PINARR", file: "naar.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "NE ANLADIN", file: "neanladın.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "NEFES NEFES", file: "nefesnefes.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "NEFSİM DOYUMSUZ", file: "nefsim-doyumsuz.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "HUY remix", file: "paravepul.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "RABBİ YESİR", file: "RabbiYesir.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "OLAMAZLARMIŞ SEN GİBİ", file: "sengibi.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "SEVGİLİ", file: "sevgili.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "TALANN", file: "talann.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "TOKSİK ÇÖPLÜK", file: "toksiktoksik.mp3", credit: "Söz & Müzik: Engin YAVRU" },
+    { title: "HİLELİ-WHAT İS REAL", file: "whatisreal.wav", credit: "Dj YAVRU MİX" },
+    { title: "YAZ GELDİ", file: "yazgeldi.mp3", credit: "Söz & Müzik: Engin YAVRU" }
+  ],
+  ARTIST: "MyByYavRu"
+};
+/* ================================================== */
+
+const $ = id => document.getElementById(id);
+try { if (new URLSearchParams(location.search).has('yayin')) document.body.classList.add('yayin'); } catch(e){}   // ?yayin: sosyal medya yayını için temiz görünüm
+const A = $('audio'), B = new Audio();
+B.preload = 'auto'; B.setAttribute('playsinline','');
+B.id = 'audio-buffer'; B.hidden = true; document.body.appendChild(B);
+let audio = A;                                   // şu an çalan eleman (geçiş sırasında A <-> B değişir)
+const bind = (ev, fn) => [A,B].forEach(el => el.addEventListener(ev, e => { if (el === audio) fn(e); }));
+const tracks = CONFIG.TRACKS;
+/* ---- Armağan linki: ?s=sarki&to=isim&f=gonderen&n=not  ---- */
+const baseOf = t => String(t.file||'').replace(/\.[^.]+$/,'').toLowerCase();
+let GIFT = null;
+(function(){
+  try{
+    const q = new URLSearchParams(location.search);
+    const clean = (v,m) => String(v||'').replace(/[\u0000-\u001f<>]/g,' ').replace(/\s+/g,' ').trim().slice(0,m);
+    const sid = (q.get('s')||'').toLowerCase(), to = clean(q.get('to'),30);
+    const gi = tracks.findIndex(t => baseOf(t) === sid);
+    if (gi >= 0 && to) GIFT = { idx: gi, to, from: clean(q.get('f'),30), note: clean(q.get('n'),140), active: true };
+  }catch(e){}
+})();
+let idx = 0, shuffle = false, wantPlay = false, srcTry = 0, failStreak = 0;
+const failed = new Set();
+
+function sources(t){
+  const l = [];
+  if (t.file){                                         // önce sitedeki dosya (boşluk / Türkçe karakter varyantlarıyla)
+    const v = new Set();
+    const names = [t.file, t.file.replace(/\s+(\.[a-z0-9]+)$/i,'$1')];
+    const mp3s = names.filter(n=>/\.wav$/i.test(n)).map(n=>n.replace(/\.wav$/i,'.mp3'));   // wav için önce aynı adlı mp3'ü dene
+    const base = [...mp3s, ...names];
+    const fold = x => x.replace(/ı/g,'i').replace(/İ/g,'I').replace(/ş/g,'s').replace(/Ş/g,'S').replace(/ğ/g,'g').replace(/Ğ/g,'G').replace(/ü/g,'u').replace(/Ü/g,'U').replace(/ö/g,'o').replace(/Ö/g,'O').replace(/ç/g,'c').replace(/Ç/g,'C');
+    [...base, ...base.map(x=>x.toLowerCase()), ...base.map(fold), ...base.map(x=>fold(x).toLowerCase())].forEach(f=>{ v.add(f.normalize('NFC')); v.add(f.normalize('NFD')); });
+    v.forEach(f=>l.push(encodeURI(f)));
+  }
+  if (t.drive){                                        // bulunamazsa Drive yedeği
+    l.push(`https://drive.usercontent.google.com/download?id=${t.drive}&export=download`);
+    l.push(`https://drive.google.com/uc?export=download&id=${t.drive}`);
+  }
+  return l;
+}
+const fmt = s => (!isFinite(s)||s<0) ? '0:00' : Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
+const setFill = el => el.style.setProperty('--p', (el.value/el.max*100)+'%');
+
+
+/* ---- Bars ---- */
+const barsEl = $('bars');
+for (let i=0;i<20;i++) barsEl.appendChild(document.createElement('span'));
+setInterval(()=>{
+  const playing = !audio.paused;
+  barsEl.childNodes.forEach(b => b.style.height = (playing ? 4+Math.random()*22 : 4) + 'px');
+}, 110);
+
+/* ---- Yükle / Çal ---- */
+function load(i){
+  idx = (i + tracks.length) % tracks.length;
+  srcTry = 0;
+  useSource(sources(tracks[idx])[0]);
+  showMeta();
+  saveLive();
+}
+function play(){
+  // Reklam/jingle sırasında arka müzik deck'i kesinlikle oynatılmaz.
+  if (inAd){ cancelFade(); otherDeck().pause(); }
+  wantPlay = true;
+  const p = audio.play();
+  if (p && p.catch) p.catch(()=>{});
+}
+function pause(){ wantPlay = false; cancelFade(); A.pause(); B.pause(); }
+function skip(dir){ load(nextIndex(dir)); if (wantPlay) play(); }
+
+/* ---- Olaylar ---- */
+bind('play', ()=>ui(true));
+bind('pause', ()=>ui(false));
+function ui(on){
+  $('player').classList.toggle('playing', on);
+  $('vinyl').classList.toggle('spin', on);
+  $('ico').innerHTML = on ? '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>' : '<path d="M8 5v14l11-7z"/>';
+  $('dot').classList.toggle('off', !on);
+  $('liveTxt').textContent = on ? 'CANLI' : 'DURAKLATILDI';
+  if ('mediaSession' in navigator) navigator.mediaSession.playbackState = on ? 'playing' : 'paused';
+}
+bind('playing', ()=>{ if(masalAd && !masalDismissed) showMasal(true); if(sedaAd && !sedaDismissed) showSeda(true); failStreak = 0; $('sub').textContent = inAd ? (isIdent ? 'RadyoAI' : 'Sponsor: ' + (masalAd ? 'Masal Çay Evi' : ADS.NAME)) : (tracks[idx].credit || CONFIG.ARTIST); });
+bind('waiting', ()=>{ $('sub').textContent = 'Yükleniyor…'; });
+bind('loadedmetadata', ()=>{ $('dur').textContent = fmt(audio.duration); });
+bind('timeupdate', ()=>{
+  if (seeking) return;
+  $('cur').textContent = fmt(audio.currentTime);
+  if (audio.duration){ $('seek').value = audio.currentTime/audio.duration*1000; setFill($('seek')); }
+});
+/* ---- Reklam arası: her ADS.EVERY şarkıda bir jingle + spot ---- */
+const ADS = { EVERY: 3, BREAK: [['masal-cay-evi.mp3'], ['Seda Baharat.mp3','spot-seda-baharat.mp3'], ['Jingle.mp3','jingle.mp3']], NAME: 'Seda Baharat' };   // her reklam için olası dosya adları
+let songsSinceAd = 0, adQ = [], inAd = false, adAlt = [], isIdent = false, totalSongs = 0;
+const IDENT = { EVERY: 0, FILE: 'kisa-jingle.mp3' };   // reklamsız aralarda her 2 şarkıda bir kısa jingle
+// Reklam aralığı her adreste üç şarkıdır; URL parametresiyle değiştirilmez.
+const adDue = () => ADS.BREAK.length > 0 && songsSinceAd + 1 >= ADS.EVERY;
+const identDue = () => totalSongs + 1 > 2 && !adDue() && IDENT.EVERY > 0 && (totalSongs + 1) % IDENT.EVERY === 0;
+function startIdent(){
+  inAd = true; isIdent = true; adQ = [[IDENT.FILE]];
+  $('title').textContent = '📻 Radyo AI'; $('title').style.fontSize = '';
+  $('giftLine').hidden = true;
+  nextAd();
+}
+function sponsorParla(on){ const s = $('sponsor'); if (s) s.classList.toggle('parla', !!on); }
+function startAdBreak(){
+  inAd = true; isIdent = false; adQ = ADS.BREAK.slice(); sponsorParla(true);
+  $('title').textContent = '📢 Reklam Arası'; $('title').style.fontSize = '';
+  $('sub').textContent = 'Sponsor: ' + ADS.NAME;
+  $('giftLine').hidden = true;
+  document.title = 'Reklam Arası · RadyoAI';
+  if ('mediaSession' in navigator){ try { navigator.mediaSession.metadata = new MediaMetadata({ title: 'Reklam Arası', artist: ADS.NAME, album: 'RadyoAI' }); } catch(e){} }
+  nextAd(); saveLive();
+}
+
+let masalAd=false, sedaAd=false, masalDismissed=false, sedaDismissed=false, masalHideTimer;
+function showMasal(on){
+ const el=$('masalOverlay');clearTimeout(masalHideTimer);
+ if(on){
+  const img=el.querySelector('img');
+  img.src='masal-sponsor.png';
+  img.alt='Masal Çay Evi — Her sohbette bir masal';
+  el.setAttribute('aria-label','Masal Çay Evi sponsor reklamı');
+  el.classList.remove('leaving');el.hidden=false;
+ }
+ else {el.hidden=true;el.classList.remove('leaving');}
+}
+$('masalClose').onclick=()=>{masalDismissed=true;showMasal(false);};
+function showSeda(on){
+ const el=$('sedaOverlay');
+ if(on){
+  const img=el.querySelector('.sedaBrand');
+  if(!img.getAttribute('src')) img.src=document.querySelector('.sponsor-logo img').src;
+  el.hidden=false;
+ }else el.hidden=true;
+}
+$('sedaClose').onclick=()=>{sedaDismissed=true;showSeda(false);};
+let openingJingle = false;
+function nextAd(){
+  showMasal(false);showSeda(false);masalAd=false;sedaAd=false;masalDismissed=false;sedaDismissed=false;
+  if (!adQ.length){ inAd = false; isIdent = false; sponsorParla(false); const next = openingJingle ? idx : nextIndex(1); openingJingle = false; load(next); if (wantPlay) play(); return; }
+  adAlt = [].concat(adQ.shift()); srcTry = 0;
+  masalAd=adAlt[0]==='masal-cay-evi.mp3';
+  sedaAd=adAlt[0]==='Seda Baharat.mp3';
+  sponsorParla(sedaAd);
+  if(sedaAd){$('title').textContent='Seda Baharat';$('sub').textContent='Sponsor: Seda Baharat';document.title='Seda Baharat · RadyoAI';}
+  isIdent=/jingle/i.test(adAlt[0]);
+  if(isIdent){sponsorParla(false);$('title').textContent='DJ YavRu';$('sub').textContent='RadyoAI';document.title='DJ YavRu · RadyoAI';}
+  if(masalAd){sponsorParla(false);$('title').textContent='Masal Çay Evi';$('sub').textContent='Sponsor: Masal Çay Evi';document.title='Masal Çay Evi · RadyoAI';}
+  if ('mediaSession' in navigator){ try { navigator.mediaSession.metadata = new MediaMetadata({ title: masalAd ? 'Masal Çay Evi' : isIdent ? 'DJ YavRu' : 'Reklam Arası', artist: masalAd ? 'Masal Çay Evi' : isIdent ? 'RadyoAI' : ADS.NAME, album: 'RadyoAI' }); } catch(e){} }
+  useSource(encodeURI(adAlt.shift()));
+  if (masalAd) showMasal(true);
+  if (sedaAd) showSeda(true);
+  if (wantPlay) play();
+}
+function adError(){ if (adAlt.length){ audio.src = encodeURI(adAlt.shift()); if (wantPlay) play(); } else nextAd(); }
+bind('ended', ()=>{
+  if (inAd){ nextAd(); return; }
+  songsSinceAd++; totalSongs++;
+  if (ADS.BREAK.length && songsSinceAd >= ADS.EVERY){ songsSinceAd = 0; startAdBreak(); }
+  else if (totalSongs > 2 && IDENT.EVERY > 0 && totalSongs % IDENT.EVERY === 0) startIdent();
+  else skip(1);
+});
+bind('error', ()=>{
+  if (inAd){ adError(); return; }
+  const list = sources(tracks[idx]);
+  if (srcTry < list.length-1){            // yedek adresi dene
+    srcTry++;
+    audio.src = list[srcTry];
+    if (wantPlay) play();
+    return;
+  }
+  // iki adres de çalışmadı: işaretle, sıradakine geç
+  failed.add(idx);
+  failStreak++;
+  if (failStreak >= tracks.length){ wantPlay = false; $('sub').textContent = 'Hiçbir şarkı açılamadı. Paylaşım ayarlarını kontrol et.'; return; }
+  $('sub').textContent = 'Bu şarkı açılamadı, sıradakine geçiliyor…';
+  skip(1);
+});
+
+let seeking = false;
+const seekEl = $('seek');
+seekEl.addEventListener('input', ()=>{ cancelFade(); seeking = true; setFill(seekEl); $('cur').textContent = fmt(seekEl.value/1000*(audio.duration||0)); });
+seekEl.addEventListener('change', ()=>{ if (audio.duration) audio.currentTime = seekEl.value/1000*audio.duration; seeking = false; });
+
+$('toggle').onclick = ()=> audio.paused ? play() : pause();
+const volEl = $('vol');
+volEl.addEventListener('input', ()=>{ const v = volEl.value/100; try { if (fade) applyFade(); else if (xfading) { audio.volume = v; otherDeck().volume = 0; } else { A.volume = v; B.volume = v; } } catch(e){} setFill(volEl); });
+setFill(volEl);
+
+document.addEventListener('keydown', e=>{
+  if (e.target.tagName === 'INPUT') return;
+  if (e.code === 'Space'){ e.preventDefault(); audio.paused ? play() : pause(); }
+});
+
+if ('mediaSession' in navigator){
+  navigator.mediaSession.setActionHandler('play', play);
+  navigator.mediaSession.setActionHandler('pause', pause);
+}
+
+/* ---- Armağan: çalan şarkının adı yerine sohbetten birinin adı ---- */
+let DED = '', _users = null;
+function getUsers(){
+  if (_users) return _users;
+  const r=(a,b)=>Math.floor(Math.random()*(b-a+1))+a, pk=a=>a[r(0,a.length-1)];
+  const first=["Ahmet","Mehmet","Ayşe","Fatma","Emre","Burak","Elif","Zeynep","Can","Cem","Deniz","Ece","Eren","Gizem","Hakan","İrem","Kaan","Melis","Mert","Nazlı","Onur","Özge","Selin","Serkan","Tuğba","Uğur","Yasemin","Yusuf","Berk","Defne","Ege","Furkan","Gökhan","Hande","Kerem","Lale","Murat","Nehir","Oğuz","Pelin","Rüya","Sinan","Tolga","Utku","Volkan","Yağmur","Zafer","Barış","Ceren","Doruk"];
+  const tails=["","_","34","06","35","61","tr","_official","x","music","_dj","1907","_beat","07","99"];
+  const set=new Set();
+  while(set.size<360){
+    const base=pk(first).toLowerCase().replace(/ç/g,"c").replace(/ğ/g,"g").replace(/ı/g,"i").replace(/ö/g,"o").replace(/ş/g,"s").replace(/ü/g,"u").replace(/i̇/g,"i");
+    set.add(base+pk(tails)+(Math.random()<.4?r(1,99):""));
+  }
+  return (_users=[...set]);
+}
+function newDedic(){
+  const rc = window.RADIO_RECENT, pool = (rc && rc.length) ? rc : getUsers();
+  let n, g = 0;
+  do { n = pool[Math.floor(Math.random()*pool.length)]; g++; } while (n === DED && pool.length > 1 && g < 10);
+  DED = n;
+}
+
+/* ---- Sıralı liste: 10 dakika içinde kaldığı yer; sonra bir sonraki şarkı ---- */
+const RESUME_KEY = 'radyoai_resume_v1';
+const RESUME_WINDOW_MS = 10 * 60 * 1000;
+// Sponsor reklamları yalnızca üç şarkılık reklam kuşağında oynatılır.
+let resumeFromVisit = false;
+let pendingSeek = 0, started = false, livePos = 0, liveN = tracks.length;
+const fileOf = i => tracks[i].file || tracks[i].title;
+const listSig = () => tracks.map((_,i)=>fileOf(i)).join('|');
+function nextIndex(dir){
+  pendingSeek = 0;
+  livePos = (idx + dir + tracks.length) % tracks.length; liveN = tracks.length;
+  return livePos;
+}
+function initLive(){
+  let r = null;
+  try { r = JSON.parse(localStorage.getItem(RESUME_KEY)); } catch(e){}
+  let i = 0, t = 0;
+  // Eski (zamansız) kayıtlar ve reklam sırasında çıkış normal açılışı kullanır.
+  const age = r ? Date.now() - r.savedAt : NaN;
+  const explicitJingle = new URLSearchParams(location.search).has('jingle');
+  if (!GIFT && !explicitJingle && r && r.sig === listSig()
+      && Number.isInteger(r.i) && r.i >= 0 && r.i < tracks.length
+      && Number.isFinite(r.savedAt) && age >= 0){
+    resumeFromVisit = true;
+    i = !r.inAd && age < RESUME_WINDOW_MS ? r.i : (r.i + 1) % tracks.length;
+    t = !r.inAd && age < RESUME_WINDOW_MS && Number.isFinite(r.t) && r.t > 0 ? r.t : 0;
+    if(Number.isInteger(r.songsSinceAd) && r.songsSinceAd >= 0 && r.songsSinceAd < ADS.EVERY) songsSinceAd=r.songsSinceAd;
+  }
+  if (GIFT){ i = GIFT.idx; t = 0; }               // armağan linki: o şarkı baştan başlar
+  livePos = i; liveN = tracks.length;
+  pendingSeek = t;
+  load(i);
+}
+function saveLive(){
+  if (!started || pendingSeek > 0) return;
+  try { localStorage.setItem(RESUME_KEY, JSON.stringify({ sig: listSig(), i: idx, t: audio.currentTime || 0, savedAt: Date.now(), inAd: inAd, songsSinceAd: songsSinceAd })); } catch(e){}
+}
+bind('loadedmetadata', ()=>{
+  if (pendingSeek > 0){
+    const d = audio.duration;
+    if (isFinite(d) && d > 0){ try { audio.currentTime = Math.min(pendingSeek, Math.max(0, d - 0.05)); } catch(e){} }
+    pendingSeek = 0;
+  }
+});
+setInterval(saveLive, 2000);
+document.addEventListener('visibilitychange', ()=>{ if (document.hidden) saveLive(); });
+window.addEventListener('pagehide', saveLive);
+
+/* ---- Mix geçiş (crossfade): ses seviyesi ayarlanabilen cihazlarda çalışır; WebAudio kullanılmaz, arka plan/kilit ekranı çalması bozulmaz ---- */
+const XF = 6;                                  // geçiş süresi (sn)
+const WA = (()=>{ try { const a = new Audio(); a.volume = 0.5; return a.volume === 0.5; } catch(e){ return false; } })();   // iPhone'da false: orada ses seviyesi koddan ayarlanamaz
+let xfading = false, xfIdx = -1, fade = null, prepared = null, unlocking = false, fadeAttempt = 0;
+function otherDeck(){ return audio === A ? B : A; }
+function releaseDeck(el){ try { el.pause(); el.removeAttribute('src'); el.load(); } catch(e){} }
+function useSource(src){
+  cancelFade();
+  otherDeck().pause();
+  // Reuse the user-activated element for every hard transition. A buffered
+  // spare deck is not necessarily allowed to play on TV browsers.
+  // Only startXfade may switch decks, after its play() has succeeded.
+  prepared = null;
+  audio.src = src;
+  audio.volume = volEl.value/100;
+  $('dur').textContent = fmt(audio.duration);
+  $('cur').textContent = fmt(audio.currentTime);
+}
+function prepareNext(){
+  if (xfading || unlocking || !tracks.length) return;
+  let src;
+  if (inAd) src = adQ.length ? encodeURI(adQ[0][0]) : sources(tracks[openingJingle ? idx : (idx+1)%tracks.length])[0];
+  else if (adDue()) src = encodeURI(ADS.BREAK[0][0]);
+  else if (identDue()) src = encodeURI(IDENT.FILE);
+  else src = sources(tracks[(idx+1)%tracks.length])[0];
+  const el = otherDeck();
+  if (prepared && prepared.el === el && prepared.src === src) return;
+  el.pause(); el.preload = 'auto'; el.src = src;
+  prepared = { el, src };
+}
+// Arka deck'i gerçek bir şarkıyı oynatarak unlock etme: reklamla örtüşebilir.
+[A,B].forEach(el => el.addEventListener('play', ()=>{
+  if (inAd && el !== audio) el.pause();
+}));
+function applyFade(){
+  if (!fade) return;
+  const v = volEl.value/100, x = fade.k*Math.PI/2;
+  fade.old.volume = Math.cos(x)*v; fade.nw.volume = Math.sin(x)*v;
+}
+function cancelFade(){
+  fadeAttempt++;
+  if (xfading && !fade) otherDeck().pause();
+  if (fade){ clearInterval(fade.timer); releaseDeck(fade.old); audio.volume = volEl.value/100; }
+  fade = null; xfading = false; xfIdx = -1;
+}
+function showMeta(){
+  const T = tracks[idx];
+  if (GIFT && GIFT.active && idx !== GIFT.idx) GIFT.active = false;
+  const gift = GIFT && GIFT.active && idx === GIFT.idx;
+  const label = T.title;
+  $('title').textContent = label;
+  $('title').style.fontSize = label.length > 60 ? '15px' : label.length > 36 ? '17px' : '';
+  $('count').textContent = (livePos+1)+' / '+liveN;
+  $('sub').textContent = T.credit || CONFIG.ARTIST;
+  const gl = $('giftLine');
+  if (gift){
+    gl.textContent = '🎁 ' + GIFT.to + ' için armağan' + (GIFT.note ? ' — “' + GIFT.note + '”' : '') + (GIFT.from ? ' — ' + GIFT.from : '');
+    gl.hidden = false;
+  } else { gl.hidden = true; gl.textContent = ''; }
+  $('seek').value = 0; setFill($('seek'));
+  $('cur').textContent = fmt(audio.currentTime); $('dur').textContent = fmt(audio.duration);
+  document.title = label + ' · RadyoAI';
+  if ('mediaSession' in navigator){
+    navigator.mediaSession.metadata = new MediaMetadata({ title: label, artist: T.credit ? 'Engin YAVRU' : CONFIG.ARTIST, album: 'RadyoAI' });
+  }
+}
+function startXfade(){
+  if (!WA || xfading || unlocking || !prepared || prepared.el.readyState < 3) return;
+  const old = audio, prevIdx = idx, nw = prepared.el;
+  const next = (idx+1)%tracks.length;
+  if (prepared.src !== sources(tracks[next])[0]) return;
+  const expected = prepared, attempt = ++fadeAttempt;
+  xfading = true; nw.volume = 0;
+  const begin = ()=>{
+    if (attempt !== fadeAttempt) return;
+    if (!xfading || audio !== old || prepared !== expected || !wantPlay){ if (nw !== audio) nw.pause(); return; }
+    prepared = null;
+    songsSinceAd++; totalSongs++;
+    idx = nextIndex(1); srcTry = 0; audio = nw; xfIdx = prevIdx;
+    showMeta(); ui(true); saveLive();
+    const len = Math.max(0.05, Math.min(XF, old.duration-old.currentTime));
+    fade = { old, nw, k: 0, start: nw.currentTime, len, timer: null };
+    applyFade();
+    fade.timer = setInterval(()=>{
+      if (!fade) return;
+      // Follow actual incoming media progress, never fade a song out while its replacement is loading.
+      fade.k = Math.min(1, Math.max(0, (nw.currentTime-fade.start)/fade.len));
+      applyFade();
+      if (fade.k >= 1) cancelFade();
+    }, 50);
+  };
+  const rejected = ()=>{ if (attempt !== fadeAttempt) return; nw.pause(); nw.volume = volEl.value/100; xfading = false; };
+  try { const pr = nw.play(); if (pr && pr.then) pr.then(begin, rejected); else if (!nw.paused) begin(); else rejected(); } catch(e){ rejected(); }
+}
+setInterval(()=>{
+  prepareNext();
+  if (started && WA && !xfading && !seeking && !audio.paused && isFinite(audio.duration) && audio.duration > XF*3
+      && audio.duration - audio.currentTime <= XF + 0.2 && pendingSeek === 0 && xfIdx !== idx && !inAd && !adDue() && !identDue()) startXfade();
+}, 250);
+
+window.addEventListener('error', e=>{ if (e.message && e.message !== 'Script error.') $('sub').textContent = 'Hata: ' + e.message; });
+
+/* ---- Başlangıç kapısı (tarayıcılar otomatik çalmayı engeller) ---- */
+if (GIFT){
+  $('gate').querySelector('h2').textContent = 'SANA BİR ARMAĞAN VAR';
+  $('gateTxt').textContent = '🎁 ' + GIFT.to + ', sana bir şarkı armağan edildi' + (GIFT.from ? ' (' + GIFT.from + ')' : '') + '. Dinlemek için dokun.';
+}
+$('start').onclick = ()=>{ $('gate').classList.add('hide'); started = true; play(); };
+if (!tracks.length){ $('gateTxt').textContent = 'Listede şarkı yok.'; $('start').style.display = 'none'; }
+else initLive();
+
+/* Açılış: Masal → Seda → YavRu → müzik. Sonra her üç şarkıda aynı kuşak. */
+if (!GIFT && tracks.length){
+  pendingSeek = 0;
+  openingJingle = true;
+  songsSinceAd = 0;
+  startAdBreak();
+  $('gate').querySelector('h2').textContent = 'RADYO AI';
+  $('gateTxt').textContent = 'Masal Çay Evi ve Seda Baharat reklamlarının ardından YavRu jingle ve müzik. Dinlemek için dokun.';
+  $('start').innerHTML = '<i></i>YAYINI DİNLE';
+  bind('playing', ()=>{ $('gate').classList.add('hide'); started = true; });
+}
+
+/* ---- Radyo sohbeti: dinleyici şarkı seçemez, DJ çalanı duyurur ---- */
+(function(){
+  const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+  const pick=a=>a[rnd(0,a.length-1)];
+  const fill=(t,m)=>t.replace(/\{(\w+)\}/g,(_,k)=>m[k]);
+  const rec={};
+  function nr(pool,key,keep){                       // son kullanılanları tekrar etme
+    const r=rec[key]||(rec[key]=[]); let c,g=0;
+    do{ c=pick(pool); g++; }while(r.includes(c)&&g<30);
+    r.push(c); if(r.length>(keep||8)) r.shift(); return c;
+  }
+  const users=getUsers();
+  const colors=["#ff8a65","#ffd54f","#aed581","#4dd0e1","#9fa8da","#ce93d8","#f48fb1","#80cbc4","#ffb74d"];
+  const title=()=>tracks[idx].title;
+
+  /* ---- yerler: 81 il + ilçeler + yurt dışı şehirler + ülkeler ---- */
+  const trCities=["Adana","Adıyaman","Afyon","Ağrı","Amasya","Ankara","Antalya","Artvin","Aydın","Balıkesir","Bilecik","Bingöl","Bitlis","Bolu","Burdur","Bursa","Çanakkale","Çankırı","Çorum","Denizli","Diyarbakır","Edirne","Elazığ","Erzincan","Erzurum","Eskişehir","Gaziantep","Giresun","Gümüşhane","Hakkari","Hatay","Isparta","Mersin","İstanbul","İzmir","Kars","Kastamonu","Kayseri","Kırklareli","Kırşehir","Kocaeli","Konya","Kütahya","Malatya","Manisa","Kahramanmaraş","Mardin","Muğla","Muş","Nevşehir","Niğde","Ordu","Rize","Sakarya","Samsun","Siirt","Sinop","Sivas","Tekirdağ","Tokat","Trabzon","Tunceli","Şanlıurfa","Uşak","Van","Yozgat","Zonguldak","Aksaray","Bayburt","Karaman","Kırıkkale","Batman","Şırnak","Bartın","Ardahan","Iğdır","Yalova","Karabük","Kilis","Osmaniye","Düzce","Adapazarı","Bodrum","Alanya","Kadıköy","Beşiktaş","Çankaya","Karşıyaka","Nilüfer","Marmaris","Fethiye","Maltepe","Üsküdar"];
+  const abroadPairs=[["Berlin","Almanya"],["Köln","Almanya"],["Hamburg","Almanya"],["Münih","Almanya"],["Stuttgart","Almanya"],["Frankfurt","Almanya"],["Düsseldorf","Almanya"],["Amsterdam","Hollanda"],["Rotterdam","Hollanda"],["Paris","Fransa"],["Strazburg","Fransa"],["Londra","İngiltere"],["Viyana","Avusturya"],["Zürih","İsviçre"],["Brüksel","Belçika"],["Stockholm","İsveç"],["Kopenhag","Danimarka"],["Bakü","Azerbaycan"],["Lefkoşa","KKTC"],["Gazimağusa","KKTC"],["Almatı","Kazakistan"],["Toronto","Kanada"],["New York","ABD"],["Sydney","Avustralya"],["Dubai","BAE"],["Doha","Katar"],["Tiflis","Gürcistan"],["Saraybosna","Bosna"],["Üsküp","Kuzey Makedonya"],["Priştine","Kosova"],["Sofya","Bulgaristan"],["Moskova","Rusya"],["Roma","İtalya"],["Madrid","İspanya"],["Barselona","İspanya"],["Tokyo","Japonya"]];
+  const countries=["Almanya","Hollanda","Fransa","Avusturya","İsviçre","Belçika","İngiltere","Azerbaycan","KKTC","Kazakistan","Kanada","ABD","Avustralya","İsveç","Danimarka","Katar","BAE","Gürcistan","Bosna","Kosova","Bulgaristan","Rusya","İtalya","İspanya","Japonya","Norveç"];
+  const placeFmtSafe=["{p}","{p} burada!","Selamlar {p} 👋","{p} 📍","Dinleyen: {p}","{p} her zaman","{p} bu akşam sizinle","{p} burada 🙌","{p} 🔥","Yer: {p}","{p} dinliyor","{p} selam gönderiyor"];
+  function placeMsg(){
+    const x=Math.random();
+    let p, t;
+    if(x<.52){ p=pick(trCities); t=fill(pick(placeFmtSafe),{p}); if(Math.random()<.2) t+=" 🇹🇷"; }
+    else if(x<.78){ const pr=pick(abroadPairs); p=pr[0]; t=Math.random()<.5 ? pr[0]+" / "+pr[1] : fill(pick(placeFmtSafe),{p}); }
+    else { p=pick(countries); t=fill(pick(placeFmtSafe),{p}); }
+    return {text:t,place:p};
+  }
+
+  /* ---- dinleyici mesajları (çeşitli) ---- */
+  const react=["Yayın efsane başlamış 🔥","Hicaz kısmı çok güzel","Ses kalitesi süper","Kaç kişiyiz bugün 😄","Bu geçiş mükemmel","Türkiye'den selamlar","Harika enerji 🔥🔥🔥","Tempo tam yerinde","Bas çok iyi","Kulaklıkla dinliyorum, muhteşem","Beğendim, takipteyim","Sabaha kadar dinlerim","Arkadaşlarıma da attım linki","Yeni albüm ne zaman?","Bu melodi kafamda kaldı","Bu sound çok özgün","Gerçekten profesyonel","Spotify'da var mı bu şarkılar?","Bu liste ateş ediyor","Geceye yakıştı","Eskilere götürdü","Bağımlısı oldum bu radyonun","Sözler çok manidar","Gece için ideal","Telefonu şarja taktım, bırakmıyorum 😅","Yolda dinliyorum, trafik bile güzel","Tüylerim diken diken","Bu kanalı yeni buldum, iyi ki bulmuşum","Arabada sesi sonuna kadar açtım 🚗","Çay eşliğinde dinleniyor ☕","Mutfakta temizlik yaparken ideal 😄","Ders çalışırken fon oldu","Tam kafa dağıtmalık","Böyle yayın az bulunur","Emeğe saygı 👏","Kim yapıyor bu müzikleri, helal olsun","Hepsi orijinal mi gerçekten?","Daha önce duymadığım bir tarz","Akşam yorgunluğu gitti","Bu radyo benim yeni favorim","Yayına yeni girdim, ne kaçırdım?","Kız arkadaşıma gönderdim linki","Annem bile beğendi 😂","Burada kimse uyumuyor mu? 🌙","Gece kuşları toplansın 🦉","Bugün de buradayım","Kaç gündür bırakmıyorum","Vokal çok temiz","Mix çok yumuşak geçiyor","Altyapı müthiş","Davul sesi çok iyi","Bu tarzda uzun set yapın","Playlist'e eklenir kesin","Shazam bile tanımadı, özel şarkı demek 😄","Ritim kafayı yerinden oynatıyor","Odada dans ettim 😂","Balkonda dinliyorum, hava harika","Yağmur yağıyor, tam atmosfer 🌧️","Trenle yolculuk, kulaklıkta bu radyo 🚆","Nöbetteyim, bu yayın tek eğlencem","Dükkânı açtım, müzik açık 🎶","Sabah sabah ne güzel başlangıç ☀️","Okuldan çıktım, direkt buraya geldim","Mesai bitti, şimdi keyif zamanı","Bu şarkıyı repeat'e alsam diyorum","Sessiz odada dinlemek bambaşka","Hoparlörü komşu da duysun 😎","Spor yaparken açtım, tempo yükseldi 💪","Yemek yaparken eşlik ediyor 🍳","Bu radyoyu herkese önerdim","Gerçek bir sanatçı işi","Duygusal oldum şimdi","Uykum kaçtı, iyi ki bu yayın varmış","Hafta sonu keyfi 🙌","Şarkılar hep bir üst seviye","Dinledikçe seviyorum"];
+  const trackT=["Bu şarkı favorim oldu","Bu şarkı yeniden dinlenir 🔥","Bu şarkı ne zaman çıktı?","Bu şarkıyı dinlerken tüylerim diken diken","Bu şarkı bu aralar dilimde","Sözleri çok iyi bu şarkının","Bu şarkı geldi, tamam bu gece kurtuldu","Bu şarkının mix'i yumuşacık geçti","Bu şarkı bitmesin 😍","Bu şarkıya bayıldım","Bu şarkı başladığı an kulaklığı taktım","Bu şarkıyı bilen var mı?","Kimler bu şarkıyı sevdi? 👇","Bu şarkının adı neydi, kaçırdım?","DJ abi şarkının adı ne?","Bu şarkıyı Shazam'a okuttum bulamadı, adı ne?"];
+  const shorts=["🔥","👏👏","❤️","😍","🙌","🎧","💯","Çok iyi","Süper","Efsane","Harika","Evet!","Aynen","+1","Bence de","😂","🥹","Vay be","Yaşasın","Bomba","Muhteşem 🤌","Güzel","Of of 🔥","Tam böyle","Helal"];
+  const quest=["Bu kanalın instagram'ı var mı?","Canlı performans ne zaman?","Hangi programla yapıyorsun?","Kaç saattir yayındasınız?","Yarın da aynı saatte mi?","Burada kimler var, el kaldırsın ✋","Kaç kişi telefonla dinliyor?","Şarkı sözleri nerede bulunur?","Albüm çıkacak mı?","Konser verir misin bir gün?","Bu şarkıları Spotify'da bulabilir miyim?","Yeni şarkı gelecek mi?","Bu yayın hep açık mı?"];
+  const toDJ=["DJ YavRu selam!","@DJ YavRu eline sağlık","DJ abi harikasın","Yavru abi bu şarkıyı çok sevdim","DJ YavRu bugün formundasın 🔥","DJ YavRu yayın süper gidiyor","@DJ YavRu naber?","DJ yavru selamlar buradayız","Yavru usta emeğine sağlık","DJ YavRu bu şarkı kimin?","@DJ YavRu teşekkürler bu güzel yayın için","DJ abi bir selam versene 🙏","DJ YavRu hayranınız oldum","@DJ YavRu ses kalitesi harika","DJ YavRu nasılsın?","Yavru abi seni çok seviyoruz ❤️","DJ YavRu sıradaki ne olacak?","@DJ YavRu bir selam bekliyorum 😄","DJ YavRu iyi ki varsın","DJ abi mixler çok güzel"];
+
+  /* ---- GENİŞLETİLMİŞ CÜMLE HAZNESİ (kombinasyonlar + elle yazılmışlar) ---- */
+  const musicP=[],ctxP=[],cityP=[];
+  const cross=(...L)=>L.reduce((a,b)=>a.flatMap(x=>b.map(y=>x+y)),['']);
+  (function(){
+    const emo=[""," 🔥"," 😍"," 👏"," ❤️"," 🎧"," 🙌"," 💯"," 🤌"];
+    const aspects=["Bas","Vokal","Melodi","Geçiş","Ritim","Tempo","Aranjman","Ses kalitesi","Nakarat","Mix","Hicaz kısmı","Davul","Synth sesi","Giriş","Beat","Sound","Sözler","Prodüksiyon"];
+    const preds=["çok iyi","muhteşem","tam yerinde","efsane","bir başka","çok temiz","harika","vurucu","süper","kusursuz","çok profesyonel","çok akıcı","kafa yapıyor","çok dolu","ne güzel","bayağı iyi","tam bana göre","bu gece çok yakıyor"];
+    const lead=["","","","Valla ","Bence ","Gerçekten ","Ya ","Abi ","Yalnız ","Açıkçası "];
+    musicP.push(...cross(lead,aspects.map(a=>a+" "),preds,emo).map(x=>{const m=x.match(/^(\S+ )?(Bas|Vokal|Melodi|Geçiş|Ritim|Tempo|Aranjman|Ses kalitesi|Nakarat|Mix|Hicaz kısmı|Davul|Synth sesi|Giriş|Beat|Sound|Sözler|Prodüksiyon)(.*)$/);return (m&&m[1])?m[1]+m[2].toLocaleLowerCase('tr')+m[3]:x;}));
+    const ctx=["Arabada","Evde","İşte","Yolda","Mutfakta","Balkonda","Otobüste","Metroda","Kafede","Dükkanda","Okulda","Sahilde","Çalışırken","Ders çalışırken","Yemek yaparken","Spor yaparken","Temizlik yaparken","Yürürken","Nöbette","Vardiyada","Taksiyle yolda","Bahçede","Çay demlerken","Kahve içerken","Yatmadan önce","Uyku öncesi","Dışarıda"];
+    const ends=[" dinliyorum 🎧"," dinleyen var mı?"," dinlemek ayrı güzel"," bu şarkılar bir başka oluyor"," ses çok iyi geliyor"," kulaklık şart"," bu radyo çok yakışıyor"," tam olmuş"];
+    ctxP.push(...cross(ctx,ends));
+    const city=trCities.slice(0,81);
+    const cf=[" tarafından selamlar 👋"," burada, kim var?"," seviyor bu yayını"," bu radyoyu dinliyor 🎶"," orada kimler var?"," 📍 canlı bağlandık"," selam gönderiyor"," ayakta! 🙌"," çok güzel gidiyor"];
+    cityP.push(...cross(city,cf));
+    const lines=["Çay koydum, hazırım ☕","Kahvemi aldım, şimdi tam oldu","Bu saatte uyumak yok 😄","Kapıdan girer girmez buraya bağlandım","Telefonu şarja taktım, bütün gece buradayım","Komşu da dinliyor, duvardan duydum 😂","Annem de dinliyor bu arada","Eşim 'bu ne güzel şey' diyor yanımda","Çocuklar dans etmeye başladı 😄","Kedi bile kulağını dikti 🐱","Yeni dinleyiciyim, ilk kez denk geldim","Instagram'dan buldum bu yayını","Arkadaşım yolladı, iyi ki yollamış","Sabahtan beri açık bu sekme","Bu radyoyu favorilere ekledim","İşyerinde hoparlörden veriyorum","Müşteriler soruyor 'ne çalıyor' diye 😄","Mesaiye bu radyo ile başlıyoruz","Ders çalışırken tam konsantrasyon müziği","Burada sakin ve güzel bir akış var","Reklam yok, konuşma yok, sadece müzik, bayıldım","Sürekli aynı yerden devam ediyor, çok akıcı","Ses seviyesini sonuna kadar açtım","Hoparlörde dinlemek de güzel, kulaklıkta da","Bugün işten sonra buraya sığındım","Akşam yorgunluğunu aldı bu şarkılar","Bu gece uyku yok 🌙","Geç saatte de yayın var, ne güzel","Sabah ezanı vakti hâlâ buradayım 😄","Dışarıda yağmur var, içeride bu şarkılar 🌧️","Hava çok soğuk ama burası sıcacık 🔥","Plajdan yazıyorum, hoparlörde çalıyor 🏖️","Yolculuğun en güzel eşlikçisi","Uzun yol şoförüyüm, gece radyosu bu","Seferden dönüyorum, bu radyo iyi geldi","Gurbetteyim, burası memleket gibi 🥹","Yurt dışından dinliyorum, çok özlemişim","Askerde telefondan dinliyorum 🫡","Hastanede nöbetteyim, moral oldu","Kuaförde açtık, herkes soruyor 😄","Pazarda tezgahta dinliyoruz 🍅","Fırında çalışıyorum, hamur eşliğinde dinliyorum","Bu müzik ellerimi dans ettiriyor","Mutfakta rakı balık değil ama bu şarkılar yeter","Telefonumun hoparlörü zorlanıyor ama değer 😄","Pil bitiyor ama bırakmam 🔋","İnternet çekmiyor gibi ama burası akıyor","Şarkıların hepsi özgün, bunu seviyorum","Yeni nesil müzik budur","Hicaz'ı böyle işleyen az","Afro house sevenler burada mı?","Türkçe house nadir buluyorum, güzel","Arka planda açıp çalışıyorum, verim arttı","Yaşım kaç olursa olsun bu tempo tutuyor","Bu radyo kimin fikriydi, tebrikler","Bir tane daha böyle radyo olsa","Bu enerjiyle bütün hafta geçer","Hafta sonu sabahı bu radyo güzel gidiyor","Pazar sabahı için ideal","Cuma akşamı modu açıldı 🎉","Pazartesi sendromunu aldı götürdü","Tatile çıkmadan önce son dinleyiş","Yarın sınavım var ama bırakmıyorum 😅","Kulaklığı kulağıma yapıştırdım","Sesi kıstım komşu uyuyor 🤫","Sesi açtım komşu da dinlesin 😂","Yayında olmak güzel, dinleyici sayısı artıyor","Bu kadar kişiyle aynı şarkıyı dinlemek garip bir keyif","Herkes aynı anda aynı şarkıda, ne güzel","Birlikte dinlemek ayrı bir hava katıyor","Burası bana huzur veriyor","Stres atmaya geldim, atıyorum","Anılarım canlandı bu şarkıyla","Bu melodiyi bir yerden hatırlıyorum","Şarkı seçimi çok yerinde","Bu sırayla gitmesi çok mantıklı","Mix geçişlerini fark ettiniz mi, pürüzsüz","Şarkılar birbirine akıyor, çok güzel","Hiç kesilmiyor, çok rahat","Rahat bir akış, hiç sıkmıyor","Hiç reklam yok, harika","Bu kalitede müzik bedava mı gerçekten?","Her şarkı bir diğerinden iyi","Hangisi daha iyi karar veremedim","Sıradaki daha da iyi mi olacak?","Beklemekten keyif alıyorum","Merak ediyorum sıradakini","Yeni gelen hoş geldin 🙌","Biz buradayız, siz de gelin","Linki gruba attım, geliyorlar","Whatsapp'tan paylaştım, bakalım kaç kişi gelecek","Hikayeme koydum bu radyoyu","Bu yayını kayıt almak istiyorum","Telefon ekranını kapattım, çalmaya devam ediyor mu? 🙂","Ekran kilitli de çalıyor, süper","Arka planda sorunsuz çalıyor","Ses kalitesi çok net","Hiç donma yok, akıcı","Bugün buraya yeni takıldım, sevdim","Dün de buradaydım, bugün de","Bu hafta her akşam buradayım","Sabah erken kalktım, ilk iş bu radyo","Gece vardiyasına bu radyo ile başlıyorum","Allah herkese huzurlu bir gece versin 🌙","Günaydın dinleyiciler ☀️","İyi akşamlar herkese 🌆","İyi geceler şimdiden 🌙","Hayırlı akşamlar","Hayırlı geceler herkese","Hayırlı sabahlar ☀️","Kolay gelsin esnaf 🙌","Kolay gelsin herkese","Herkese iyi çalışmalar","Afiyet olsun yemek yiyenlere 🍽️","Çay içenler el kaldırsın ✋☕","Kahve içenler de buraya 😄","Ben mandalina soyuyorum, şarkı eşlik ediyor 🍊","Mısır patlattım, tam film gibi 🍿","Battaniye altındayım, tam huzur","Sobanın yanında dinliyorum","Klima açık, ses açık, hayat güzel","Çalışma masasındayım, mod tam","Dersten çıktım direkt buraya bağlandım","Toplantıdayım ama kulaklık takılı 🤫","Dolmuşta kulaklıkla bu radyo ♥","Vapurda dinliyorum, martılar eşlik ediyor 🚢","Tren yolculuğunda güzel gidiyor","Uçakta uçak modunda indirdim, yok olmuyor 😅","Bisikletle dönerken dinliyorum 🚲","Koşu bandında tempo tuttu 🏃","Salonda ağırlık kaldırırken tam motivasyon","Yürüyüşte kulaklığımda bu radyo"];
+    react.push(...lines);
+    shorts.push("😎","🤩","🥰","👌","🫶","🙏","💥","🚀","✨","🎶","🎵","Sağ olun","Çok güzel","Tam bana göre","Harikasınız","Tamam bu iş bitti 😄","Kral","Aşırı iyi","Bayıldım","Ne iyi ya","Güzelmiş","Of ya","Çok yaşa","Müthiş","Süpersiniz","Bravo","Alkış 👏","İyi ki varsınız","Devam devam","Hadi be","Vallahi güzel","Yok artık 🔥","Resmen","Tam isabet","Kafa dağıtıyor","Bayağı iyi","Hep birlikte","Hadi hep beraber","Evet evet","Kesinlikle","Katılıyorum","Doğru","Hakikaten","Tabii ya","Ayyy","Ooo","Waoo","Mükemmel","Şahane","Harikulade");
+    const qw=["Bu radyo her gün açık mı?","Gece boyunca da yayın var mı?","Yayını kim yapıyor?","Bu şarkılar kimin?","Şarkıların hepsi aynı sanatçıdan mı?","Burada kim var, nerelisiniz?","Sizce en iyi şarkı hangisi?","Favori şarkınız hangisi?","Kaç şarkı var acaba?","Liste baştan mı başlıyor bittiğinde?","Yeni şarkı ne zaman eklenecek?","Konser olacak mı?","Instagram hesabı neydi?","Whatsapp kanalı var mı?","DJ YavRu kaç yaşında?","Kaç yıldır müzik yapıyorsun?","İlk şarkını ne zaman çıkardın?","Hangi sanatçıları dinliyorsun?","En sevdiğin şarkı hangisi?","Müzik yapmaya nasıl başladın?","Stüdyoda mı yapıyorsun?","Vokal kime ait?","Bu tarz hangi türe giriyor?","Afro house mu bu?","Remix mi bu?","Orijinal mi bu şarkı?","Spotify'da var mı?","Youtube'da da var mı?","Kulaklık markası ne tavsiye edersin?","Hangi kulaklıkla dinliyorsunuz?","Bu saatte kaç kişi dinler sizce?","Dinleyici sayısı hep böyle mi?","Burası nasıl bir yer?","Kim kurdu bu radyoyu?","Bu şarkıyı daha önce duymuştum, nerede?","Bu şarkının sözleri var mı?","Yabancı şarkı mı bu?","Ne zamandır yayındasınız?","Sabaha kadar mı?","Sabaha kadar kim uyanık?","Kim hâlâ ayakta?","Uyuyan var mı?","Kim işte?","Kim evde?","Kim yolda?","Gurbetçi var mı?","Yurt dışından yazan var mı?","Memleket nereli kim var?","İzmirli var mı?","Ankaralı var mı?","İstanbullu var mı?","Karadenizli var mı?","Doğulu var mı?","Egeli var mı?","Hatay'dan kim var?","Sakarya'dan yazan var mı?","Adapazarı'ndan biri var mı?"];
+    quest.push(...qw);
+    const dj1=["DJ YavRu","@DJ YavRu","Yavru abi","DJ abi","Yavru usta","DJ YavRu hocam","DJ Yavru","Sayın DJ YavRu"];
+    const dj2=["selam!","eline sağlık","bugün çok iyisin","yayın süper gidiyor","bir selam versene","hayranınız","seni seviyoruz","naber?","sağ ol bu yayın için","harikasın","enerji tavan","bu akşam kurtardın","mikser başında usta 🎛️","nasılsın?","bu gece uyumak yok 😄","bu sıralama çok iyi","kral yayın 🔥","iyi ki varsın","tebrikler, çok güzel olmuş","hoş geldin yayına","emeğine sağlık","sesin çok güzel","bu şarkıyı kim yaptı?","bu şarkının adı neydi?","bize bir şarkı armağan et 😄","bizi de duyuyor musun?","beni fark ettin mi 😄","buradayız, sen devam et"];
+    toDJ.push(...cross(dj1,dj2.map(x=>" "+x)).map(x=>x.trim()));
+  })();
+  react.push(...["Bir şarkının en çok girişini mi nakaratını mı beklersiniz?","Ritme masada parmaklarımla eşlik ediyorum 🎶","Bu akışa bir fincan çay yakışır ☕","Bugünün temposunu biraz müzikle dengeleyelim","Melodiyi mırıldanmaya başladım bile","Kulaklığı taktım, küçük bir müzik molası 🎧","Bazen tek bir melodi bütün günü hatırlatıyor","Söz mü daha önce yakalar sizi, melodi mi?","Uzun versiyonları dinlemek ayrı keyif","Bir parçayı tekrar dinleyince başka ayrıntılar duyuluyor","Müzikte küçük susuşlar da güzel","Nakarat gelene kadar ritmi takip ediyorum","Bu saatin fonuna biraz müzik bırakalım","Bugünün rengi hangi şarkı olurdu?","Çay mı kahve mi, müzik molasında hangisi?","Melodiler bazen bir fotoğraf gibi geliyor","Kısa bir mola, biraz müzik ✨","Yeni bir şarkıyla tanışmak güzel","Biraz ritim, biraz hayal 🎵","Müzik açıkken yol daha kısa geliyor","Şarkıların hikâyelerini merak ediyorum","Enstrümantal bölümlere de kulak veriyorum","Ritimden çok melodiyi takip edenlerdenim","Ben önce davullara dikkat ediyorum","Bir şarkıyı ilk dinleyişinizle sonrakiler aynı olmuyor","Sözleri dinlerken aklıma başka anılar geldi","Müzik molasına eşlik edenlere selam 👋","Bir şarkı bir şehir hatırlatır mı size?","Kulaklıkla mı hoparlörle mi dinlemeyi seversiniz?","Az konuşup biraz müzik dinleyelim 🎧"]);
+  function botText(){
+    const x=Math.random();
+    if(x<.38){
+      const y=Math.random();
+      if(y<.42) return {text:nr(react,'react',120)};
+      if(y<.66) return {text:nr(musicP,'mus',400)};
+      if(y<.86) return {text:nr(ctxP,'ctx',300)};
+      return {text:nr(cityP,'cty',300)};
+    }
+    if(x<.54){ const tx=nr(trackT,'trk',6); return {text:tx,q:/adı|neydi/.test(tx),toDJ:/adı ne/.test(tx)}; }
+    if(x<.66) return {text:nr(shorts,'sh',18)};
+    if(x<.75) return {text:nr(quest,'q',25),q:true};
+    if(x<.80) return {text:nr(toDJ,'toDJ',40),toDJ:true};
+    if(x<.90) return {text:nr(shorts,'sh',18)};
+    return {text:placeMsg().text};
+  }
+
+  /* ---- DJ cevapları ---- */
+  const thanks=["Teşekkürler @{n}! Çok güzel söyledin ❤️","Sağ ol @{n}, bu sözler beni çok mutlu etti 🙏","@{n} çok teşekkür ederim, devam edeceğiz 🔥","Eyvallah @{n}, asıl sen sağ ol!","@{n} teşekkürler, dinlediğin için ayrıca minnettarım 🎧","Çok sağ ol @{n}, enerjin harika ✨","@{n} teşekkür ederim, böyle desteklerle ayaktayız 💪","Sevgiler @{n}, teşekkürler canım ❤️","@{n} bu söz bana yeter, teşekkürler 🙌","Minnettarım @{n}, çok sağ ol! 🥹","@{n} sen de çok yaşa, teşekkürler 🤝","Teşekkürler @{n}, her mesajı okuyorum 👀"];
+  const greets=["Selam @{n}, hoş geldin! 🙌","Merhaba @{n}, iyi ki buradasın!","@{n} hoş geldin, kendini evinde hisset 🏠","Selamlar @{n}! Keyifli dinlemeler 🎧","Hoş geldin @{n}, yayın tam seninle güzelleşti ✨","Aleyküm selam / selam @{n} 👋","@{n} selam, nasılsın bakalım?","Selam selam @{n}! Çay kahve hazır mı? ☕"];
+  const howare=["İyiyim @{n}, sorduğun için sağ ol! Sen nasılsın? 😊","@{n} çok iyiyim, sizlerle olunca daha da iyi! Sen nasılsın?","Şükür iyiyim @{n}, yayın başında hep enerjiliyim 😄","@{n} iyiyim, teşekkürler! Bugün neler yaptın?"];
+  const praise=["@{n} çok teşekkür ederim, bu emeğin karşılığı 🙏","Sağ ol @{n}, böyle söz duyunca daha çok üretmek istiyorum ❤️","@{n} yüzümü kızarttın 😄 teşekkürler!","@{n} teşekkürler, daha iyisini yapmak için çalışıyorum 🎛️","Allah razı olsun @{n}, çok sağ ol! 🥹","@{n} bu güzel yorum için teşekkürler, günümü güzelleştirdin ✨"];
+  const reqs=["@{n} burası radyo gibi, akışı ben belirliyorum, istek alamıyorum 😄 Şarkının adını sorarsan söylerim","İstek alamıyorum @{n} ama sıradakiler de güzel, kalın! 🎶","@{n} radyo mantığı bu, herkes aynı şarkıyı birlikte dinliyor 🎧"];
+  const nowp=["@{n} şu an çalan: {t} 🎶","@{n} {t} çalıyor, keyfini çıkar! 🎧","@{n} dinlediğin şarkı: {t} 🔊","@{n} sorduğun şarkı {t}, güzel değil mi? 😍"];
+  const defaults=["@{n} yazdıklarını okuyorum, teşekkürler! 🔥","@{n} sağ ol, devam edelim böyle 🎧","@{n} güzel söyledin, teşekkürler ❤️","@{n} seni duyuyorum, yayın seninle güzel 🙌","@{n} teşekkürler, mesajların çok değerli!","@{n} bence de! Sağ ol 😄"];
+  (function(){
+    const o=["Teşekkürler","Sağ ol","Eyvallah","Çok sağ ol","Teşekkür ederim","Allah razı olsun","Sevgiler","Minnettarım","Çok teşekkürler"];
+    const tl=["bu güzel sözler için","bu destek için","dinlediğin için","enerjin için","yorumun için","burada olduğun için","bu sıcak ilgi için","her zaman yanımda olduğun için"];
+    const em=[" ❤️"," 🙏"," 🔥"," 🎧"," ✨"," 🙌"," 🥹",""];
+    thanks.push(...cross(o,tl.map(x=>" @{n}, "+x),em).map(x=>x.replace(/^(\S+) @/,'$1 @')));
+    const gr=["Selam","Merhaba","Hoş geldin","Selamlar","Hoş bulduk","Aleyküm selam"];
+    const gt=["keyifli dinlemeler 🎧","kendini evinde hisset 🏠","bugün yayın seninle güzel ✨","çay kahve hazır mı? ☕","nasılsın bakalım?","iyi ki geldin 🙌","bugün nereden bağlandın?","yayın tam sana göre 🔥"];
+    greets.push(...cross(gr,gt.map(x=>" @{n}, "+x)));
+    defaults.push(...cross(["Güzel söyledin","Haklısın","Bence de","Aynen öyle","Çok doğru","Katılıyorum","Süper bir bakış","Ne güzel yazmışsın"],[" @{n}, "],["yayın seninle güzel 🙌","devam edelim böyle 🎧","teşekkürler ❤️","sağ ol 😄","mesajların çok değerli 🙏","seni okumak güzel ✨"]));
+  })();
+  function reply(t,n){
+    const l=t.toLowerCase(), m={n,t:title()};
+    if(locMode && t.trim().split(/\s+/).length<=4) return fill(nr([ "@{n} "+t.trim()+" selamlar, aramıza hoş geldin! 🌍","Hoş geldin @{n}! "+t.trim()+" tarafına selam olsun 👋","@{n} "+t.trim()+" burada demek, harika! 🙌"],'locr',3),m);
+    if(/çalan|çalıyor|calan|caliyor|hangi şarkı|hangi sarki|şarkı adı|sarki adi|bu şarkı|bu sarki|bu parça|bu parca|ne dinliyoruz|kimin/.test(l)) return fill(nr(nowp,'nowp',3),m);
+    if(/çal\b|cal\b|çalsan|çalar mısın|istek|koy\b|aç\b|değiştir|degistir/.test(l)) return fill(nr(reqs,'reqs',2),m);
+    if(/nasılsın|nasilsin|naber|ne haber|nasıl gidiyor/.test(l)) return fill(nr(howare,'how',3),m);
+    if(/instagram|takip|sosyal|hesap/.test(l)) return fill("@{n} beni platformlarda "+CONFIG.ARTIST+" adıyla bulabilirsin, Instagram'da da aynı isim 🎶",m);
+    if(/albüm|album|spotify|platform|şarkılar nerede|sozleri|sözleri|yeni şarkı/.test(l)) return fill(pick(["@{n} hepsi orijinal, platformlarda "+CONFIG.ARTIST+" adıyla bulabilirsin 🎶","@{n} yeni şarkılar yolda, takipte kal! 🚀","@{n} dinleme platformlarında "+CONFIG.ARTIST+" diye aratman yeterli 🔍"]),m);
+    if(/konser|performans|canlı set|sahne/.test(l)) return fill(pick(["@{n} canlı performans planlarımız var, duyurusunu buradan yapacağım 🎤","@{n} sahneye çıkmak en büyük hayalim, yakında haber veririm! 🙏"]),m);
+    if(/ableton|program|nasıl yap|nasil yap/.test(l)) return fill("@{n} Ableton Live kullanıyorum, hepsi orada şekilleniyor 🎛️",m);
+    if(/sıradaki|siradaki|sonra ne/.test(l)) return fill(pick(["@{n} sıradaki sürpriz, kalın 😉","@{n} akış hazır, sıradaki de çok güzel! 🔥"]),m);
+    if(/selam|merhaba|mrb|slm|günaydın|iyi akşamlar|iyi geceler/.test(l)) return fill(nr(greets,'gr',3),m);
+    if(/harika|süper|super|efsane|eline sağlık|emeğ|helal|hayran|çok iyi|güzel|beğen|muhteşem|bayıl|seviyorum|iyi ki/.test(l)) return fill(nr(praise,'pr',4),m);
+    if(/teşekkür|tesekkur|sağ ol|saol|eyvallah/.test(l)) return fill(nr(thanks,'th',5),m);
+    return fill(Math.random()<.6 ? nr(thanks,'th',5) : nr(defaults,'df',4),m);
+  }
+
+  /* ---- DOM ---- */
+  const chat=$('chat');
+  function add(name,text,cls,color){
+    const d=document.createElement('div');
+    d.className='msg '+(cls||'');
+    d.innerHTML='<b></b><p></p>';
+    const b=d.querySelector('b'); b.textContent=name; if(color)b.style.color=color;
+    d.querySelector('p').textContent=text;
+    const stick=chat.scrollHeight-chat.scrollTop-chat.clientHeight<80;
+    chat.appendChild(d);
+    while(chat.children.length>80)chat.firstChild.remove();
+    if(stick||cls==='me')chat.scrollTop=chat.scrollHeight;
+  }
+  const dj=(text,delay)=>setTimeout(()=>add('DJ YavRu','🎧 '+text,'dj'),delay||0);
+  const recent=[]; window.RADIO_RECENT=recent;
+  const recentBotTexts=[];
+  const botSay=(u,text)=>{
+    if(recentBotTexts.includes(text)) return;
+    recentBotTexts.push(text); if(recentBotTexts.length>100)recentBotTexts.shift();
+    add(u,text,'',colors[u.length%colors.length]);
+    recent.push(u); if(recent.length>12)recent.shift();
+  };
+  function flurry(n,pool){ for(let k=0;k<n;k++) setTimeout(()=>botSay(pick(users),nr(pool||shorts,'fl',6)),rnd(900,5500)); }
+
+  /* ---- çalan şarkı duyurusu ---- */
+  const annT=["Şu an çalan: {t} 🎶","Sırada {t} var 🎧","{t} başlıyor, keyifli dinlemeler 🎶","Şimdi {t} çalıyor 🔊","{t} geldi, sesi açın 🔥","Yayında {t} 🎵"];
+  let lastAnn=-1;
+  bind('playing',()=>{
+    if(lastAnn!==idx){
+      lastAnn=idx;
+      if(GIFT && GIFT.active && idx===GIFT.idx){
+        dj('🎁 '+GIFT.to+', bu şarkı sana armağan edildi'+(GIFT.from?' — '+GIFT.from+' gönderdi':'')+'! Çalan: '+tracks[idx].title+' 🎶',600);
+      } else if(Math.random()<.85){
+        dj(fill(nr(annT,'ann',3),{t:tracks[idx].title}),600);
+      }
+    }
+  });
+
+  /* ---- akan sohbet ---- */
+  let locMode=false, placed=[];
+  (function tick(){
+    const u=pick(users);
+    let txt, meta={};
+    if(locMode){ const pm=placeMsg(); txt=pm.text; placed.push(pm.place); if(Math.random()<.02) dj(pm.place+" selamlar, hoş geldiniz! 👋",rnd(1200,2800)); }
+    else { meta=botText(); txt=meta.text; }
+    botSay(u,txt);
+    if(!locMode){
+      if(meta.toDJ && Math.random()<.06) dj(reply(txt,u),rnd(5000,11000));          // DJ'e hitap edilene bizzat cevap + teşekkür
+      else if(meta.q && Math.random()<.03) dj(reply(txt,u),rnd(5000,11000));
+    }
+    setTimeout(tick, locMode ? rnd(350,900) : rnd(500,1600));
+  })();
+  for(let k=0;k<6;k++) botSay(pick(users),nr(react,'react',250));
+
+  /* ---- DJ kendiliğinden konuşur ---- */
+  const hour=()=>new Date().getHours();
+  const greetTime=()=>{ const h=hour(); return h<6?"Gece kuşları, hoş geldiniz 🌙":h<12?"Günaydın herkese ☀️":h<18?"İyi günler herkese 👋":"İyi akşamlar herkese 🌆"; };
+  const djPool=[
+    "Bugün chat çok güzel, hepinize teşekkürler ❤️","Nasılsınız? Neler yapıyorsunuz? Yazın bakalım 😄","Kim kulaklıkla dinliyor? Elini kaldırsın 🎧","Yeni gelenlere hoş geldin, kendinizi evinizde hissedin 🙌","Sorularınızı okuyorum, hepsine cevap vermeye çalışıyorum 👀","Bu radyo sizin sayenizde büyüyor, her mesajınız değerli","Arkadaşlarınıza da gönderin, birlikte dinleyelim 🔊","Şarkıların hepsi orijinal, beni "+CONFIG.ARTIST+" adıyla bulabilirsiniz 🎶","Uyku yok mu bugün? 🌙 Ben buradayım","Chat'e yazan herkese teşekkürler, hepinizi okuyorum","Mix geçişlerini beğendiniz mi? Yorumlarınız önemli","Bir soru: en sevdiğiniz tarz hangisi? Afro house mu, slow mu, pop mu?","Bu şarkıyı yaparken çok emek verdim, sizin de sevmeniz harika 🥹","Radyo mantığı: hepimiz aynı şarkıyı aynı anda dinliyoruz, bu çok güzel bir his","Birazdan sürprizler var, kalın 😉","Hava nasıl sizin orada? Yazın bakalım ☁️","Şimdi herkes bir emoji bıraksın, kimler buradaymış görelim 🎧","Su içmeyi unutmayın, uzun yayın bu 💧","Tempo biraz yükseliyor, hazırlanın 🔥","Chat bugün efsane, teşekkürler hepinize 🙏",
+    "Kim hangi saatte dinliyor? Gece mi gündüz mü? ☀️🌙","Bu akşam ne yaptınız? Anlatın bakalım","Bir dilek tutun, şarkı bitene kadar kimseye söylemeyin ✨","Her mesajı okuyorum, sağ olun, iyi ki varsınız"
+  ];
+  const shout=["@{u} hoş geldin, dinlediğin için teşekkürler! 🙏","@{u} yazdıkların için teşekkürler ❤️","Selam @{u}, nasılsın?","@{u} sen buradan hiç ayrılmıyorsun, teşekkürler 😄","@{u} mesajını gördüm, çok sağ ol! 🔥","@{u} bu akşam yayına güç verdin, teşekkürler ✨","@{u} hoş geldin, kulaklık tam mı? 🎧","Teşekkürler @{u}, böyle dinleyiciler olunca yayın güzel oluyor 🙌"];
+  (function djLoop(){
+    setTimeout(()=>{
+      const r=Math.random();
+      if(r<.45 && recent.length) add('DJ YavRu','🎧 '+fill(nr(shout,'sh2',4),{u:pick(recent)}),'dj');
+      else if(r<.55) add('DJ YavRu','🎧 '+greetTime(),'dj');
+      else add('DJ YavRu','🎧 '+nr(djPool,'djp',10),'dj');
+      if(Math.random()<.55) flurry(rnd(2,5),react);
+      djLoop();
+    },rnd(100000,190000));
+  })();
+
+  /* ---- "Herkes dinlediği yeri yazsın" anı: sohbet şehir ve ülkelerle dolar ---- */
+  const locCalls=["Herkes dinlediği yeri yazsın! 🌍 Şehrini ve ülkeni yaz, hepinizi okuyacağım","Hadi bakalım, herkes dinlediği yeri yazsın! 📍 Nereden katılıyorsunuz?","Herkes dinlediği yeri yazsın, merak ediyorum nerelerdeyiz! 🌎","Şimdi herkes dinlediği yeri yazsın, şehir de olur ülke de! 🗺️"];
+  function runLoc(call){
+    if(locMode) return;
+    add('DJ YavRu','🎧 '+call,'dj');
+    setTimeout(()=>{ locMode=true; placed=[]; },rnd(1200,2200));
+    setTimeout(()=>{ if(locMode && placed.length){ const u=[...new Set(placed)]; dj("Vay be! "+u.slice(0,3).join(", ")+"… hepsini görüyorum, süpersiniz! 🌍🔥"); } },22000);
+    setTimeout(()=>{
+      const u=[...new Set(placed)]; locMode=false;
+      dj("Teşekkürler hepinize! "+u.length+" farklı yerden mesaj geldi: "+u.slice(0,4).join(", ")+" ve daha fazlası. Nerelerden dinlendiğimizi görmek harika 🌍❤️");
+    },46000);
+  }
+  function startLoc(){
+    runLoc(nr(locCalls,'loc',3));
+    setTimeout(startLoc, rnd(420000,600000));
+  }
+  setTimeout(startLoc, 100000);
+
+  /* ---- Her saat başı: DJ YavRu "hangi şehirlerden yazıyorsunuz?" diye sorar ---- */
+  const hourCalls=["Saat başı yoklaması! 🕐 Şu an hangi şehirlerden yazıyorsunuz? Şehrinizi yazın, hepsini okuyacağım 📍","Saat {h}:00 oldu! 🕐 Herkes hangi şehirde olduğunu yazsın, bakalım nerelerdeyiz 🌍","Yeni saat, yeni yoklama! 📍 Hangi şehirdesiniz, hangi ülkedesiniz? Yazın bakalım","Saat tam {h}:00! ⏰ Kim hangi şehirden dinliyor? Şehirlerinizi bekliyorum 🗺️","Saat başı geldi! 🕐 Sohbetteki herkes şehrini yazsın, kim nereden bağlanmış merak ediyorum 🌎"];
+  function hourly(){
+    if(locMode){ setTimeout(hourly,50000); return; }
+    const d=new Date(); const h=String(d.getHours()).padStart(2,'0');
+    runLoc(fill(nr(hourCalls,'hc',2),{h}));
+    const nx=new Date(); nx.setHours(nx.getHours()+1,0,2,0);
+    setTimeout(hourly, nx-new Date());
+  }
+  (function(){ const nx=new Date(); nx.setHours(nx.getHours()+1,0,2,0); setTimeout(hourly, nx-new Date()); })();
+
+  /* ---- Sponsor anonsu: DJ YavRu açıkça sponsor olarak anar (her saat :30'da + açılıştan ~3 dk sonra bir kez) ---- */
+  const sponsorCalls=[
+    "Bu saatler Seda Baharat'ın katkısıyla sizlerle 🌶️ Adapazarı Katlı Pazar Yeri, zemin kat",
+    "Radyomuzun sponsoru Seda Baharat'a teşekkürler 🙏 Yıllardır Sakarya sofralarının tadı onlardan",
+    "Yayınımızı destekleyen Seda Baharat'a selam olsun 🌿 Katlı Pazar Yeri'ne yolu düşen uğrasın",
+    "Müzik bizden, tat Seda Baharat'tan 😄 Sponsorumuza teşekkürler",
+    "Seda Baharat'ın katkılarıyla yayındayız 🎧 Sayfanın üstündeki karttan arayabilir, yol tarifi alabilirsiniz",
+    "Baharat, aktar ürünleri arayan Sakaryalılar: sponsorumuz Seda Baharat, Katlı Pazar Yeri zemin kat 📍",
+    "Bu yayın Seda Baharat'ın desteğiyle 🌶️ Sizin de işletmeniz burada yer alsın isterseniz kartın köşesinden yazın"
+  ];
+  function sponsorSay(){ if(!locMode) add('DJ YavRu','🎧 '+nr(sponsorCalls,'spc',3),'dj'); }
+  function sponsorHalf(){
+    sponsorSay();
+    const nx=new Date(); nx.setHours(nx.getHours()+(nx.getMinutes()>=30?1:0),30,5,0);
+    setTimeout(sponsorHalf, nx-new Date());
+  }
+  setTimeout(sponsorSay, 180000);
+  (function(){ const nx=new Date(); nx.setHours(nx.getHours()+(nx.getMinutes()>=30?1:0),30,5,0); setTimeout(sponsorHalf, nx-new Date()); })();
+
+
+  /* ---- DJ'in ara sıra yazdığı belirgin teşekkür mesajı ---- */
+  const specials=["İlginiz için müteşekkirim 🙏 Her mesaja cevap yazamıyorum ama her birini okuyorum. Yazmaya devam edin, sizi seviyorum 🫶"];
+  (function special(){
+    setTimeout(()=>{ showSpecial(nr(specials,'spc',1)); special(); }, rnd(480000,840000));
+  })();
+  setTimeout(()=>showSpecial(specials[0]),rnd(70000,110000));
+  // belirgin DJ mesajı önce ~25 sn pencerenin üstünde sabit kalır, sonra akışa karışır
+  function showSpecial(text){
+    const d=document.createElement('div'); d.className='msg dj special';
+    d.innerHTML='<small class="pn"></small><b></b><p></p>';
+    d.querySelector('.pn').textContent='📌 DJ YavRu';
+    d.querySelector('b').textContent='DJ YavRu'; d.querySelector('p').textContent=text;
+    const pinEl=$('pin'); pinEl.insertBefore(d,pinEl.firstChild); pinEl.hidden=false;
+    setTimeout(()=>{ d.remove(); add('DJ YavRu',text,'dj special'); if(!pinEl.children.length) pinEl.hidden=true; },25000);
+  }
+
+  /* ---- dinleyiciler çalan şarkıyı sorar ---- */
+  const askQ=["Çalan şarkı ne?","Bu şarkının adı ne?","Şu an ne çalıyor?","Bu parça kimin?","Şarkı adını yazar mısın?","Bu şarkı çok güzel, adı neydi?","Az önce başlayan şarkı hangisi?"];
+  (function ask(){
+    setTimeout(()=>{
+      if(!locMode){
+        const u=pick(users); const q=nr(askQ,'ask',4);
+        botSay(u,q); if(Math.random()<.4) dj(reply(q,u),rnd(4500,9000));
+      }
+      ask();
+    },rnd(120000,240000));
+  })();
+
+  /* ---- kullanıcı mesajı ---- */
+  /* ---- gerçek dinleyici mesajı: sohbetin üstüne sabitlenir, DJ cevabı altına eklenir ---- */
+  const pin=$('pin'); let pinned=[];
+  function pinAdd(name,text,cls,label){
+    const d=document.createElement('div'); d.className='msg '+(cls||'');
+    d.innerHTML='<small class="pn"></small><b></b><p></p>';
+    d.querySelector('.pn').textContent='📌 '+(label||'Sabitlendi');
+    d.querySelector('b').textContent=name; d.querySelector('p').textContent=text;
+    pin.appendChild(d); pin.hidden=false; pin.scrollTop=pin.scrollHeight;
+    pinned.push({name,text,cls,el:d}); return d;
+  }
+  function unpinAll(){
+    if(!pinned.length) return;
+    pinned.forEach(m=>{ add(m.name,m.text,m.cls); if(m.el) m.el.remove(); });
+    pinned=[]; if(!pin.children.length) pin.hidden=true;
+  }
+  $('ci').addEventListener('input',()=>{ if(pinned.length) unpinAll(); });   // yeni mesaja başlayınca eskiler akışa karışır
+  $('cf').addEventListener('submit',e=>{
+    e.preventDefault();
+    const i=$('ci'),t=i.value.trim();
+    if(!t)return;
+    unpinAll();
+    i.value='';
+    const id=Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+    pinAdd('Sen',t,'me','Mesajın');
+    const api=(CONFIG.API||'').replace(/\/+$/,'');
+    const wait=document.createElement('div'); wait.className='wait'; wait.textContent='⏳ DJ YavRu mesajını okuyunca cevap verecek…';
+    const showReply=r=>{ wait.remove(); pinAdd('DJ YavRu','🎧 '+r,'dj','DJ YavRu cevapladı'); };
+    if(api){
+      pin.appendChild(wait);
+      fetch(api+'/message',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,name:'Dinleyici',text:t})}).catch(()=>{});
+      let tries=0;
+      const iv=setInterval(()=>{
+        if(++tries>225){ clearInterval(iv); wait.remove(); return; }       // ~15 dk bekler
+        fetch(api+'/reply?id='+encodeURIComponent(id)).then(r=>r.json()).then(j=>{ if(j&&j.reply){ clearInterval(iv); showReply(j.reply); } }).catch(()=>{});
+      },4000);
+    } else {
+      setTimeout(()=>showReply(reply(t,'Sen')),rnd(1200,3000));
+    }
+  });
+
+  /* ---- izleyici sayacı 2400–5000, aktif yazan sayısı, her +100'de duyuru ---- */
+  let lastHype=0, v=rnd(2800,4200), top=Math.floor(v/100)*100, tgt=3700;
+  const fmt=n=>n.toLocaleString('tr-TR');
+  const hype=["📈 Dinleyici sayısı {x} oldu! Hoş geldiniz herkese 🙌","🎉 Şu an {x} kişi birlikte dinliyoruz!","🔥 {x} dinleyiciyiz, yayın büyüyor!","👥 Aktif dinleyici sayısı {x} oldu, hepinize teşekkürler ❤️","🚀 {x} kişi aynı anda dinliyor, inanılmaz!"];
+  function upd(){
+    tgt=Math.max(2600,Math.min(4800,tgt+rnd(-25,25)));
+    v+=rnd(-40,40)+Math.round((tgt-v)*0.03);
+    if(v<2400)v=2400+rnd(0,60);
+    if(v>5000)v=5000-rnd(0,60);
+    $('n').textContent='· 👁 '+fmt(v);
+    $('actN').textContent=fmt(Math.max(40,Math.round(v*0.055+rnd(-10,10))));
+    const lvl=Math.floor(v/100)*100;
+    if(lvl>=top+100 && Date.now()-lastHype>300000){ lastHype=Date.now(); top=lvl; add('DJ YavRu','🎧 '+fill(nr(hype,'hype',3),{x:fmt(lvl)}),'dj'); flurry(rnd(2,4),shorts); }
+    else if(lvl<=top-300){ top=lvl; }     // sayı düştüyse yeniden artışta tekrar duyur
+  }
+  upd(); setInterval(upd,2000);
+})();
+
+/* ---- Ezan vakti uyarısı: dinleyicinin bulunduğu konuma ve saatine göre ---- */
+(function(){
+  const btn=$('ezan'), bar=$('ezanBar'), KEY='radyoai_ezan_v1';
+  const NAMES=[['Fajr','Sabah'],['Dhuhr','Öğle'],['Asr','İkindi'],['Maghrib','Akşam'],['Isha','Yatsı']];
+  let on=false, coords=null, timings=null, tz='', loadedDate='', fired={}, hideT=null;
+  const sv=o=>{ try{ localStorage.setItem(KEY,JSON.stringify(o)); }catch(e){} };
+  const ld=()=>{ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } };
+  function nowIn(){
+    const f=new Intl.DateTimeFormat('en-GB',{timeZone:tz||undefined,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+    const p={}; f.formatToParts(new Date()).forEach(x=>p[x.type]=x.value);
+    return {date:p.year+'-'+p.month+'-'+p.day, dmy:p.day+'-'+p.month+'-'+p.year, min:(+p.hour)*60+(+p.minute)};
+  }
+  async function load(){
+    if(!coords) return;
+    const n=nowIn();
+    try{
+      const r=await fetch('https://api.aladhan.com/v1/timings/'+n.dmy+'?latitude='+coords.lat+'&longitude='+coords.lon+'&method=13');
+      const j=await r.json();
+      timings=j.data.timings; tz=j.data.meta.timezone||tz; loadedDate=nowIn().date;
+    }catch(e){ timings=null; }
+  }
+  function show(name){
+    $('ezanTxt').textContent='🕌 '+name+' ezanı vakti girdi';
+    bar.hidden=false; clearTimeout(hideT); hideT=setTimeout(()=>{ bar.hidden=true; },120000);
+    try{ if('Notification' in window && Notification.permission==='granted' && document.hidden) new Notification('RadyoAI',{body:name+' ezanı vakti girdi 🕌'}); }catch(e){}
+  }
+  async function check(){
+    if(!on||!coords) return;
+    const n=nowIn();
+    if(!timings||loadedDate!==n.date) await load();
+    if(!timings) return;
+    NAMES.forEach(([k,name])=>{
+      const t=(timings[k]||'').slice(0,5).split(':'); if(t.length<2) return;
+      const m=(+t[0])*60+(+t[1]), key=n.date+k;
+      if(n.min>=m && n.min<=m+1 && !fired[key]){ fired[key]=1; show(name); }
+    });
+  }
+  function setOn(v){ on=v; btn.classList.toggle('on',v); btn.title=v?'Ezan vakti uyarısı açık':'Ezan vakti uyarısı'; sv({on:v,coords}); }
+  function ask(){
+    if(!navigator.geolocation){ alert('Bu cihaz konum bilgisini desteklemiyor.'); return; }
+    navigator.geolocation.getCurrentPosition(async pos=>{
+      coords={lat:+pos.coords.latitude.toFixed(2),lon:+pos.coords.longitude.toFixed(2)};
+      setOn(true); await load(); check();
+      try{ if('Notification' in window && Notification.permission==='default') Notification.requestPermission(); }catch(e){}
+      $('ezanTxt').textContent='🕌 Ezan vakti uyarısı açıldı'; bar.hidden=false; clearTimeout(hideT); hideT=setTimeout(()=>{ bar.hidden=true; },4000);
+    },()=>{ alert('Ezan vakti uyarısı için konum izni gerekli. Tarayıcı ayarlarından konuma izin verebilirsin.'); },{timeout:15000,maximumAge:3600000});
+  }
+  btn.onclick=()=>{ if(on){ setOn(false); } else if(coords){ setOn(true); load().then(check); } else ask(); };
+  $('ezanClose').onclick=()=>{ bar.hidden=true; };
+  $('ezanPause').onclick=()=>{ try{ if(!audio.paused) pause(); }catch(e){} bar.hidden=true; };
+  const saved=ld(); if(saved&&saved.coords){ coords=saved.coords; if(saved.on){ setOn(true); load(); } }
+  setInterval(check,15000);
+})();
+
+/* ---- Armağan et: çalan şarkıyı bir isme armağan eden link üretir ---- */
+(function(){
+  const M=$('giftModal');
+  const open=()=>{ $('gOut').hidden=true; M.hidden=false; setTimeout(()=>{ try{$('gTo').focus();}catch(e){} },50); };
+  $('giftBtn').onclick=open; $('giftX').onclick=()=>{ M.hidden=true; };
+  M.addEventListener('click',e=>{ if(e.target===M) M.hidden=true; });
+  $('gMake').onclick=()=>{
+    const to=$('gTo').value.trim(); if(!to){ $('gTo').focus(); return; }
+    const q=new URLSearchParams({ s: baseOf(tracks[idx]), to });
+    const f=$('gFrom').value.trim(), n=$('gNote').value.trim();
+    if(f) q.set('f',f); if(n) q.set('n',n);
+    const link=(CONFIG.SITE_URL||location.origin+'/')+'?'+q.toString();
+    const msg=to+', sana bir şarkı yolladım'+(f?' ('+f+')':'')+'. Dinlemek için dokun: '+link;
+    $('gLink').value=link; $('gOut').hidden=false; $('gHint').hidden=true;
+    $('gWa').href='https://wa.me/?text='+encodeURIComponent(msg);
+    $('gShare').hidden=!navigator.share;
+    $('gShare').onclick=()=>{ try{ navigator.share({title:'RadyoAI',text:to+', sana bir şarkı yolladım',url:link}); }catch(e){} };
+    const hint=t=>{ const h=$('gHint'); h.textContent=t; h.hidden=false; };
+    const copy=()=>{
+      try{ if(navigator.clipboard) return navigator.clipboard.writeText(msg).then(()=>true).catch(()=>fb()); }catch(e){}
+      return Promise.resolve(fb());
+    };
+    const fb=()=>{ try{ const l=$('gLink'); l.value=msg; l.focus(); l.select(); l.setSelectionRange(0,99999); const ok=document.execCommand('copy'); l.value=link; return ok; }catch(e){ return false; } };
+    $('gCopy').textContent='Kopyala';
+    $('gCopy').onclick=()=>{ copy().then(ok=>{ $('gCopy').textContent=ok?'Kopyalandı ✓':'Kopyalanamadı'; }); };
+    // ---- Hikâye kartı: şarkı adı + isim içeren 1080x1920 görsel ----
+    const wrap=(c,text,x,y,maxW,lh,maxLines)=>{
+      const words=String(text).split(' '); let line='', n=0;
+      for(let i=0;i<words.length;i++){
+        const t=line?line+' '+words[i]:words[i];
+        if(c.measureText(t).width>maxW && line){ c.fillText(line,x,y); y+=lh; line=words[i]; if(++n>=maxLines-1){ line=words.slice(i).join(' '); break; } }
+        else line=t;
+      }
+      if(c.measureText(line).width>maxW){ while(line.length>1 && c.measureText(line+'…').width>maxW) line=line.slice(0,-1); line+='…'; }
+      c.fillText(line,x,y); return y+lh;
+    };
+    function makeCard(){
+      const W=1080,H=1920, cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+      const c=cv.getContext('2d'); if(!c) return null;
+      const F="'Space Grotesk',Inter,Arial,sans-serif";
+      const to=$('gTo').value.trim(), from=$('gFrom').value.trim(), note=$('gNote').value.trim(), T=tracks[idx];
+      const rr=(x,y,w,h,r)=>{ c.beginPath(); if(c.roundRect) c.roundRect(x,y,w,h,r); else c.rect(x,y,w,h); };
+      // --- arka plan: koyu zemin + renkli ışık küreleri
+      let g=c.createLinearGradient(0,0,0,H); g.addColorStop(0,'#0a0a12'); g.addColorStop(.55,'#150c27'); g.addColorStop(1,'#07070c'); c.fillStyle=g; c.fillRect(0,0,W,H);
+      const orb=(x,y,r,col)=>{ const o=c.createRadialGradient(x,y,0,x,y,r); o.addColorStop(0,col); o.addColorStop(1,'rgba(0,0,0,0)'); c.fillStyle=o; c.fillRect(0,0,W,H); };
+      orb(540,560,760,'rgba(168,85,247,.50)'); orb(1000,1500,620,'rgba(236,72,153,.22)'); orb(60,1100,560,'rgba(46,229,166,.14)');
+      c.textAlign='center'; c.textBaseline='alphabetic';
+      // --- üst etiket
+      rr(380,92,320,64,32); c.fillStyle='rgba(255,255,255,.08)'; c.fill(); c.strokeStyle='rgba(255,255,255,.18)'; c.lineWidth=2; c.stroke();
+      c.beginPath(); c.arc(424,124,9,0,Math.PI*2); c.fillStyle='#2ee5a6'; c.shadowColor='#2ee5a6'; c.shadowBlur=18; c.fill(); c.shadowBlur=0;
+      c.fillStyle='#fff'; c.font='700 30px '+F; c.letterSpacing='6px'; c.textAlign='left'; c.fillText('RADYOAI',448,135); c.letterSpacing='0px'; c.textAlign='center';
+      // --- büyük plak
+      const cx=540, cy=450, R=225;
+      c.save(); c.shadowColor='rgba(168,85,247,.8)'; c.shadowBlur=90; c.beginPath(); c.arc(cx,cy,R,0,Math.PI*2); c.fillStyle='#07070b'; c.fill(); c.restore();
+      g=c.createRadialGradient(cx,cy,40,cx,cy,R); g.addColorStop(0,'#17171f'); g.addColorStop(.6,'#0b0b11'); g.addColorStop(1,'#000'); c.beginPath(); c.arc(cx,cy,R,0,Math.PI*2); c.fillStyle=g; c.fill();
+      for(let r=100;r<R-6;r+=13){ c.beginPath(); c.arc(cx,cy,r,0,Math.PI*2); c.strokeStyle='rgba(255,255,255,'+(r%28?'.035':'.07')+')'; c.lineWidth=2; c.stroke(); }
+      if(c.createConicGradient){ const cg=c.createConicGradient(-0.6,cx,cy); cg.addColorStop(0,'rgba(255,255,255,0)'); cg.addColorStop(.08,'rgba(255,255,255,.20)'); cg.addColorStop(.16,'rgba(255,255,255,0)'); cg.addColorStop(.5,'rgba(255,255,255,0)'); cg.addColorStop(.58,'rgba(168,85,247,.28)'); cg.addColorStop(.66,'rgba(255,255,255,0)'); cg.addColorStop(1,'rgba(255,255,255,0)'); c.beginPath(); c.arc(cx,cy,R-4,0,Math.PI*2); c.fillStyle=cg; c.fill(); }
+      c.beginPath(); c.arc(cx,cy,R,0,Math.PI*2); c.strokeStyle='rgba(255,255,255,.22)'; c.lineWidth=4; c.stroke();
+      g=c.createLinearGradient(cx-100,cy-100,cx+100,cy+100); g.addColorStop(0,'#c084fc'); g.addColorStop(1,'#7c3aed'); c.beginPath(); c.arc(cx,cy,88,0,Math.PI*2); c.fillStyle=g; c.fill();
+      c.beginPath(); c.arc(cx,cy,12,0,Math.PI*2); c.fillStyle='#0a0a12'; c.fill();
+      c.fillStyle='#fff'; c.font='700 56px '+F; c.fillText('R',cx,cy-28);
+      c.font='600 18px '+F; c.letterSpacing='5px'; c.fillText('RADYOAI',cx+2,cy+56); c.letterSpacing='0px';
+      // --- "<GÖNDEREN> sana bir şarkı yolladı" + not
+      c.fillStyle='#fff'; c.font='700 104px '+F; c.shadowColor='rgba(168,85,247,.55)'; c.shadowBlur=40;
+      let y=wrap(c,(from||'Bir dost').toLocaleUpperCase('tr'),cx,860,920,116,2); c.shadowBlur=0;
+      c.fillStyle='rgba(255,255,255,.88)'; c.font='600 58px '+F; c.fillText('sana bir şarkı yolladı',cx,y+10); y+=76;
+      if(note){ c.fillStyle='#d8b4fe'; c.font='600 34px '+F; c.letterSpacing='6px'; c.fillText('NOT',cx+3,y+30); c.letterSpacing='0px';
+        c.fillStyle='rgba(255,255,255,.94)'; c.font='italic 500 48px '+F; y=wrap(c,'“'+note+'”',cx,y+96,880,64,3)-6; }
+      // --- şarkı paneli (cam efekti)
+      const by=Math.max(y+40,1160), bh=250;
+      rr(80,by,920,bh,44); g=c.createLinearGradient(0,by,0,by+bh); g.addColorStop(0,'rgba(168,85,247,.34)'); g.addColorStop(1,'rgba(124,58,237,.14)'); c.fillStyle=g; c.fill(); c.strokeStyle='rgba(216,180,254,.65)'; c.lineWidth=3; c.stroke();
+      c.fillStyle='#d8b4fe'; c.font='600 28px '+F; c.letterSpacing='6px'; c.fillText('♪  ŞARKI',cx+3,by+56); c.letterSpacing='0px';
+      c.fillStyle='#fff'; c.font='700 70px '+F; wrap(c,T.title,cx,by+142,840,76,2);
+      c.fillStyle='rgba(255,255,255,.72)'; c.font='500 34px '+F; wrap(c,T.credit||CONFIG.ARTIST,cx,by+214,840,42,1);
+      // --- ekolayzer çubukları
+      let seed=0; for(const ch of (T.title+to)) seed=(seed*31+ch.charCodeAt(0))>>>0;
+      const rnd=()=>{ seed=(seed*1664525+1013904223)>>>0; return seed/4294967296; };
+      const py=1740, avail=py-(by+bh)-50;
+      if(avail>=90){
+        const n=36, bw=14, gap=12, tw=n*bw+(n-1)*gap, bx0=(W-tw)/2, mid=by+bh+50+avail/2, mx=avail/2-6;
+        for(let i=0;i<n;i++){ const hh=Math.max(8,(0.25+0.75*rnd())*mx*(0.55+0.45*Math.sin(i/(n-1)*Math.PI))); const x=bx0+i*(bw+gap);
+          const gg=c.createLinearGradient(0,mid-hh,0,mid+hh); gg.addColorStop(0,'#c084fc'); gg.addColorStop(1,'#ec4899'); c.fillStyle=gg; rr(x,mid-hh,bw,hh*2,7); c.fill(); }
+      }
+      // --- alt buton: dinle
+      rr(230,py,620,104,52); g=c.createLinearGradient(230,0,850,0); g.addColorStop(0,'#a855f7'); g.addColorStop(1,'#ec4899'); c.fillStyle=g; c.fill();
+      c.fillStyle='#fff'; c.font='700 44px '+F; c.fillText('▶  radioai.com.tr',cx,py+66);
+      c.fillStyle='rgba(255,255,255,.55)'; c.font='500 30px '+F; c.fillText('Dinlemek için bağlantıya dokun',cx,1884);
+      return cv;
+    }
+    window.__makeCard=makeCard;
+    let cardFile=null;
+    try{ const cv=makeCard(); if(cv && cv.toBlob) cv.toBlob(bl=>{ if(bl){ try{ cardFile=new File([bl],'radyoai-sarki.png',{type:'image/png'}); }catch(e){ cardFile=null; } } },'image/png'); }catch(e){}
+    function copyNow(){
+      // Hikâye çıkartması için yalnızca LİNK kopyalanır
+      let ok=false;
+      try{ const t=document.createElement('textarea'); t.value=link; t.setAttribute('readonly',''); t.style.cssText='position:fixed;top:0;left:0;opacity:0;font-size:16px'; document.body.appendChild(t); t.focus(); t.select(); t.setSelectionRange(0,99999); ok=document.execCommand('copy'); t.remove(); }catch(e){}
+      try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(link).catch(()=>{}); ok=true; } }catch(e){}
+      return ok;
+    }
+    const ua=navigator.userAgent||'', isAndroid=/Android/i.test(ua), isIOS=/iPhone|iPad|iPod/i.test(ua);
+    function story(name, iosScheme, androidIntent, web){
+      const ok=copyNow();   // 1) link önce kopyalanır
+      const btn=name==='Instagram'?$('gIg'):$('gTt'), old=btn.textContent;
+      if(ok){ btn.textContent='Link kopyalandı ✓'; setTimeout(()=>{ btn.textContent=old; },2500); }
+      const how=name==='Instagram' ? 'Hikâyeye “Bağlantı” çıkartması ekleyip yapıştır.' : 'Açıklamaya yapıştır.';
+      // 2) Kart görseli telefonun paylaş menüsüne gider (Instagram → Hikâyen / TikTok)
+      if(cardFile && navigator.canShare && navigator.canShare({files:[cardFile]})){
+        hint((ok?'✓ Link kopyalandı. ':'')+'Kart hazır: menüden '+(name==='Instagram'?'Instagram → Hikâyen':'TikTok')+' seç. '+how);
+        navigator.share({files:[cardFile]}).catch(()=>{});
+        return;
+      }
+      // 3) Menü yoksa: kartı indir, sonra uygulamayı aç
+      try{ const cv=makeCard(); if(cv){ const a=document.createElement('a'); a.download='radyoai-sarki.png'; a.href=cv.toDataURL('image/png'); document.body.appendChild(a); a.click(); a.remove(); } }catch(e){}
+      hint((ok?'✓ Link kopyalandı. ':'')+'Kart görseli indirildi (Galeri/İndirilenler). '+name+'’da hikâyene kartı seç. '+how);
+      setTimeout(()=>{
+        if(isAndroid) location.href=androidIntent;
+        else if(isIOS){ location.href=iosScheme; setTimeout(()=>{ if(!document.hidden) window.open(web,'_blank','noopener'); },2500); }
+        else window.open(web,'_blank','noopener');
+      },1200);
+    }
+    $('gIg').onclick=()=>story('Instagram','instagram://story-camera','intent://story-camera#Intent;scheme=instagram;package=com.instagram.android;S.browser_fallback_url='+encodeURIComponent('https://www.instagram.com/')+';end','https://www.instagram.com/');
+    $('gTt').onclick=()=>story('TikTok','tiktok://','intent://#Intent;scheme=tiktok;package=com.zhiliaoapp.musically;S.browser_fallback_url='+encodeURIComponent('https://www.tiktok.com/')+';end','https://www.tiktok.com/');
+  };
+})();
+</script>
+<script src="akis.js" defer></script>
+</body>
+</html>
+
+
+
+
+
