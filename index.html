@@ -225,9 +225,9 @@ body.yayin #yayinInfo{display:block;flex:none;text-align:center;padding:14px 16p
 @media (max-width:380px){.sponsor-logo img{height:40px}.sponsor-slogan{font-size:13px}}
 @media (prefers-reduced-motion:reduce){.sponsor-cerceve,.sponsor-kart::after{animation:none}}
 
-#masalOverlay{position:fixed;inset:0;z-index:65;display:grid;place-items:center;pointer-events:none;overflow:hidden}
+#masalOverlay{position:fixed;top:0;right:0;bottom:0;left:0;inset:0;z-index:65;display:flex;align-items:center;justify-content:center;display:grid;place-items:center;pointer-events:none;overflow:hidden}
 #masalOverlay[hidden]{display:none}
-#masalOverlay img{width:min(96vw,560px);max-height:86dvh;object-fit:contain;filter:drop-shadow(0 0 22px #f5aa3060);animation:masalEnter .7s cubic-bezier(.16,1,.3,1) both,masalFloat 3s .7s ease-in-out infinite}
+#masalOverlay img{width:96vw;max-width:560px;height:auto;max-height:86vh;width:min(96vw,560px);max-height:86dvh;object-fit:contain;filter:drop-shadow(0 0 22px #f5aa3060);animation:masalEnter .7s cubic-bezier(.16,1,.3,1) both,masalFloat 3s .7s ease-in-out infinite}
 #masalOverlay.leaving img{animation:masalExit .55s ease-in both}
 #masalClose{position:absolute;right:16px;top:16px;pointer-events:auto;background:#341513;color:white;border:1px solid #efc367;border-radius:50%;width:40px;height:40px;font-size:24px}
 @keyframes masalEnter{from{opacity:0;transform:translateY(120px) scale(.35)}to{opacity:1;transform:translateY(0) scale(1)}}
@@ -235,15 +235,15 @@ body.yayin #yayinInfo{display:block;flex:none;text-align:center;padding:14px 16p
 @keyframes masalExit{to{opacity:0;transform:translateY(60px) scale(.65)}}
 @media(prefers-reduced-motion:reduce){#masalOverlay img,#masalOverlay.leaving img{animation:none}}
 
-#sedaOverlay{position:fixed;inset:0;z-index:65;display:grid;place-items:center;pointer-events:none;overflow:hidden}
+#sedaOverlay{position:fixed;top:0;right:0;bottom:0;left:0;inset:0;z-index:65;display:flex;align-items:center;justify-content:center;display:grid;place-items:center;pointer-events:none;overflow:hidden}
 #sedaOverlay[hidden]{display:none}
-.sedaGift{position:relative;width:min(88vw,430px);text-align:center;animation:masalEnter .7s cubic-bezier(.16,1,.3,1) both,masalFloat 3s .7s ease-in-out infinite;filter:drop-shadow(0 0 24px #ffbf5470)}
-.sedaMedal{position:relative;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border:7px solid #f5c35a;border-radius:50%;background:radial-gradient(circle at 35% 28%,#fff2b0,#d99a30 60%,#995114);box-shadow:inset 0 0 30px #fff6b9,0 0 36px #efa62d80;color:#8b1121}
+.sedaGift{position:relative;width:88vw;max-width:430px;width:min(88vw,430px);text-align:center;animation:masalEnter .7s cubic-bezier(.16,1,.3,1) both,masalFloat 3s .7s ease-in-out infinite;filter:drop-shadow(0 0 24px #ffbf5470)}
+.sedaMedal{position:relative;height:350px;height:min(88vw,430px);aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border:7px solid #f5c35a;border-radius:50%;background:radial-gradient(circle at 35% 28%,#fff2b0,#d99a30 60%,#995114);box-shadow:inset 0 0 30px #fff6b9,0 0 36px #efa62d80;color:#8b1121}
 .sedaMedal::before{content:'';position:absolute;inset:-18px;border:2px solid #ffde86;border-radius:50%;box-shadow:0 0 15px #ffcd67;animation:sedaGlow 2s ease-in-out infinite}
 .sedaBrand{width:62%;max-height:70px;object-fit:contain;mix-blend-mode:multiply;margin:0 0 12px}
-.sedaMedal strong{font-family:Georgia,serif;font-size:clamp(30px,9vw,50px);line-height:1.05;text-shadow:0 1px #fff0b3}
-.sedaSpices{position:absolute;right:-12px;bottom:10%;font-size:clamp(40px,14vw,72px);transform:rotate(-15deg);filter:drop-shadow(0 3px 4px #69200c80)}
-.sedaRibbon{position:relative;margin:-18px -5px 0;padding:14px 12px;border:2px solid #f7d773;border-radius:12px;background:linear-gradient(#ad2630,#6c1020);color:#fff0b3;font:italic bold clamp(17px,5vw,25px) Georgia,serif;box-shadow:0 4px 15px #0008}
+.sedaMedal strong{font-family:Georgia,serif;font-size:40px;font-size:clamp(30px,9vw,50px);line-height:1.05;text-shadow:0 1px #fff0b3}
+.sedaSpices{position:absolute;right:-12px;bottom:10%;font-size:60px;font-size:clamp(40px,14vw,72px);transform:rotate(-15deg);filter:drop-shadow(0 3px 4px #69200c80)}
+.sedaRibbon{position:relative;margin:-18px -5px 0;padding:14px 12px;border:2px solid #f7d773;border-radius:12px;background:linear-gradient(#ad2630,#6c1020);color:#fff0b3;font:italic bold 22px Georgia,serif;font:italic bold clamp(17px,5vw,25px) Georgia,serif;box-shadow:0 4px 15px #0008}
 #sedaClose{position:absolute;right:16px;top:16px;pointer-events:auto;background:#341513;color:#fff;border:1px solid #efc367;border-radius:50%;width:40px;height:40px;font-size:24px}
 @keyframes sedaGlow{50%{transform:scale(1.03);opacity:.5}}
 @media(prefers-reduced-motion:reduce){.sedaGift,.sedaMedal::before{animation:none}}
@@ -543,6 +543,8 @@ function nextAd(){
   if(masalAd){sponsorParla(false);$('title').textContent='Masal Çay Evi';$('sub').textContent='Sponsor: Masal Çay Evi';document.title='Masal Çay Evi · RadyoAI';}
   if ('mediaSession' in navigator){ try { navigator.mediaSession.metadata = new MediaMetadata({ title: masalAd ? 'Masal Çay Evi' : isIdent ? 'DJ YavRu' : 'Reklam Arası', artist: masalAd ? 'Masal Çay Evi' : isIdent ? 'RadyoAI' : ADS.NAME, album: 'RadyoAI' }); } catch(e){} }
   useSource(encodeURI(adAlt.shift()));
+  if (masalAd) showMasal(true);
+  if (sedaAd) showSeda(true);
   if (wantPlay) play();
 }
 function adError(){ if (adAlt.length){ audio.src = encodeURI(adAlt.shift()); if (wantPlay) play(); } else nextAd(); }
@@ -668,14 +670,12 @@ function releaseDeck(el){ try { el.pause(); el.removeAttribute('src'); el.load()
 function useSource(src){
   cancelFade();
   otherDeck().pause();
-  if (WA && prepared && prepared.src === src && prepared.el.readyState >= 3){
-    const old = audio;
-    audio = prepared.el; prepared = null;
-    releaseDeck(old);
-    audio.volume = volEl.value/100;
-  } else {
-    audio.src = src;
-  }
+  // Reuse the user-activated element for every hard transition. A buffered
+  // spare deck is not necessarily allowed to play on TV browsers.
+  // Only startXfade may switch decks, after its play() has succeeded.
+  prepared = null;
+  audio.src = src;
+  audio.volume = volEl.value/100;
   $('dur').textContent = fmt(audio.duration);
   $('cur').textContent = fmt(audio.currentTime);
 }
@@ -1288,6 +1288,7 @@ if (!GIFT && tracks.length){
 <script src="akis.js" defer></script>
 </body>
 </html>
+
 
 
 
