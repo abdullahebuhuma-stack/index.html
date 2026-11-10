@@ -40,7 +40,7 @@
       .filter(Boolean).map(function (el) {
         return { el: el, position: el.currentTime || 0, source: el.currentSrc || el.src,
           audible: !el.muted && el.volume > 0, running: !el.paused && el.readyState >= 3,
-          seeking: el.seeking, lastProgress: -Infinity };
+          seeking: el.seeking, rate: Number(el.playbackRate) || 1, lastProgress: -Infinity };
       });
 
     function on(target, event, fn) {
@@ -53,17 +53,17 @@
       if (pageOpen && previousVisible) visibleTotal += Math.min(elapsed, 5);
       decks.forEach(function (d) {
         var el = d.el, position = Number(el.currentTime) || 0;
-        var source = el.currentSrc || el.src, rate = Number(el.playbackRate) || 1;
+        var source = el.currentSrc || el.src, rate = d.rate;
         var advance = position - d.position;
         if (pageOpen && d.audible && d.running && !d.seeking && !el.seeking &&
             source === d.source && advance > 0 && advance <= elapsed * rate + 0.5) {
           // Use the union of both decks, so crossfade never doubles duration.
-          heard = Math.max(heard, Math.min(advance / rate, elapsed, 120));
+          heard = Math.max(heard, Math.min(advance / rate, elapsed));
           d.lastProgress = t;
         }
         d.position = position; d.source = source;
         d.audible = !el.muted && el.volume > 0;
-        d.seeking = el.seeking;
+        d.seeking = el.seeking; d.rate = Number(el.playbackRate) || 1;
       });
       listeningTotal += heard;
       previousTime = t; previousVisible = !document.hidden;
