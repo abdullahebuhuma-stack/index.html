@@ -247,6 +247,7 @@ body.yayin #yayinInfo{display:block;flex:none;text-align:center;padding:14px 16p
 #sedaClose{position:absolute;right:16px;top:16px;pointer-events:auto;background:#341513;color:#fff;border:1px solid #efc367;border-radius:50%;width:40px;height:40px;font-size:24px}
 @keyframes sedaGlow{50%{transform:scale(1.03);opacity:.5}}
 @media(prefers-reduced-motion:reduce){.sedaGift,.sedaMedal::before{animation:none}}
+.sedaArtwork{display:block;width:100%;height:auto;max-height:86vh;max-height:86dvh;object-fit:contain;filter:drop-shadow(0 0 22px #f5aa3060)}
 </style>
 </head>
 <body>
@@ -341,7 +342,7 @@ body.yayin #yayinInfo{display:block;flex:none;text-align:center;padding:14px 16p
 
 <audio id="audio" preload="metadata" playsinline></audio>
 
-<div id="sedaOverlay" hidden aria-label="Seda Baharat sponsor reklamı"><div class="sedaGift"><div class="sedaMedal"><img class="sedaBrand" alt="Seda Baharat"><strong>SEDA<br>BAHARAT</strong><span class="sedaSpices" aria-hidden="true">🌶️ 🌿</span></div><p class="sedaRibbon">Lezzetinize renk katın</p></div><button id="sedaClose" type="button" aria-label="Görseli kapat">×</button></div>
+<div id="sedaOverlay" hidden aria-label="Seda Baharat sponsor reklamı"><div class="sedaGift"><img class="sedaArtwork" src="seda-sponsor.png" alt="Seda Baharat — Sofralarınızdaki tat"></div><button id="sedaClose" type="button" aria-label="Görseli kapat">×</button></div>
 <div id="masalOverlay" hidden aria-label="Masal Çay Evi sponsor reklamı"><img src="masal-sponsor.png" alt="Masal Çay Evi — Her sohbette bir masal"><button id="masalClose" type="button" aria-label="Görseli kapat">×</button></div>
 <script>
 /* ============ AYARLAR — burayı düzenle ============ */
@@ -543,8 +544,6 @@ $('masalClose').onclick=()=>{masalDismissed=true;showMasal(false);};
 function showSeda(on){
  const el=$('sedaOverlay');
  if(on){
-  const img=el.querySelector('.sedaBrand');
-  if(!img.getAttribute('src')) img.src=document.querySelector('.sponsor-logo img').src;
   el.hidden=false;
  }else el.hidden=true;
 }
