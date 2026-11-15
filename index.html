@@ -498,6 +498,7 @@ bind('playing', ()=>{ if(masalAd && !masalDismissed) showMasal(true); if(sedaAd 
 bind('waiting', ()=>{ $('sub').textContent = 'Yükleniyor…'; });
 bind('loadedmetadata', ()=>{ $('dur').textContent = fmt(audio.duration); });
 bind('timeupdate', ()=>{
+  if(inAd && Number.isFinite(audio.currentTime)) adLastTime = audio.currentTime;
   if (seeking) return;
   $('cur').textContent = fmt(audio.currentTime);
   if (audio.duration){ $('seek').value = audio.currentTime/audio.duration*1000; setFill($('seek')); }
@@ -548,8 +549,9 @@ function showSeda(on){
  }else el.hidden=true;
 }
 $('sedaClose').onclick=()=>{sedaDismissed=true;showSeda(false);};
-let openingJingle = false;
+let openingJingle = false, adRetryCount = 0, adLastTime = 0;
 function nextAd(){
+  adRetryCount = 0; adLastTime = 0; pendingSeek = 0;
   showMasal(false);showSeda(false);masalAd=false;sedaAd=false;masalDismissed=false;sedaDismissed=false;
   if (!adQ.length){ inAd = false; isIdent = false; sponsorParla(false); const next = openingJingle ? idx : nextIndex(1); openingJingle = false; load(next); if (wantPlay) play(); return; }
   adAlt = [].concat(adQ.shift()); srcTry = 0;
@@ -566,7 +568,32 @@ function nextAd(){
   if (sedaAd) showSeda(true);
   if (wantPlay) play();
 }
-function adError(){ if (adAlt.length){ useSource(encodeURI(adAlt.shift())); if (wantPlay) play(); } else nextAd(); }
+function adError(){
+  const code = audio.error && audio.error.code;
+  // A transient network/decode failure must not skip an unfinished sponsor.
+  if ((!code || code === 2 || code === 3) && adRetryCount < 2){
+    const src = audio.src;
+    const position = Math.max(adLastTime, audio.currentTime || 0);
+    adRetryCount++;
+    useSource(src);
+    pendingSeek = position;
+    $('sub').textContent = 'Reklam bağlantısı yenileniyor…';
+    if (wantPlay){
+      if (position > 0){
+        const el = audio, attempt = playAttempt;
+        el.addEventListener('seeked', ()=>{
+          if (audio === el && playAttempt === attempt && inAd && wantPlay) play();
+        }, {once:true});
+        // Load metadata and seek before playback, avoiding a replay from zero.
+        el.load();
+      } else play();
+    }
+    return;
+  }
+  pendingSeek = 0; adLastTime = 0;
+  if (adAlt.length){ useSource(encodeURI(adAlt.shift())); if (wantPlay) play(); }
+  else nextAd();
+}
 bind('ended', ()=>{
   if (inAd){ nextAd(); return; }
   songsSinceAd++; totalSongs++;
