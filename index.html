@@ -297,6 +297,26 @@ body.yayin #showChat{display:block}
 #donerClose{position:absolute;right:16px;top:62px;pointer-events:auto;background:#29190e;color:#ffd08a;border:1px solid #b87431;border-radius:50%;width:40px;height:40px;font-size:24px}
 #donerSponsor.parla .sponsor-cerceve{animation:sponsorRenk 2s linear infinite,sponsorNabiz 1.2s ease-in-out infinite}
 @media(prefers-reduced-motion:reduce){#donerVideo{animation:none}}
+
+/* Compact permanent sponsors leave more room for chat. */
+.sponsorbox{padding:11px 10px 7px}
+.sponsor-grid{grid-template-columns:repeat(2,minmax(0,1fr));max-width:304px;gap:8px}
+.sponsor-grid .sponsor{display:block;padding-top:0}
+.sponsor-grid .sponsor-cerceve{padding:2px;border-radius:12px}
+.sponsor-grid .sponsor-kart{padding:4px 6px;border-radius:10px}
+.sponsor-grid .sponsor-ust{flex-direction:column;align-items:stretch;gap:3px}
+.sponsor-grid .sponsor-logo{width:100%;padding:2px 4px;border-radius:7px}
+.sponsor-grid .sponsor-logo img{height:24px;width:100%;object-fit:contain}
+.sponsor-grid .sponsor-yazi{width:100%;text-align:center}
+.sponsor-grid .sponsor-slogan{display:none}
+.sponsor-grid .sponsor-butonlar{display:flex;flex-wrap:nowrap;gap:4px}
+.sponsor-grid .sponsor-butonlar a{flex:1 1 auto;min-height:28px;padding:4px 5px;font-size:11px;line-height:1.1;border-radius:8px}
+.sponsor-grid .sponsor-butonlar a.ikincil{flex-grow:2}
+.sponsor-grid .sponsor-rozet{top:-8px;left:8px;font-size:7px;letter-spacing:.08em;padding:2px 6px}
+.sponsor-grid .sponsor-davet{position:absolute;top:auto;bottom:-18px;left:0;right:auto;display:block;width:max-content;max-width:100%;margin:0;line-height:12px;text-align:center;padding:1px 5px;font-size:8px}
+body:not(.yayin) .sponsorbox{padding-bottom:20px}
+body.yayin .sponsorbox{padding-bottom:7px}
+
 </style>
 </head>
 <body>
