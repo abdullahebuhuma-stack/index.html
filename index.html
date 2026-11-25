@@ -286,12 +286,24 @@ body.yayin #yayinInfo{display:block;flex:none;text-align:center;padding:14px 16p
  body:not(.yayin) .sponsorbox{padding-bottom:34px}
 }
 
+
+#showChat{display:none;border:1px solid #a855f780;border-radius:99px;padding:7px 10px;background:#21142f;color:#fff;font-size:11px;white-space:nowrap}
+body.yayin #showChat{display:block}
+@media(max-width:380px){body.yayin .brand{gap:6px}body.yayin .brand b{font-size:12px}body.yayin .live{padding:6px 8px}body.yayin header{gap:6px;padding:0 10px}}
+#openingSponsorImage{border-radius:50%;filter:drop-shadow(0 0 14px #c7762c55)}
+#donerOverlay{position:fixed;inset:0;z-index:65;display:grid;place-items:center;pointer-events:none;overflow:hidden}
+#donerOverlay[hidden]{display:none}
+#donerVideo{display:block;width:min(84vw,420px);max-height:70dvh;aspect-ratio:1;object-fit:contain;border-radius:50%;filter:drop-shadow(0 0 22px #b46b3670);animation:masalEnter .7s cubic-bezier(.16,1,.3,1) both}
+#donerClose{position:absolute;right:16px;top:62px;pointer-events:auto;background:#29190e;color:#ffd08a;border:1px solid #b87431;border-radius:50%;width:40px;height:40px;font-size:24px}
+#donerSponsor.parla .sponsor-cerceve{animation:sponsorRenk 2s linear infinite,sponsorNabiz 1.2s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){#donerVideo{animation:none}}
 </style>
 </head>
 <body>
 <div id="app">
   <header>
     <div class="brand"><div class="logo display">R</div><b class="display">RADYOAI</b></div>
+    <button type="button" id="showChat" aria-controls="listWrap">Sohbeti aç</button>
     <div class="live"><i id="dot" class="off"></i><span id="liveTxt">HAZIR</span><em id="n"></em></div>
   </header>
   <div id="akis" class="banner" role="status" hidden></div>
@@ -386,6 +398,7 @@ body.yayin #yayinInfo{display:block;flex:none;text-align:center;padding:14px 16p
 </div>
 <div id="ezanBar" hidden><span id="ezanTxt"></span><button id="ezanPause" type="button">Müziği duraklat</button><button id="ezanClose" type="button" aria-label="Kapat">✕</button></div>
 <div id="gate">
+  <img id="openingSponsorImage" src="doner-agaci-poster.jpg" alt="Döner Ağacı — Odun ateşinde nefis et döneri" hidden>
 
   <div class="vinyl spin"><div class="label display">R</div></div>
   <h2 class="display">RADYOAI HAZIR</h2>
@@ -395,6 +408,7 @@ body.yayin #yayinInfo{display:block;flex:none;text-align:center;padding:14px 16p
 
 <audio id="audio" preload="metadata" playsinline></audio>
 
+<div id="donerOverlay" hidden aria-label="Döner Ağacı sponsor reklamı"><video id="donerVideo" src="doner-agaci-reklam.mp4" poster="doner-agaci-poster.jpg" muted playsinline preload="metadata" aria-label="Döner Ağacı hareketli reklamı"></video><button type="button" id="donerClose" aria-label="Döner Ağacı görselini kapat">×</button></div>
 <div id="sedaOverlay" hidden aria-label="Seda Baharat sponsor reklamı"><div class="sedaGift"><img class="sedaArtwork" src="seda-sponsor.png?v=nur-280b31a" alt="Nur Seda Baharat — Doğallığın Adresi"></div><button id="sedaClose" type="button" aria-label="Görseli kapat">×</button></div>
 <div id="masalOverlay" hidden aria-label="Masal Çay Evi sponsor reklamı"><img src="masal-sponsor.png" alt="Masal Çay Evi — Her sohbette bir masal"><button id="masalClose" type="button" aria-label="Görseli kapat">×</button></div>
 <script>
@@ -450,6 +464,11 @@ const CONFIG = {
 
 const $ = id => document.getElementById(id);
 try { if (new URLSearchParams(location.search).has('yayin')) document.body.classList.add('yayin'); } catch(e){}   // ?yayin: sosyal medya yayını için temiz görünüm
+$('showChat').onclick=()=>{
+  document.body.classList.remove('yayin');
+  const url=new URL(location.href);url.searchParams.delete('yayin');history.replaceState(null,'',url);
+  $('listWrap').scrollIntoView({block:'nearest'});
+};
 const A = $('audio'), B = new Audio();
 B.preload = 'auto'; B.setAttribute('playsinline','');
 B.id = 'audio-buffer'; B.hidden = true; document.body.appendChild(B);
@@ -548,7 +567,7 @@ function ui(on){
   $('liveTxt').textContent = on ? 'CANLI' : 'DURAKLATILDI';
   if ('mediaSession' in navigator) navigator.mediaSession.playbackState = on ? 'playing' : 'paused';
 }
-bind('playing', ()=>{ if(masalAd && !masalDismissed) showMasal(true); if(sedaAd && !sedaDismissed) showSeda(true); failStreak = 0; $('sub').textContent = inAd ? (isIdent ? 'RadyoAI' : 'Sponsor: ' + (masalAd ? 'Masal Çay Evi' : ADS.NAME)) : (tracks[idx].credit || CONFIG.ARTIST); });
+bind('playing', ()=>{ if(masalAd && !masalDismissed) showMasal(true); if(sedaAd && !sedaDismissed) showSeda(true); if(donerAd && !donerDismissed) showDoner(true); failStreak = 0; $('sub').textContent = inAd ? (isIdent ? 'RadyoAI' : 'Sponsor: ' + (donerAd ? 'Döner Ağacı' : masalAd ? 'Masal Çay Evi' : ADS.NAME)) : (tracks[idx].credit || CONFIG.ARTIST); });
 bind('waiting', ()=>{ $('sub').textContent = 'Yükleniyor…'; });
 bind('loadedmetadata', ()=>{ $('dur').textContent = fmt(audio.duration); });
 bind('timeupdate', ()=>{
@@ -557,12 +576,15 @@ bind('timeupdate', ()=>{
   $('cur').textContent = fmt(audio.currentTime);
   if (audio.duration){ $('seek').value = audio.currentTime/audio.duration*1000; setFill($('seek')); }
 });
-/* ---- Reklam arası: her ADS.EVERY şarkıda bir jingle + spot ---- */
+/* ---- Döngü: Döner → jingle → 1 şarkı → Masal → Seda → jingle → 3 şarkı ---- */
 const ADS = { EVERY: 3, BREAK: [['masal-cay-evi.mp3'], ['Seda Baharat.mp3','spot-seda-baharat.mp3'], ['Jingle.mp3','jingle.mp3']], NAME: 'Seda Baharat' };   // her reklam için olası dosya adları
+const DONER_BREAK = [['doner-agaci-reklam.mp4'], ['Jingle.mp3','jingle.mp3']];
+let nextAdGroup = 'doner', songsPerBreak = 1;
+const nextBreakQueue = () => nextAdGroup === 'doner' ? DONER_BREAK : ADS.BREAK;
 let songsSinceAd = 0, adQ = [], inAd = false, adAlt = [], isIdent = false, totalSongs = 0;
 const IDENT = { EVERY: 0, FILE: 'kisa-jingle.mp3' };   // reklamsız aralarda her 2 şarkıda bir kısa jingle
-// Reklam aralığı her adreste üç şarkıdır; URL parametresiyle değiştirilmez.
-const adDue = () => ADS.BREAK.length > 0 && songsSinceAd + 1 >= ADS.EVERY;
+// Döner kuşağından sonra bir, Masal/Seda kuşağından sonra üç şarkı çalar.
+const adDue = () => ADS.BREAK.length > 0 && songsSinceAd + 1 >= songsPerBreak;
 const identDue = () => totalSongs + 1 > 2 && !adDue() && IDENT.EVERY > 0 && (totalSongs + 1) % IDENT.EVERY === 0;
 function startIdent(){
   inAd = true; isIdent = true; adQ = [[IDENT.FILE]];
@@ -572,7 +594,10 @@ function startIdent(){
 }
 function sponsorParla(on){ const s = $('sponsor'); if (s) s.classList.toggle('parla', !!on); }
 function startAdBreak(){
-  inAd = true; isIdent = false; adQ = ADS.BREAK.slice(); sponsorParla(true);
+  inAd = true; isIdent = false; adQ = nextBreakQueue().map(group=>group.slice());
+  songsPerBreak = nextAdGroup === 'doner' ? 1 : 3;
+  nextAdGroup = nextAdGroup === 'doner' ? 'regular' : 'doner';
+  sponsorParla(false);
   $('title').textContent = '📢 Reklam Arası'; $('title').style.fontSize = '';
   $('sub').textContent = 'Sponsor: ' + ADS.NAME;
   $('giftLine').hidden = true;
@@ -581,7 +606,24 @@ function startAdBreak(){
   nextAd(); saveLive();
 }
 
-let masalAd=false, sedaAd=false, masalDismissed=false, sedaDismissed=false, masalHideTimer;
+let masalAd=false, sedaAd=false, donerAd=false, masalDismissed=false, sedaDismissed=false, donerDismissed=false, masalHideTimer;
+const donerVideo=$('donerVideo');
+function syncDonerVideo(force=false){
+  if(!donerAd || $('donerOverlay').hidden) return;
+  if(force || Math.abs(donerVideo.currentTime-audio.currentTime)>.45){try{donerVideo.currentTime=audio.currentTime||0;}catch(e){}}
+  if(audio.paused) donerVideo.pause();
+  else if(donerVideo.paused) donerVideo.play().catch(()=>{});
+}
+function showDoner(on){
+  const visible=!!on && started;
+  $('donerOverlay').hidden=!visible;
+  if(visible)syncDonerVideo(true);else donerVideo.pause();
+}
+$('donerClose').onclick=()=>{donerDismissed=true;showDoner(false);};
+bind('pause',()=>donerVideo.pause());
+bind('timeupdate',()=>syncDonerVideo());
+bind('seeked',()=>syncDonerVideo(true));
+donerVideo.addEventListener('loadedmetadata',()=>syncDonerVideo(true));
 function showMasal(on){
  const el=$('masalOverlay');clearTimeout(masalHideTimer);
  if(on){
@@ -604,20 +646,25 @@ $('sedaClose').onclick=()=>{sedaDismissed=true;showSeda(false);};
 let openingJingle = false, adRetryCount = 0, adLastTime = 0;
 function nextAd(){
   adRetryCount = 0; adLastTime = 0; pendingSeek = 0;
-  showMasal(false);showSeda(false);masalAd=false;sedaAd=false;masalDismissed=false;sedaDismissed=false;
+  showMasal(false);showSeda(false);showDoner(false);masalAd=false;sedaAd=false;donerAd=false;masalDismissed=false;sedaDismissed=false;donerDismissed=false;
+  $('donerSponsor').classList.remove('parla');
   if (!adQ.length){ inAd = false; isIdent = false; sponsorParla(false); const next = openingJingle ? idx : nextIndex(1); openingJingle = false; load(next); if (wantPlay) play(); return; }
   adAlt = [].concat(adQ.shift()); srcTry = 0;
   masalAd=adAlt[0]==='masal-cay-evi.mp3';
   sedaAd=adAlt[0]==='Seda Baharat.mp3';
+  donerAd=adAlt[0]==='doner-agaci-reklam.mp4';
+  $('donerSponsor').classList.toggle('parla',donerAd);
+  if(donerAd){$('title').textContent='Döner Ağacı';$('sub').textContent='Sponsor: Döner Ağacı';document.title='Döner Ağacı · RadyoAI';}
   sponsorParla(sedaAd);
   if(sedaAd){$('title').textContent='Seda Baharat';$('sub').textContent='Sponsor: Seda Baharat';document.title='Seda Baharat · RadyoAI';}
   isIdent=/jingle/i.test(adAlt[0]);
   if(isIdent){sponsorParla(false);$('title').textContent='DJ YavRu';$('sub').textContent='RadyoAI';document.title='DJ YavRu · RadyoAI';}
   if(masalAd){sponsorParla(false);$('title').textContent='Masal Çay Evi';$('sub').textContent='Sponsor: Masal Çay Evi';document.title='Masal Çay Evi · RadyoAI';}
-  if ('mediaSession' in navigator){ try { navigator.mediaSession.metadata = new MediaMetadata({ title: masalAd ? 'Masal Çay Evi' : isIdent ? 'DJ YavRu' : 'Reklam Arası', artist: masalAd ? 'Masal Çay Evi' : isIdent ? 'RadyoAI' : ADS.NAME, album: 'RadyoAI' }); } catch(e){} }
+  if ('mediaSession' in navigator){ try { navigator.mediaSession.metadata = new MediaMetadata({ title: donerAd ? 'Döner Ağacı' : masalAd ? 'Masal Çay Evi' : isIdent ? 'DJ YavRu' : 'Reklam Arası', artist: donerAd ? 'Döner Ağacı' : masalAd ? 'Masal Çay Evi' : isIdent ? 'RadyoAI' : ADS.NAME, album: 'RadyoAI' }); } catch(e){} }
   useSource(encodeURI(adAlt.shift()));
   if (masalAd) showMasal(true);
   if (sedaAd) showSeda(true);
+  if (donerAd) showDoner(true);
   if (wantPlay) play();
 }
 function adError(){
@@ -649,7 +696,7 @@ function adError(){
 bind('ended', ()=>{
   if (inAd){ nextAd(); return; }
   songsSinceAd++; totalSongs++;
-  if (ADS.BREAK.length && songsSinceAd >= ADS.EVERY){ songsSinceAd = 0; startAdBreak(); }
+  if (ADS.BREAK.length && songsSinceAd >= songsPerBreak){ songsSinceAd = 0; startAdBreak(); }
   else if (totalSongs > 2 && IDENT.EVERY > 0 && totalSongs % IDENT.EVERY === 0) startIdent();
   else skip(1);
 });
@@ -714,7 +761,7 @@ function newDedic(){
 /* ---- Sıralı liste: 10 dakika içinde kaldığı yer; sonra bir sonraki şarkı ---- */
 const RESUME_KEY = 'radyoai_resume_v1';
 const RESUME_WINDOW_MS = 10 * 60 * 1000;
-// Sponsor reklamları yalnızca üç şarkılık reklam kuşağında oynatılır.
+// Her yeni giriş Döner kuşağıyla başlar; müzik sırası kayıtlı konumdan devam eder.
 let resumeFromVisit = false;
 let pendingSeek = 0, started = false, livePos = 0, liveN = tracks.length;
 const fileOf = i => tracks[i].file || tracks[i].title;
@@ -785,7 +832,7 @@ function prepareNext(){
   if (crossfadeBlocked || xfading || unlocking || !tracks.length) return;
   let src;
   if (inAd) src = adQ.length ? encodeURI(adQ[0][0]) : sources(tracks[openingJingle ? idx : (idx+1)%tracks.length])[0];
-  else if (adDue()) src = encodeURI(ADS.BREAK[0][0]);
+  else if (adDue()) src = encodeURI(nextBreakQueue()[0][0]);
   else if (identDue()) src = encodeURI(IDENT.FILE);
   else src = sources(tracks[(idx+1)%tracks.length])[0];
   const el = otherDeck();
@@ -874,14 +921,16 @@ $('start').onclick = ()=>{ $('gate').classList.add('hide'); started = true; play
 if (!tracks.length){ $('gateTxt').textContent = 'Listede şarkı yok.'; $('start').style.display = 'none'; }
 else initLive();
 
-/* Açılış: Masal → Seda → YavRu → müzik. Sonra her üç şarkıda aynı kuşak. */
-if (!GIFT && tracks.length){
+/* Her girişte Döner → radyo jingle → 1 şarkı; sonra Masal → Seda → jingle → 3 şarkı. */
+if (tracks.length){
   pendingSeek = 0;
   openingJingle = true;
   songsSinceAd = 0;
   startAdBreak();
-  $('gate').querySelector('h2').textContent = 'RADYO AI';
-  $('gateTxt').textContent = 'Masal Çay Evi ve Seda Baharat reklamlarının ardından YavRu jingle ve müzik. Dinlemek için dokun.';
+  $('gate').classList.add('sponsor-opening');
+  $('openingSponsorImage').hidden=false;
+  $('gate').querySelector('h2').textContent = 'DÖNER AĞACI';
+  $('gateTxt').textContent = 'Odun ateşinde nefis et döneri. RadyoAI yayınına başlamak için dokun.';
   $('start').innerHTML = '<i></i>YAYINI DİNLE';
   bind('playing', ()=>{ $('gate').classList.add('hide'); started = true; });
 }
