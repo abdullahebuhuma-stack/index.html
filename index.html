@@ -435,7 +435,7 @@ body.yayin .sponsorbox{padding-bottom:7px}
 /* ============ AYARLAR — burayı düzenle ============ */
 const CONFIG = {
   // Gerçek mesajlaşma sunucusu (Cloudflare Worker adresi). Boşsa mesaj sadece yazanın ekranında sabitlenir ve otomatik cevap gelir.
-  API: "",
+  API:'https://radioai-telegram-sohbet.jethymn2.chatgpt.site',
   // Armağan linklerinin başında kullanılacak site adresi.
   SITE_URL: "https://radioai.com.tr/",
   // Şarkıları iki şekilde ekleyebilirsin:
@@ -1242,28 +1242,31 @@ if (tracks.length){
     pinned=[]; if(!pin.children.length) pin.hidden=true;
   }
   $('ci').addEventListener('input',()=>{ if(pinned.length) unpinAll(); });   // yeni mesaja başlayınca eskiler akışa karışır
-  $('cf').addEventListener('submit',e=>{
-    e.preventDefault();
-    const i=$('ci'),t=i.value.trim();
-    if(!t)return;
-    unpinAll();
-    i.value='';
-    const id=Date.now().toString(36)+Math.random().toString(36).slice(2,7);
-    pinAdd('Sen',t,'me','Mesajın');
-    const api=(CONFIG.API||'').replace(/\/+$/,'');
-    const wait=document.createElement('div'); wait.className='wait'; wait.textContent='⏳ DJ YavRu mesajını okuyunca cevap verecek…';
-    const showReply=r=>{ wait.remove(); pinAdd('DJ YavRu','🎧 '+r,'dj','DJ YavRu cevapladı'); };
-    if(api){
-      pin.appendChild(wait);
-      fetch(api+'/message',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,name:'Dinleyici',text:t})}).catch(()=>{});
-      let tries=0;
-      const iv=setInterval(()=>{
-        if(++tries>225){ clearInterval(iv); wait.remove(); return; }       // ~15 dk bekler
-        fetch(api+'/reply?id='+encodeURIComponent(id)).then(r=>r.json()).then(j=>{ if(j&&j.reply){ clearInterval(iv); showReply(j.reply); } }).catch(()=>{});
-      },4000);
-    } else {
-      setTimeout(()=>showReply(reply(t,'Sen')),rnd(1200,3000));
-    }
+  document.addEventListener('DOMContentLoaded',()=>{
+    const rows=new Map();
+    const bridge=window.RadioAITelegram({
+      api:CONFIG.API,
+      onMessage(entry){
+        pinAdd('Sen',entry.text,'me','Mesajın');
+        const wait=document.createElement('div');wait.className='wait';pin.appendChild(wait);rows.set(entry.id,wait);
+      },
+      onStatus(entry,state){
+        const row=rows.get(entry.id);if(!row)return;
+        const labels={pending:'⏳ Mesajın gönderiliyor…',sent:'✓ DJ YavRu’ya iletildi. Yanıtı burada görünecek.',
+          unconfirmed:'İletim henüz doğrulanamadı.',connection_lost:'Bağlantı kesildi; yanıt kontrolü sürüyor.',
+          rate_limited:'Biraz hızlı yazdın. Bir dakika sonra yeniden dene.',failed:'Mesaj gönderilemedi. Lütfen yeniden dene.'};
+        row.textContent=labels[state]||'Yanıt bekleniyor…';
+      },
+      onReply(entry,text){
+        const row=rows.get(entry.id);if(row)row.remove();rows.delete(entry.id);
+        pinAdd('DJ YavRu','🎧 '+text,'dj','Yanıt: '+entry.text.slice(0,50));
+      }
+    });
+    $('ci').maxLength=1500;
+    $('cf').addEventListener('submit',e=>{
+      e.preventDefault();const i=$('ci'),text=i.value.trim();if(!text)return;
+      unpinAll();if(bridge.send(text))i.value='';
+    });
   });
 
   /* ---- İstanbul saatine göre değişen otomatik izleyici sayacı ---- */
@@ -1470,6 +1473,7 @@ if (tracks.length){
 </script>
 <script src="akis.js" defer></script>
 <script src="analytics.js?v=1" defer onload="if(window.RadioAIAnalytics) window.RadioAIAnalytics.start()"></script>
+<script src="radio-chat-bridge.js?v=1" defer></script>
 </body>
 </html>
 
