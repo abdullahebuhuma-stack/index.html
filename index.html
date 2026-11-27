@@ -1236,30 +1236,38 @@ if (tracks.length){
     pin.appendChild(d); pin.hidden=false; pin.scrollTop=pin.scrollHeight;
     pinned.push({name,text,cls,el:d}); return d;
   }
-  function unpinAll(){
-    if(!pinned.length) return;
-    pinned.forEach(m=>{ add(m.name,m.text,m.cls); if(m.el) m.el.remove(); });
-    pinned=[]; if(!pin.children.length) pin.hidden=true;
+  function unpinAll(elements){
+    const moving=elements?pinned.filter(m=>elements.includes(m.el)):pinned;
+    moving.forEach(m=>{ add(m.name,m.text,m.cls); if(m.el) m.el.remove(); });
+    pinned=pinned.filter(m=>!moving.includes(m));
+    if(!pin.children.length) pin.hidden=true;
   }
   $('ci').addEventListener('input',()=>{ if(pinned.length) unpinAll(); });   // yeni mesaja başlayınca eskiler akışa karışır
   document.addEventListener('DOMContentLoaded',()=>{
-    const rows=new Map();
+    const conversations=new Map();
     const bridge=window.RadioAITelegram({
       api:CONFIG.API,
       onMessage(entry){
-        pinAdd('Sen',entry.text,'me','Mesajın');
-        const wait=document.createElement('div');wait.className='wait';pin.appendChild(wait);rows.set(entry.id,wait);
+        const message=pinAdd('Sen',entry.text,'me','Mesajın');
+        const wait=document.createElement('div');wait.className='wait';pin.appendChild(wait);
+        conversations.set(entry.id,{wait,pins:[message],timer:null});
       },
       onStatus(entry,state){
-        const row=rows.get(entry.id);if(!row)return;
+        const row=conversations.get(entry.id)?.wait;if(!row)return;
         const labels={pending:'⏳ Mesajın gönderiliyor…',sent:'✓ DJ YavRu’ya iletildi. Yanıtı burada görünecek.',
           unconfirmed:'İletim henüz doğrulanamadı.',connection_lost:'Bağlantı kesildi; yanıt kontrolü sürüyor.',
           rate_limited:'Biraz hızlı yazdın. Bir dakika sonra yeniden dene.',failed:'Mesaj gönderilemedi. Lütfen yeniden dene.'};
         row.textContent=labels[state]||'Yanıt bekleniyor…';
       },
       onReply(entry,text){
-        const row=rows.get(entry.id);if(row)row.remove();rows.delete(entry.id);
-        pinAdd('DJ YavRu','🎧 '+text,'dj','Yanıt: '+entry.text.slice(0,50));
+        const conversation=conversations.get(entry.id)||{wait:null,pins:[],timer:null};
+        if(conversation.wait)conversation.wait.remove();conversation.wait=null;
+        conversation.pins.push(pinAdd('DJ YavRu','🎧 '+text,'dj','Yanıt: '+entry.text.slice(0,50)));
+        clearTimeout(conversation.timer);
+        conversation.timer=setTimeout(()=>{
+          unpinAll(conversation.pins);conversations.delete(entry.id);
+        },15000);
+        conversations.set(entry.id,conversation);
       }
     });
     $('ci').maxLength=1500;
